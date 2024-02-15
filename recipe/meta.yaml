@@ -1,5 +1,5 @@
 {% set name = "llama.cpp" %}
-{% set version = "0.0.1661" %}
+{% set version = "0.0.2144" %}
 
 package:
   name: {{ name|lower }}
@@ -7,17 +7,18 @@ package:
 
 source:
   url: https://github.com/ggerganov/llama.cpp/archive/b{{ version.split(".")[-1] }}.tar.gz
-  sha256: 88b4befe7d44b18e9419a0604adad2c130bfea9af45100b8531822bb2e1184fb
+  sha256: 679d2deb41b9df3d04bc5fb3b8fd255717009a08927962eca6476f26bff74731
   patches:
     - osx-64-pick-discrete.patch  # [osx]
     - mkl.patch                   # [blas_impl == "mkl"]
 
 build:
   number: 0
+  skip: true # [not (linux and x86_64) or (cuda_compiler_version == "None")]
   string: cuda{{ cuda_compiler_version | replace('.', '') }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version != "None"]
   string: cpu_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                 # [(osx and x86_64) or cuda_compiler_version == "None"]
   string: mps_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                                 # [osx and arm64]
-
+ 
   script:
     - LLAMA_ARGS="-DLLAMA_BUILD_TESTS=OFF"              # [unix]
     - set LLAMA_ARGS=-DLLAMA_BUILD_TESTS=OFF            # [win]
@@ -50,6 +51,9 @@ build:
     - echo $LLAMA_ARGS  # [unix]
     - set LLAMA_ARGS    # [win]
 
+    - export CUDACXX=/usr/local/cuda/bin/nvcc   # [cuda_compiler_version != "None" and not (cuda_compiler_version or "").startswith("12")]
+    - export CUDAHOSTCXX="${CXX}"               # [cuda_compiler_version != "None" and not (cuda_compiler_version or "").startswith("12")]
+
     - cmake -S . -B build -G Ninja %CMAKE_ARGS% %LLAMA_ARGS%    # [win]
     - cmake -S . -B build -G Ninja ${CMAKE_ARGS} ${LLAMA_ARGS}  # [unix]
     - cmake --build build
@@ -59,23 +63,24 @@ requirements:
   build:
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
-    - {{ compiler('cuda') }}                        # [cuda_compiler_version != "None"]
+    - {{ compiler('cuda') }}                        # [(cuda_compiler_version or "").startswith("12")]
     - cmake
     - git
     - ninja
     - pkgconfig
   host:
     # NOTE: Without cuda-version, we are installing cuda-toolkit 11.8 instead of 11.2!
-    - cuda-version     {{ cuda_compiler_version }}  # [cuda_compiler_version != "None" and not (cuda_compiler_version or "").startswith("12")]
+    - cudatoolkit      {{ cuda_compiler_version }}  # [cuda_compiler_version != "None" and not (cuda_compiler_version or "").startswith("12")]
     - cuda-cudart-dev  {{ cuda_compiler_version }}  # [(cuda_compiler_version or "").startswith("12")]
     - libcublas-dev    {{ cuda_compiler_version }}  # [(cuda_compiler_version or "").startswith("12")]
 
     - blas-devel * *{{ blas_impl }}                 # [not osx and cuda_compiler_version == "None" and blas_impl == "mkl"]
     - mkl-devel {{ mkl }}                           # [not osx and cuda_compiler_version == "None" and blas_impl == "mkl"]
   run:
-    - cuda-version {{ cuda_compiler_version }}      # [cuda_compiler_version != "None" and not (cuda_compiler_version or "").startswith("12")]
+    - {{ pin_compatible('cudatoolkit', max_pin='x.x') }}  # [cuda_compiler_version != "None" and not (cuda_compiler_version or "").startswith("12")]
 
     - llvm-openmp                                   # [linux and cuda_compiler_version == "None" and blas_impl == "mkl"]
+    - __cuda >={{ cuda_compiler_version }}          # [cuda_compiler_version != "None" and not (cuda_compiler_version or "").startswith("12")]
 
 test:
   commands:
