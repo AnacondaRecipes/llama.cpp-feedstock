@@ -37,7 +37,7 @@ build:
 
     {{ cmake_args("BUILD_SHARED_LIBS=ON") }}
 
-    {{ llama_args("NATIVE=OFF") }}      # [(osx and arm64) or win]
+    {{ llama_args("NATIVE=OFF") }}      # [cpu_variant == "main_channel_default"]
     {{ llama_args("AVX=OFF") }}         # [osx and arm64]
     {{ llama_args("AVX2=OFF") }}        # [osx and arm64]
     {{ llama_args("FMA=OFF") }}         # [osx and arm64]
