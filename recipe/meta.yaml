@@ -57,6 +57,7 @@ build:
 
     - export CUDACXX=/usr/local/cuda/bin/nvcc   # [cuda_compiler_version != "None" and not (cuda_compiler_version or "").startswith("12")]
     - export CUDAHOSTCXX="${CXX}"               # [cuda_compiler_version != "None" and not (cuda_compiler_version or "").startswith("12")]
+    - export LDFLAGS="$LDFLAGS -Wl,-rpath-link,/usr/lib64"    # [(cuda_compiler_version or "").startswith("12")]
 
     - cmake -S . -B build -G Ninja %CMAKE_ARGS% %LLAMA_ARGS%    # [win]
     - cmake -S . -B build -G Ninja ${CMAKE_ARGS} ${LLAMA_ARGS}  # [unix]
