@@ -1,5 +1,5 @@
 {% set name = "llama.cpp" %}
-{% set version = "0.0.1661" %}
+{% set version = "0.0.2408" %}
 
 package:
   name: {{ name|lower }}
@@ -7,17 +7,20 @@ package:
 
 source:
   url: https://github.com/ggerganov/llama.cpp/archive/b{{ version.split(".")[-1] }}.tar.gz
-  sha256: 88b4befe7d44b18e9419a0604adad2c130bfea9af45100b8531822bb2e1184fb
+  sha256: 163255cb77599be6f97c487bcdce79912c7509a9c522ad4ab5b23cc4104d0bb4
   patches:
     - osx-64-pick-discrete.patch  # [osx]
     - mkl.patch                   # [blas_impl == "mkl"]
 
 build:
   number: 0
+  skip: true # [not (linux and x86_64) or (cuda_compiler_version == "None")]
   string: cuda{{ cuda_compiler_version | replace('.', '') }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version != "None"]
   string: cpu_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                 # [(osx and x86_64) or cuda_compiler_version == "None"]
   string: mps_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                                 # [osx and arm64]
-
+  missing_dso_whitelist:
+    - "**/libcuda.so*"
+ 
   script:
     - LLAMA_ARGS="-DLLAMA_BUILD_TESTS=OFF"              # [unix]
     - set LLAMA_ARGS=-DLLAMA_BUILD_TESTS=OFF            # [win]
@@ -32,7 +35,7 @@ build:
 
     {{ cmake_args("BUILD_SHARED_LIBS=ON") }}
 
-    {{ llama_args("NATIVE=OFF") }}      # [(osx and arm64) or win]
+    {{ llama_args("NATIVE=OFF") }}      # [cpu_variant == "main_channel_default"]
     {{ llama_args("AVX=OFF") }}         # [osx and arm64]
     {{ llama_args("AVX2=OFF") }}        # [osx and arm64]
     {{ llama_args("FMA=OFF") }}         # [osx and arm64]
@@ -50,6 +53,10 @@ build:
     - echo $LLAMA_ARGS  # [unix]
     - set LLAMA_ARGS    # [win]
 
+    - export CUDACXX=/usr/local/cuda/bin/nvcc   # [cuda_compiler_version != "None" and not (cuda_compiler_version or "").startswith("12")]
+    - export CUDAHOSTCXX="${CXX}"               # [cuda_compiler_version != "None" and not (cuda_compiler_version or "").startswith("12")]
+    - export LDFLAGS="$LDFLAGS -Wl,-rpath-link,/usr/lib64"    # [(cuda_compiler_version or "").startswith("12")]
+
     - cmake -S . -B build -G Ninja %CMAKE_ARGS% %LLAMA_ARGS%    # [win]
     - cmake -S . -B build -G Ninja ${CMAKE_ARGS} ${LLAMA_ARGS}  # [unix]
     - cmake --build build
@@ -59,23 +66,25 @@ requirements:
   build:
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
-    - {{ compiler('cuda') }}                        # [cuda_compiler_version != "None"]
+    - {{ compiler('cuda') }}                        # [(cuda_compiler_version or "").startswith("12")]
     - cmake
     - git
     - ninja
     - pkgconfig
   host:
-    # NOTE: Without cuda-version, we are installing cuda-toolkit 11.8 instead of 11.2!
-    - cuda-version     {{ cuda_compiler_version }}  # [cuda_compiler_version != "None" and not (cuda_compiler_version or "").startswith("12")]
+    - cudatoolkit      {{ cuda_compiler_version }}  # [cuda_compiler_version != "None" and not (cuda_compiler_version or "").startswith("12")]
+    - cuda-version     {{ cuda_compiler_version }}  # [cuda_compiler_version != "None"]
     - cuda-cudart-dev  {{ cuda_compiler_version }}  # [(cuda_compiler_version or "").startswith("12")]
     - libcublas-dev    {{ cuda_compiler_version }}  # [(cuda_compiler_version or "").startswith("12")]
 
     - blas-devel * *{{ blas_impl }}                 # [not osx and cuda_compiler_version == "None" and blas_impl == "mkl"]
     - mkl-devel {{ mkl }}                           # [not osx and cuda_compiler_version == "None" and blas_impl == "mkl"]
   run:
-    - cuda-version {{ cuda_compiler_version }}      # [cuda_compiler_version != "None" and not (cuda_compiler_version or "").startswith("12")]
+    - {{ pin_compatible('cudatoolkit', max_pin='x.x') }}  # [cuda_compiler_version != "None" and not (cuda_compiler_version or "").startswith("12")]
+    - {{ pin_compatible('cuda-version', max_pin='x.x') }} # [cuda_compiler_version != "None"]
 
     - llvm-openmp                                   # [linux and cuda_compiler_version == "None" and blas_impl == "mkl"]
+    - __cuda >={{ cuda_compiler_version }}          # [cuda_compiler_version != "None" and not (cuda_compiler_version or "").startswith("12")]
 
 test:
   commands:
