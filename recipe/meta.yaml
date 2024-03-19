@@ -20,8 +20,6 @@ build:
   string: mps_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                                 # [osx and arm64]
   missing_dso_whitelist:
     - "**/libcuda.so*"
-
-
  
   script:
     - LLAMA_ARGS="-DLLAMA_BUILD_TESTS=OFF"              # [unix]
@@ -74,8 +72,8 @@ requirements:
     - ninja
     - pkgconfig
   host:
-    # NOTE: Without cuda-version, we are installing cuda-toolkit 11.8 instead of 11.2!
     - cudatoolkit      {{ cuda_compiler_version }}  # [cuda_compiler_version != "None" and not (cuda_compiler_version or "").startswith("12")]
+    - cuda-version     {{ cuda_compiler_version }}  # [cuda_compiler_version != "None"]
     - cuda-cudart-dev  {{ cuda_compiler_version }}  # [(cuda_compiler_version or "").startswith("12")]
     - libcublas-dev    {{ cuda_compiler_version }}  # [(cuda_compiler_version or "").startswith("12")]
 
@@ -83,6 +81,7 @@ requirements:
     - mkl-devel {{ mkl }}                           # [not osx and cuda_compiler_version == "None" and blas_impl == "mkl"]
   run:
     - {{ pin_compatible('cudatoolkit', max_pin='x.x') }}  # [cuda_compiler_version != "None" and not (cuda_compiler_version or "").startswith("12")]
+    - {{ pin_compatible('cuda-version', max_pin='x.x') }} # [cuda_compiler_version != "None"]
 
     - llvm-openmp                                   # [linux and cuda_compiler_version == "None" and blas_impl == "mkl"]
     - __cuda >={{ cuda_compiler_version }}          # [cuda_compiler_version != "None" and not (cuda_compiler_version or "").startswith("12")]
