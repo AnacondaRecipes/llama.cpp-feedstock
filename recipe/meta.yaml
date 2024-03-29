@@ -9,7 +9,8 @@ source:
   url: https://github.com/ggerganov/llama.cpp/archive/b{{ version.split(".")[-1] }}.tar.gz
   sha256: 163255cb77599be6f97c487bcdce79912c7509a9c522ad4ab5b23cc4104d0bb4
   patches:
-    - osx-64-pick-discrete.patch  # [osx]
+    # this seems to break metal builds, have a closer look
+    #- osx-64-pick-discrete.patch  # [osx]
     - mkl.patch                   # [blas_impl == "mkl"]
 
 build:
