@@ -14,77 +14,35 @@ source:
 
 build:
   number: 0
-  skip: true # [not (linux and x86_64) or (cuda_compiler_version == "None")]
-  string: cuda{{ cuda_compiler_version | replace('.', '') }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version != "None"]
-  string: cpu_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                 # [(osx and x86_64) or cuda_compiler_version == "None"]
-  string: mps_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                                 # [osx and arm64]
-  missing_dso_whitelist:
-    - "**/libcuda.so*"
- 
-  script:
-    - LLAMA_ARGS="-DLLAMA_BUILD_TESTS=OFF"              # [unix]
-    - set LLAMA_ARGS=-DLLAMA_BUILD_TESTS=OFF            # [win]
-    {% macro llama_args(value) -%}
-    - LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_{{ value }}"    # [unix]
-    - set LLAMA_ARGS=%LLAMA_ARGS% -DLLAMA_{{ value }}   # [win]
-    {%- endmacro %}
-    {% macro cmake_args(value) -%}
-    - LLAMA_ARGS="${LLAMA_ARGS} -D{{ value }}"          # [unix]
-    - set LLAMA_ARGS=%LLAMA_ARGS% -D{{ value }}         # [win]
-    {%- endmacro %}
-
-    {{ cmake_args("BUILD_SHARED_LIBS=ON") }}
-
-    {{ llama_args("NATIVE=OFF") }}      # [cpu_variant == "main_channel_default"]
-    {{ llama_args("AVX=OFF") }}         # [osx and arm64]
-    {{ llama_args("AVX2=OFF") }}        # [osx and arm64]
-    {{ llama_args("FMA=OFF") }}         # [osx and arm64]
-    {{ llama_args("F16C=OFF") }}        # [osx and arm64]
-    {{ llama_args("METAL=ON") }}        # [osx and arm64]
-    {{ llama_args("METAL=OFF") }}       # [osx and x86_64]
-    {{ llama_args("ACCELERATE=ON") }}   # [osx]
-
-    {{ llama_args("CUBLAS=ON") }}                     # [cuda_compiler_version != "None"]
-    {{ cmake_args("CMAKE_CUDA_ARCHITECTURES=all") }}  # [cuda_compiler_version != "None"]
-
-    {{ llama_args("BLAS=ON") }}                     # [not osx and cuda_compiler_version == "None"]
-    {{ llama_args("BLAS_VENDOR=Intel10_64_dyn") }}  # [not osx and cuda_compiler_version == "None" and blas_impl == "mkl"]
-
-    - echo $LLAMA_ARGS  # [unix]
-    - set LLAMA_ARGS    # [win]
-
-    - export CUDACXX=/usr/local/cuda/bin/nvcc   # [cuda_compiler_version != "None" and not (cuda_compiler_version or "").startswith("12")]
-    - export CUDAHOSTCXX="${CXX}"               # [cuda_compiler_version != "None" and not (cuda_compiler_version or "").startswith("12")]
-    - export LDFLAGS="$LDFLAGS -Wl,-rpath-link,/usr/lib64"    # [(cuda_compiler_version or "").startswith("12")]
-
-    - cmake -S . -B build -G Ninja %CMAKE_ARGS% %LLAMA_ARGS%    # [win]
-    - cmake -S . -B build -G Ninja ${CMAKE_ARGS} ${LLAMA_ARGS}  # [unix]
-    - cmake --build build
-    - cmake --install build 
-
+  skip: true
+  string: cuda{{ cuda_compiler_version | replace('.', '') }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [(gpu_variant == "cuda-11") or (gpu_variant == "cuda-12")]
+  string: cpu_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                 # [gpu_variant == "none"]
+  string: mps_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                                 # [gpu_variant == "metal"]
+  missing_dso_whitelist:                                                                         # [(gpu_variant == "cuda-11") or (gpu_variant == "cuda-12")]
+    - "**/libcuda.so*"                                                                           # [(gpu_variant == "cuda-11") or (gpu_variant == "cuda-12")]
+  
+# TODO implement cpu/gpu variant selection pattern from pytorch recipe
 requirements:
   build:
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
-    - {{ compiler('cuda') }}                        # [(cuda_compiler_version or "").startswith("12")]
+    - {{ compiler('cuda') }}                              # [gpu_variant == "cuda-12"]
     - cmake
     - git
     - ninja
     - pkgconfig
   host:
-    - cudatoolkit      {{ cuda_compiler_version }}  # [cuda_compiler_version != "None" and not (cuda_compiler_version or "").startswith("12")]
-    - cuda-version     {{ cuda_compiler_version }}  # [cuda_compiler_version != "None"]
-    - cuda-cudart-dev  {{ cuda_compiler_version }}  # [(cuda_compiler_version or "").startswith("12")]
-    - libcublas-dev    {{ cuda_compiler_version }}  # [(cuda_compiler_version or "").startswith("12")]
+    - cudatoolkit      {{ cuda_compiler_version }}        # [gpu_variant == "cuda-11"]
+    - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant == "cuda-11") or (gpu_variant == "cuda-12")]
+    - cuda-cudart-dev  {{ cuda_compiler_version }}        # [gpu_variant == "cuda-12"]
+    - libcublas-dev    {{ cuda_compiler_version }}        # [gpu_variant == "cuda-12"]
 
-    - blas-devel * *{{ blas_impl }}                 # [not osx and cuda_compiler_version == "None" and blas_impl == "mkl"]
-    - mkl-devel {{ mkl }}                           # [not osx and cuda_compiler_version == "None" and blas_impl == "mkl"]
+    - blas-devel * *{{ blas_impl }}                       # [blas_impl == "mkl"]
+    - mkl-devel {{ mkl }}                                 # [blas_impl == "mkl"]
   run:
-    - {{ pin_compatible('cudatoolkit', max_pin='x.x') }}  # [cuda_compiler_version != "None" and not (cuda_compiler_version or "").startswith("12")]
-    - {{ pin_compatible('cuda-version', max_pin='x.x') }} # [cuda_compiler_version != "None"]
-
-    - llvm-openmp                                   # [linux and cuda_compiler_version == "None" and blas_impl == "mkl"]
-    - __cuda >={{ cuda_compiler_version }}          # [cuda_compiler_version != "None" and not (cuda_compiler_version or "").startswith("12")]
+    - {{ pin_compatible('cudatoolkit', max_pin='x.x') }}  # [gpu_variant == "cuda-11"]
+    - {{ pin_compatible('cuda-version', max_pin='x.x') }} # [(gpu_variant == "cuda-11") or (gpu_variant == "cuda-12")]
+    - llvm-openmp                                         # [linux and blas_impl == "mkl"]
 
 test:
   commands:
