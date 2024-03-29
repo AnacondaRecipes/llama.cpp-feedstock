@@ -64,5 +64,7 @@ cmake -S . -B build \
     -DLLAMA_F16C=OFF
 
 cmake --build build --verbose
-cmake --install build 
+cmake --install build
+pushd build/tests
 ctest --output-on-failure build -j${CPU_COUNT}
+popd
