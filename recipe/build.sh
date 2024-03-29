@@ -1,8 +1,20 @@
 #!/bin/bash
 set -ex
 
-LLAMA_ARGS=""
-CMAKE_ARGS=""
+################ CONFIGURE CMAKE FOR CONDA ENVIRONMENT ###################
+# This section contains some stuff from the pytorch recipe that may be required; enable as needed.
+if [[ "$OSTYPE" != "darwin"* ]]; then
+    export CMAKE_SYSROOT=$CONDA_BUILD_SYSROOT
+else
+    export CMAKE_OSX_SYSROOT=$CONDA_BUILD_SYSROOT
+fi
+# # Required to make the right SDK found on Anaconda's CI system. Ideally should be fixed in the CI or conda-build
+# if [[ "${build_platform}" = "osx-arm64" ]]; then
+#     export DEVELOPER_DIR=/Library/Developer/CommandLineTools
+# fi
+# export CMAKE_LIBRARY_PATH=$PREFIX/lib:$PREFIX/include:$CMAKE_LIBRARY_PATH
+# export CMAKE_PREFIX_PATH=$PREFIX
+##########################################################################
 
 if [[ ${gpu_variant:-} = "cuda-12" ]]; then
     CMAKE_ARGS="${CMAKE_ARGS} -DCMAKE_CUDA_ARCHITECTURES=all"
@@ -38,8 +50,8 @@ fi
 # TODO: set LLAMA_BUILD_TESTS=ON, i.e. run the upstream tests
 cmake -S . -B build \
     -G Ninja \
-    "${CMAKE_ARGS}" \
-    "${LLAMA_ARGS}" \
+    ${CMAKE_ARGS} \
+    ${LLAMA_ARGS} \
     -DLLAMA_BUILD_TESTS=OFF  \
     -DBUILD_SHARED_LIBS=ON  \
     -DLLAMA_NATIVE=OFF \

@@ -1,9 +1,6 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set LLAMA_ARGS=
-set CMAKE_ARGS=
-
 if "%gpu_variant%"=="cuda-12" or "%gpu_variant%"=="cuda-11" (
     set CMAKE_ARGS=!CMAKE_ARGS! -DCMAKE_CUDA_ARCHITECTURES=all
     set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_CUBLAS=ON

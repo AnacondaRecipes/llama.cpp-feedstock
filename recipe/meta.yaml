@@ -38,12 +38,13 @@ requirements:
     - cuda-cudart-dev  {{ cuda_compiler_version }}        # [gpu_variant == "cuda-12"]
     - libcublas-dev    {{ cuda_compiler_version }}        # [gpu_variant == "cuda-12"]
 
-    - blas-devel * *{{ blas_impl }}                       # [blas_impl == "mkl"]
+    - openblas-devel {{ openblas }}                       # [blas_impl == "openblas"]
     - mkl-devel {{ mkl }}                                 # [blas_impl == "mkl"]
   run:
     - {{ pin_compatible('cudatoolkit', max_pin='x.x') }}  # [gpu_variant == "cuda-11"]
     - {{ pin_compatible('cuda-version', max_pin='x.x') }} # [(gpu_variant == "cuda-11") or (gpu_variant == "cuda-12")]
-    - llvm-openmp                                         # [linux and blas_impl == "mkl"]
+    # openmp isn't mentioned in the upstream source, re-enable if required
+    #- llvm-openmp                                         # [linux and blas_impl == "mkl"]
 
 test:
   commands:
