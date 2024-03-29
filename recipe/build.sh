@@ -52,7 +52,7 @@ cmake -S . -B build \
     -G Ninja \
     ${CMAKE_ARGS} \
     ${LLAMA_ARGS} \
-    -DLLAMA_BUILD_TESTS=OFF  \
+    -DLLAMA_BUILD_TESTS=ON  \
     -DBUILD_SHARED_LIBS=ON  \
     -DLLAMA_NATIVE=OFF \
     -DLLAMA_AVX=OFF \
@@ -65,3 +65,4 @@ cmake -S . -B build \
 
 cmake --build build --verbose
 cmake --install build 
+ctest --output-on-failure build -j${CPU_COUNT}
