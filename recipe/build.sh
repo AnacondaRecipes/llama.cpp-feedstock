@@ -47,7 +47,9 @@ elif [[ ${blas_impl:-} = "openblas" ]]; then
     LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_BLAS_VENDOR=OpenBLAS"
 fi
 
-# TODO: set LLAMA_BUILD_TESTS=ON, i.e. run the upstream tests
+# This is so the tests find pthread during linking
+export LDFLAGS="$LDFLAGS -lpthread"
+
 cmake -S . -B build \
     -G Ninja \
     ${CMAKE_ARGS} \
