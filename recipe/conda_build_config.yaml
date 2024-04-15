@@ -1,5 +1,9 @@
-MACOSX_DEPLOYMENT_TARGET:   # [osx and x86_64]
-- '11.0'                    # [osx and x86_64]
+macos_min_version:
+  - 10.12 # [osx and x86_64]
+MACOSX_DEPLOYMENT_TARGET:
+  - 10.12 # [osx and x86_64]
+CONDA_BUILD_SYSROOT:
+  - /opt/MacOSX10.12.sdk        # [osx and x86_64]
 
 # To provide "restrict", otherwise compilation errors
 c_compiler:
