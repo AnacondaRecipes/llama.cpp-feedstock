@@ -25,8 +25,9 @@ build:
   string: cuda{{ cuda_compiler_version | replace('.', '') }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [(gpu_variant == "cuda-11") or (gpu_variant == "cuda-12")]
   string: cpu_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                 # [gpu_variant == "none"]
   string: mps_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                                 # [gpu_variant == "metal"]
-  missing_dso_whitelist:                                                                         # [(gpu_variant == "cuda-11") or (gpu_variant == "cuda-12")]
+  missing_dso_whitelist:                                                                         # [s390x or (gpu_variant == "cuda-11") or (gpu_variant == "cuda-12")]
     - "**/libcuda.so*"                                                                           # [(gpu_variant == "cuda-11") or (gpu_variant == "cuda-12")]
+    - '$RPATH/ld64.so.1'  # [s390x]
   
 requirements:
   build:
