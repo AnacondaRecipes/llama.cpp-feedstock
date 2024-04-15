@@ -3,4 +3,4 @@ build_parameters:
   - "--suppress-variables"
   - "--skip-existing"
   - "--error-overlinking"
-  - "--variants '{skip_gpu: True}'"
+  - "--variants \"{skip_gpu: True}\""
