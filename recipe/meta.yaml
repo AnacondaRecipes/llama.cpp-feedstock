@@ -8,9 +8,7 @@ package:
 source:
   url: https://github.com/ggerganov/llama.cpp/archive/b{{ version.split(".")[-1] }}.tar.gz
   sha256: 163255cb77599be6f97c487bcdce79912c7509a9c522ad4ab5b23cc4104d0bb4
-  patches:
-    # TODO: test that this patch is working properly, i.e. observe the output from the debug comments
-    - osx-64-pick-discrete.patch  # [osx]
+  patches:                        # [blas_impl == "mkl"]
     - mkl.patch                   # [blas_impl == "mkl"]
 
 build:
@@ -30,9 +28,10 @@ requirements:
     - {{ compiler('cxx') }}
     - {{ compiler('cuda') }}                              # [gpu_variant == "cuda-12"]
     - cmake
-    - git
-    - ninja
+    - ninja-base
     - pkgconfig
+    - patch     # [unix and blas_impl == "mkl"]
+    - m2-patch  # [win and blas_impl == "mkl"]
   host:
     - cudatoolkit      {{ cuda_compiler_version }}        # [gpu_variant == "cuda-11"]
     - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant == "cuda-11") or (gpu_variant == "cuda-12")]
@@ -41,12 +40,10 @@ requirements:
 
     - openblas-devel {{ openblas }}                       # [blas_impl == "openblas"]
     - mkl-devel {{ mkl }}                                 # [blas_impl == "mkl"]
-    - pthread-stubs
+    - pthread-stubs 0.3                                   # [linux]
   run:
     - {{ pin_compatible('cudatoolkit', max_pin='x.x') }}  # [gpu_variant == "cuda-11"]
     - {{ pin_compatible('cuda-version', max_pin='x.x') }} # [(gpu_variant == "cuda-11") or (gpu_variant == "cuda-12")]
-    # openmp isn't mentioned in the upstream source, re-enable if required
-    #- llvm-openmp                                         # [linux and blas_impl == "mkl"]
 
 test:
   commands:
@@ -55,10 +52,14 @@ test:
 
 about:
   home: https://github.com/ggerganov/llama.cpp
-  summary: Port of Facebook's LLaMA model in C/C++
+  summary: LLM inference in C/C++
+  description: |
+    Inference of Meta's LLaMA model (and others) in pure C/C++
   license: MIT
   license_family: MIT
   license_file: LICENSE
+  dev_url: https://github.com/ggerganov/llama.cpp
+  doc_url: https://github.com/ggerganov/llama.cpp
 
 extra:
   recipe-maintainers:

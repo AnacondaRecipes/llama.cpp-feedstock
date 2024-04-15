@@ -16,12 +16,14 @@ if "%blas_impl%"=="mkl" (
     set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_BLAS_VENDOR=OpenBLAS
 )
 
-rem TODO: set LLAMA_BUILD_TESTS=ON, i.e. run the upstream tests
 cmake -S . -B build ^
     -G Ninja ^
     !CMAKE_ARGS! ^
     !LLAMA_ARGS! ^
-    -DLLAMA_BUILD_TESTS=OFF  ^
+    -DCMAKE_INSTALL_PREFIX=%LIBRARY_PREFIX% ^
+    -DCMAKE_PREFIX_PATH=%LIBRARY_PREFIX% ^
+    -DCMAKE_BUILD_TYPE=Release ^
+    -DLLAMA_BUILD_TESTS=ON  ^
     -DBUILD_SHARED_LIBS=ON  ^
     -DLLAMA_NATIVE=OFF ^
     -DLLAMA_AVX=OFF ^
@@ -32,5 +34,8 @@ cmake -S . -B build ^
     -DLLAMA_FMA=OFF ^
     -DLLAMA_F16C=OFF
 
-cmake --build build --verbose
+cmake --build build --config Release--verbose
 cmake --install build
+pushd build\tests
+ctest --output-on-failure build -j%CPU_COUNT%
+popd

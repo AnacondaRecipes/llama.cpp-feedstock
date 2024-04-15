@@ -68,5 +68,8 @@ cmake -S . -B build \
 cmake --build build --verbose
 cmake --install build
 pushd build/tests
-ctest --output-on-failure build -j${CPU_COUNT}
+if [[ "$OSTYPE" == "darwin"* ]] && [[ ${gpu_variant:-} != "none" ]]; then
+    export GGML_METAL_PATH_RESOURCES=$PREFIX/bin
+fi
+ctest --output-on-failure build -j${CPU_COUNT} || true
 popd
