@@ -9,7 +9,7 @@ package:
 source:
   url: https://github.com/ggerganov/llama.cpp/archive/b{{ version.split(".")[-1] }}.tar.gz
   sha256: 163255cb77599be6f97c487bcdce79912c7509a9c522ad4ab5b23cc4104d0bb4
-  patches:                        # [linux or (unix and blas_impl == "mkl")]
+  patches:                        # [linux or (blas_impl == "mkl")]
     - test_exe_threads.patch      # [linux]
     - mkl.patch                   # [blas_impl == "mkl"]
 
