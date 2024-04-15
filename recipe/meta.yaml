@@ -1,5 +1,6 @@
 {% set name = "llama.cpp" %}
 {% set version = "0.0.2408" %}
+{% set build_number = 0 %}
 
 package:
   name: {{ name|lower }}
@@ -13,16 +14,20 @@ source:
     - mkl.patch                   # [blas_impl == "mkl"]
 
 build:
-  number: 0
-  # put "not" in front for building cuda
-  skip: true # [((gpu_variant == "cuda-11") or (gpu_variant == "cuda-12"))]
+  # skip_gpu is set through abs.yaml for use in prefect only
+  skip: true # [skip_gpu and ((gpu_variant == "cuda-11") or (gpu_variant == "cuda-12"))]
+  # Use a build number difference to ensure that the GPU
+  # variant is slightly preferred by conda's solver, so that it's preferentially
+  # installed where the platform supports it.
+  number: {{ build_number + 110 }}  # [gpu_variant == "cuda-12"]
+  number: {{ build_number + 100 }}  # [(gpu_variant == "cuda-11") or (gpu_variant == "metal")]
+  number: {{ build_number }}        # [gpu_variant == "none"]
   string: cuda{{ cuda_compiler_version | replace('.', '') }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [(gpu_variant == "cuda-11") or (gpu_variant == "cuda-12")]
   string: cpu_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                 # [gpu_variant == "none"]
   string: mps_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                                 # [gpu_variant == "metal"]
   missing_dso_whitelist:                                                                         # [(gpu_variant == "cuda-11") or (gpu_variant == "cuda-12")]
     - "**/libcuda.so*"                                                                           # [(gpu_variant == "cuda-11") or (gpu_variant == "cuda-12")]
   
-# TODO implement cpu/gpu variant selection pattern from pytorch recipe
 requirements:
   build:
     - {{ compiler('c') }}
