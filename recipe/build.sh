@@ -1,21 +1,6 @@
 #!/bin/bash
 set -ex
 
-################ CONFIGURE CMAKE FOR CONDA ENVIRONMENT ###################
-# This section contains some stuff from the pytorch recipe that may be required; enable as needed.
-if [[ "$OSTYPE" != "darwin"* ]]; then
-    export CMAKE_SYSROOT=$CONDA_BUILD_SYSROOT
-else
-    export CMAKE_OSX_SYSROOT=$CONDA_BUILD_SYSROOT
-fi
-# # Required to make the right SDK found on Anaconda's CI system. Ideally should be fixed in the CI or conda-build
-# if [[ "${build_platform}" = "osx-arm64" ]]; then
-#     export DEVELOPER_DIR=/Library/Developer/CommandLineTools
-# fi
-# export CMAKE_LIBRARY_PATH=$PREFIX/lib:$PREFIX/include:$CMAKE_LIBRARY_PATH
-# export CMAKE_PREFIX_PATH=$PREFIX
-##########################################################################
-
 if [[ ${gpu_variant:-} = "cuda-12" ]]; then
     CMAKE_ARGS="${CMAKE_ARGS} -DCMAKE_CUDA_ARCHITECTURES=all"
     LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_CUBLAS=ON"
@@ -47,13 +32,13 @@ elif [[ ${blas_impl:-} = "openblas" ]]; then
     LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_BLAS_VENDOR=OpenBLAS"
 fi
 
-# This is so the tests find pthread during linking
-export LDFLAGS="$LDFLAGS -lpthread"
-
 cmake -S . -B build \
     -G Ninja \
     ${CMAKE_ARGS} \
     ${LLAMA_ARGS} \
+    -DCMAKE_INSTALL_PREFIX=${PREFIX} \
+    -DCMAKE_PREFIX_PATH=${PREFIX} \
+    -DCMAKE_BUILD_TYPE=Release \
     -DLLAMA_BUILD_TESTS=ON  \
     -DBUILD_SHARED_LIBS=ON  \
     -DLLAMA_NATIVE=OFF \
@@ -65,7 +50,7 @@ cmake -S . -B build \
     -DLLAMA_FMA=OFF \
     -DLLAMA_F16C=OFF
 
-cmake --build build --verbose
+cmake --build build --config Release --verbose
 cmake --install build
 pushd build/tests
 if [[ "$OSTYPE" == "darwin"* ]] && [[ ${gpu_variant:-} != "none" ]]; then

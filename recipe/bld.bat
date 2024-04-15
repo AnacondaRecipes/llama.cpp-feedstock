@@ -34,7 +34,7 @@ cmake -S . -B build ^
     -DLLAMA_FMA=OFF ^
     -DLLAMA_F16C=OFF
 
-cmake --build build --config Release--verbose
+cmake --build build --config Release --verbose
 cmake --install build
 pushd build\tests
 ctest --output-on-failure build -j%CPU_COUNT%
