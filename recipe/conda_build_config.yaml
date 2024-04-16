@@ -17,10 +17,10 @@ blas_impl:
   - accelerate                 # [osx]
 
 gpu_variant:
-  - none
+  - none                       # [not win]
   - metal                      # [osx and arm64]
   - cuda-11                    # [linux and x86_64]
-  - cuda-12                    # [linux and x86_64]
+  - cuda-12                    # [win or (linux and x86_64)]
 # CONDA_BUILD_SYSROOT is defined in the base cbc.yaml, but it's reflected here so we can zip the keys and
 # build GPU and CPU at the same time for osx-arm64. It'll need to be manually updated here if the base cbc is changed.
 # This could be done using extend_keys instead, with a change to the base cbc.yaml.
@@ -37,7 +37,7 @@ zip_keys:                    # [(osx and arm64)]
   - CONDA_BUILD_SYSROOT      # [(osx and arm64)]
 
 # the below for cuda-12 only
-cuda_compiler_version:         # [linux and x86_64]
-  - 12.3                       # [linux and x86_64]
-cuda_compiler:                 # [linux and x86_64]
-  - cuda-nvcc                  # [linux and x86_64]
+cuda_compiler_version:         # [win or (linux and x86_64)]
+  - 12.3                       # [win or (linux and x86_64)]
+cuda_compiler:                 # [win or (linux and x86_64)]
+  - cuda-nvcc                  # [win or (linux and x86_64)]
