@@ -12,10 +12,17 @@ elif [[ ${gpu_variant:-} = "cuda-11" ]]; then
     export CUDAHOSTCXX="${CXX}"
 fi
 
-# LLAMA_METAL is on by default on osx, but it requires macOS v12.3,
-# so to support earlier macOS versions we provide the non-metal variant
-if [[ "$OSTYPE" == "darwin"* ]] && [[ ${gpu_variant:-} = "none" ]]; then
-    LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_METAL=OFF"
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    if [[ ${gpu_variant:-} = "none" ]]; then
+        # LLAMA_METAL is on by default on osx, but it requires macOS v12.3,
+        # so to support earlier macOS versions we provide the non-metal variant
+        LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_METAL=OFF"
+    elif [[ ${gpu_variant:-} = "metal" ]]; then
+        # LLAMA_METAL as a shared library requires xcode 
+        # to run metal and metallib commands to compile Metal kernels
+        LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_METAL=ON"
+        LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_METAL_EMBED_LIBRARY=ON"
+    fi
 fi
 
 # TODO: implement test that detects whether the correct BLAS is actually used
@@ -53,8 +60,5 @@ cmake -S . -B build \
 cmake --build build --config Release --verbose
 cmake --install build
 pushd build/tests
-if [[ "$OSTYPE" == "darwin"* ]] && [[ ${gpu_variant:-} != "none" ]]; then
-    export GGML_METAL_PATH_RESOURCES=$PREFIX/bin
-fi
-ctest --output-on-failure build -j${CPU_COUNT} || true
+ctest --output-on-failure build -j${CPU_COUNT}
 popd

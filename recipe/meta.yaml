@@ -9,9 +9,10 @@ package:
 source:
   url: https://github.com/ggerganov/llama.cpp/archive/b{{ version.split(".")[-1] }}.tar.gz
   sha256: 163255cb77599be6f97c487bcdce79912c7509a9c522ad4ab5b23cc4104d0bb4
-  patches:                        # [linux or (blas_impl == "mkl")]
+  patches:                        # [unix or (blas_impl == "mkl")]
     - test_exe_threads.patch      # [linux]
     - mkl.patch                   # [blas_impl == "mkl"]
+    - metal_gpu_selection.patch   # [osx]
 
 build:
   # skip_gpu is set through abs.yaml for use in prefect only
@@ -37,17 +38,16 @@ requirements:
     - cmake
     - ninja-base
     - pkgconfig
-    - patch     # [linux or (unix and blas_impl == "mkl")]
-    - m2-patch  # [win and blas_impl == "mkl"]
-    - pthread-stubs 0.3                                   # [linux]
+    - patch     # [unix or (blas_impl == "mkl")]
+    - m2-patch  # [win and (blas_impl == "mkl")]
   host:
     - cudatoolkit      {{ cuda_compiler_version }}        # [gpu_variant == "cuda-11"]
     - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant == "cuda-11") or (gpu_variant == "cuda-12")]
     - cuda-cudart-dev  {{ cuda_compiler_version }}        # [gpu_variant == "cuda-12"]
     - libcublas-dev    {{ cuda_compiler_version }}        # [gpu_variant == "cuda-12"]
-
     - openblas-devel {{ openblas }}                       # [blas_impl == "openblas"]
     - mkl-devel {{ mkl }}                                 # [blas_impl == "mkl"]
+    - pthread-stubs 0.3                                   # [linux]
   run:
     - {{ pin_compatible('cudatoolkit', max_pin='x.x') }}  # [gpu_variant == "cuda-11"]
     - {{ pin_compatible('cuda-version', max_pin='x.x') }} # [(gpu_variant == "cuda-11") or (gpu_variant == "cuda-12")]
