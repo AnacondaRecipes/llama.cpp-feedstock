@@ -1,5 +1,5 @@
 {% set name = "llama.cpp" %}
-{% set version = "0.0.2408" %}
+{% set version = "0.0.2687" %}
 {% set build_number = 0 %}
 
 package:
@@ -8,11 +8,11 @@ package:
 
 source:
   url: https://github.com/ggerganov/llama.cpp/archive/b{{ version.split(".")[-1] }}.tar.gz
-  sha256: 163255cb77599be6f97c487bcdce79912c7509a9c522ad4ab5b23cc4104d0bb4
-  patches:                        # [unix or (blas_impl == "mkl")]
-    - test_exe_threads.patch      # [linux]
-    - mkl.patch                   # [blas_impl == "mkl"]
-    - metal_gpu_selection.patch   # [osx]
+  sha256: 02be686a82e267e10e869b4ae8fc37db51abde63e323d19d9ebf4ba33523f5f9
+  patches:
+    - patches/test_exe_threads.patch      # [linux]
+    - patches/mkl.patch                   # [blas_impl == "mkl"]
+    - patches/metal_gpu_selection.patch   # [osx]
 
 build:
   # skip_gpu is set through abs.yaml for use in prefect only
@@ -21,7 +21,7 @@ build:
   # Use a build number difference to ensure that the GPU
   # variant is slightly preferred by conda's solver, so that it's preferentially
   # installed where the platform supports it.
-  number: {{ build_number + 110 }}  # [gpu_variant == "cuda-12"]
+  number: {{ build_number + 200 }}  # [gpu_variant == "cuda-12"]
   number: {{ build_number + 100 }}  # [(gpu_variant == "cuda-11") or (gpu_variant == "metal")]
   number: {{ build_number }}        # [gpu_variant == "none"]
   string: cuda{{ cuda_compiler_version | replace('.', '') }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [(gpu_variant == "cuda-11") or (gpu_variant == "cuda-12")]
@@ -72,3 +72,4 @@ about:
 extra:
   recipe-maintainers:
     - sodre
+    - cbouss

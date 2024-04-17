@@ -1,0 +1,73 @@
+From f9be8f9492ef7e92a5f169f13d6c4dab83686882 Mon Sep 17 00:00:00 2001
+From: Charles Bousseau <cbousseau@anaconda.com>
+Date: Wed, 17 Apr 2024 16:14:29 -0400
+Subject: [PATCH] metal gpu selection
+
+In macOS, in order for the system to provide a default Metal device object, you must link to the Core Graphics framework. 
+You usually need to do this explicitly if you’re writing apps that don’t use graphics by default, such as command line tools.
+https://developer.apple.com/documentation/metal/1433401-mtlcreatesystemdefaultdevice?language=objc
+Systems with Apple silicon only have one GPU, which removes the need to choose a GPU.
+https://developer.apple.com/documentation/metal/mtldevice/1433409-lowpower#discussion
+---
+ ggml-metal.m | 38 ++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 38 insertions(+)
+
+diff --git a/ggml-metal.m b/ggml-metal.m
+index ae6ddeac..d1383c49 100644
+--- a/ggml-metal.m
++++ b/ggml-metal.m
+@@ -278,6 +278,25 @@ static void ggml_metal_log(enum ggml_log_level level, const char * format, ...){
+ 
+     // Pick and show default Metal device
+     id<MTLDevice> device = MTLCreateSystemDefaultDevice();
++    if (device == nil) {
++        /* 
++        In macOS, in order for the system to provide a default Metal device object, you must link to the Core Graphics framework. 
++        You usually need to do this explicitly if you’re writing apps that don’t use graphics by default, such as command line tools.
++        > https://developer.apple.com/documentation/metal/1433401-mtlcreatesystemdefaultdevice?language=objc
++        Systems with Apple silicon only have one GPU, which removes the need to choose a GPU.
++        > https://developer.apple.com/documentation/metal/mtldevice/1433409-lowpower#discussion
++        */
++        NSArray * devices = MTLCopyAllDevices();
++        for (id<MTLDevice> dev in devices) {
++            if (dev != nil) {
++                if (device == nil) {
++                    device = dev;
++                } else {
++                    [dev release];
++                }
++            }
++        }
++    }
+     GGML_METAL_LOG_INFO("%s: picking default device: %s\n", __func__, [[device name] UTF8String]);
+ 
+     // Configure context
+@@ -2620,6 +2639,25 @@ static enum ggml_status ggml_metal_graph_compute(
+ static id<MTLDevice> ggml_backend_metal_get_device(void) {
+     if (g_backend_device == nil) {
+         g_backend_device = MTLCreateSystemDefaultDevice();
++        if (g_backend_device == nil) {
++            /* 
++            In macOS, in order for the system to provide a default Metal device object, you must link to the Core Graphics framework. 
++            You usually need to do this explicitly if you’re writing apps that don’t use graphics by default, such as command line tools.
++            > https://developer.apple.com/documentation/metal/1433401-mtlcreatesystemdefaultdevice?language=objc
++            Systems with Apple silicon only have one GPU, which removes the need to choose a GPU.
++            > https://developer.apple.com/documentation/metal/mtldevice/1433409-lowpower#discussion
++            */
++            NSArray * devices = MTLCopyAllDevices();
++            for (id<MTLDevice> dev in devices) {
++                if (dev != nil) {
++                    if (g_backend_device == nil) {
++                        g_backend_device = dev;
++                    } else {
++                        [dev release];
++                    }
++                }
++            }
++        }   
+     }
+ 
+     g_backend_device_ref_count++;
+-- 
+2.39.3 (Apple Git-146)
+
