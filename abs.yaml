@@ -4,3 +4,7 @@ build_parameters:
   - "--skip-existing"
   - "--error-overlinking"
   - "--variants \"{skip_gpu: True}\""
+
+# destination upon merge
+upload_channels:
+  ai-staging
