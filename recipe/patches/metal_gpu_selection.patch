@@ -8,6 +8,8 @@ You usually need to do this explicitly if you’re writing apps that don’t use
 https://developer.apple.com/documentation/metal/1433401-mtlcreatesystemdefaultdevice?language=objc
 Systems with Apple silicon only have one GPU, which removes the need to choose a GPU.
 https://developer.apple.com/documentation/metal/mtldevice/1433409-lowpower#discussion
+
+I did try linking to CoreGraphics, but MTLCreateSystemDefaultDevice was still returning nil.
 ---
  ggml-metal.m | 38 ++++++++++++++++++++++++++++++++++++++
  1 file changed, 38 insertions(+)

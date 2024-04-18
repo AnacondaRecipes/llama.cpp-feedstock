@@ -15,27 +15,27 @@ source:
     - patches/metal_gpu_selection.patch   # [osx]
 
 build:
-  # skip_gpu is set through abs.yaml for use in prefect only
-  skip: true # [skip_gpu and ((gpu_variant == "cuda-11") or (gpu_variant == "cuda-12"))]
+  # skip_cuda_prefect is set through abs.yaml for use in prefect only
+  skip: true # [skip_cuda_prefect and (gpu_variant or "").startswith('cuda')]
   skip: true # [s390x]
   # Use a build number difference to ensure that the GPU
   # variant is slightly preferred by conda's solver, so that it's preferentially
   # installed where the platform supports it.
-  number: {{ build_number + 200 }}  # [gpu_variant == "cuda-12"]
+  number: {{ build_number + 200 }}  # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11")]
   number: {{ build_number + 100 }}  # [(gpu_variant == "cuda-11") or (gpu_variant == "metal")]
   number: {{ build_number }}        # [gpu_variant == "none"]
-  string: cuda{{ cuda_compiler_version | replace('.', '') }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [(gpu_variant == "cuda-11") or (gpu_variant == "cuda-12")]
+  string: cuda{{ cuda_compiler_version | replace('.', '') }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [(gpu_variant or "").startswith('cuda')]
   string: cpu_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                 # [gpu_variant == "none"]
   string: mps_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                                 # [gpu_variant == "metal"]
-  missing_dso_whitelist:                                                                         # [s390x or (gpu_variant == "cuda-11") or (gpu_variant == "cuda-12")]
-    - "**/libcuda.so*"                                                                           # [(gpu_variant == "cuda-11") or (gpu_variant == "cuda-12")]
+  missing_dso_whitelist:                                                                         # [s390x or (gpu_variant or "").startswith('cuda')]
+    - "**/libcuda.so*"                                                                           # [(gpu_variant or "").startswith('cuda')]
     - '$RPATH/ld64.so.1'  # [s390x]
   
 requirements:
   build:
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
-    - {{ compiler('cuda') }}                              # [gpu_variant == "cuda-12"]
+    - {{ compiler('cuda') }}                              # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11")]
     - cmake
     - ninja-base
     - pkgconfig
@@ -43,20 +43,32 @@ requirements:
     - m2-patch  # [win]
   host:
     - cudatoolkit      {{ cuda_compiler_version }}        # [gpu_variant == "cuda-11"]
-    - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant == "cuda-11") or (gpu_variant == "cuda-12")]
-    - cuda-cudart-dev  {{ cuda_compiler_version }}        # [gpu_variant == "cuda-12"]
-    - libcublas-dev    {{ cuda_compiler_version }}        # [gpu_variant == "cuda-12"]
+    - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
+    - cuda-cudart-dev  {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11")]
+    - libcublas-dev    {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11")]
     - openblas-devel {{ openblas }}                       # [blas_impl == "openblas"]
     - mkl-devel {{ mkl }}                                 # [blas_impl == "mkl"]
-    - pthread-stubs 0.3                                   # [linux]
   run:
     - {{ pin_compatible('cudatoolkit', max_pin='x.x') }}  # [gpu_variant == "cuda-11"]
-    - {{ pin_compatible('cuda-version', max_pin='x.x') }} # [(gpu_variant == "cuda-11") or (gpu_variant == "cuda-12")]
+    - {{ pin_compatible('cuda-version', max_pin='x.x') }} # [(gpu_variant or "").startswith('cuda')]
+    - __osx >={{ MACOSX_DEPLOYMENT_TARGET|default("10.12") }}  # [osx and x86_64]
+    - __osx >={{ MACOSX_DEPLOYMENT_TARGET|default("11.1") }}   # [osx and arm64 and (gpu_variant != "metal")]
+    - __osx >={{ MACOSX_DEPLOYMENT_TARGET|default("12.3") }}   # [osx and arm64 and (gpu_variant == "metal")]
 
 test:
   commands:
     - main --help
     - server --help
+    - test -f $PREFIX/include/llama.h    # [unix]
+    - test -f $PREFIX/bin/main           # [unix]
+    - test -f $PREFIX/bin/server         # [unix]
+    - test -f $PREFIX/lib/libllama.so    # [linux]
+    - test -f $PREFIX/lib/libllama.dylib # [osx]
+    - if not exist %PREFIX%/Library/include/llama.h exit 1  # [win]
+    - if not exist %PREFIX%/Library/lib/llama.lib exit 1    # [win]
+    - if not exist %PREFIX%/Library/bin/llama.dll exit 1    # [win]
+    - if not exist %PREFIX%/Library/bin/main.exe exit 1     # [win]
+    - if not exist %PREFIX%/Library/bin/server.exe exit 1   # [win]
 
 about:
   home: https://github.com/ggerganov/llama.cpp
