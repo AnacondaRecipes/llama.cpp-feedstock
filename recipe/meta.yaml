@@ -52,8 +52,6 @@ requirements:
     - {{ pin_compatible('cudatoolkit', max_pin='x.x') }}  # [gpu_variant == "cuda-11"]
     - {{ pin_compatible('cuda-version', max_pin='x.x') }} # [(gpu_variant or "").startswith('cuda')]
     - __osx >={{ MACOSX_DEPLOYMENT_TARGET|default("10.12") }}  # [osx and x86_64]
-    - __osx >={{ MACOSX_DEPLOYMENT_TARGET|default("11.1") }}   # [osx and arm64 and (gpu_variant != "metal")]
-    - __osx >={{ MACOSX_DEPLOYMENT_TARGET|default("12.3") }}   # [osx and arm64 and (gpu_variant == "metal")]
 
 test:
   commands:
