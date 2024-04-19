@@ -1,0 +1,25 @@
+From e35bc4a336a84a017c0947e0dc228f46aa8008fb Mon Sep 17 00:00:00 2001
+From: Charles Bousseau <cbousseau@anaconda.com>
+Date: Wed, 17 Apr 2024 16:11:02 -0400
+Subject: [PATCH] link tests to pthread
+
+---
+ tests/CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tests/CMakeLists.txt b/tests/CMakeLists.txt
+index 89f23ca2..ed7aab3e 100644
+--- a/tests/CMakeLists.txt
++++ b/tests/CMakeLists.txt
+@@ -25,7 +25,7 @@ function(llama_test source)
+ 
+     add_executable(${TEST_TARGET} ${source} get-model.cpp)
+     install(TARGETS ${TEST_TARGET} RUNTIME)
+-    target_link_libraries(${TEST_TARGET} PRIVATE common)
++    target_link_libraries(${TEST_TARGET} PRIVATE Threads::Threads common)
+     add_test(
+         NAME ${TEST_TARGET}
+         WORKING_DIRECTORY ${LLAMA_TEST_WORKING_DIRECTORY}
+-- 
+2.39.3 (Apple Git-146)
+

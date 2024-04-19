@@ -1,0 +1,26 @@
+From 93c8b7bd307013c00b4894c4f24abbf05ab5bb8a Mon Sep 17 00:00:00 2001
+From: Charles Bousseau <cbousseau@anaconda.com>
+Date: Wed, 17 Apr 2024 16:23:33 -0400
+Subject: [PATCH] mkl build
+
+Co-Authored-By: Patrick Sodré <psodre@gmail.com>
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2cc0df3f..3a8817bf 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -357,7 +357,7 @@ if (LLAMA_BLAS)
+ 
+         add_compile_definitions(GGML_USE_OPENBLAS)
+ 
+-        if (${BLAS_INCLUDE_DIRS} MATCHES "mkl" AND (${LLAMA_BLAS_VENDOR} MATCHES "Generic" OR ${LLAMA_BLAS_VENDOR} MATCHES "Intel"))
++        if ((${BLAS_INCLUDE_DIRS} MATCHES "mkl" AND ${LLAMA_BLAS_VENDOR} MATCHES "Generic") OR ${LLAMA_BLAS_VENDOR} MATCHES "Intel")
+             add_compile_definitions(GGML_BLAS_USE_MKL)
+         endif()
+ 
+-- 
+2.39.3 (Apple Git-146)
+

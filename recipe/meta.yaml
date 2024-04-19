@@ -1,5 +1,6 @@
 {% set name = "llama.cpp" %}
-{% set version = "0.0.2408" %}
+{% set version = "0.0.2687" %}
+{% set build_number = 0 %}
 
 package:
   name: {{ name|lower }}
@@ -7,97 +8,78 @@ package:
 
 source:
   url: https://github.com/ggerganov/llama.cpp/archive/b{{ version.split(".")[-1] }}.tar.gz
-  sha256: 163255cb77599be6f97c487bcdce79912c7509a9c522ad4ab5b23cc4104d0bb4
+  sha256: 02be686a82e267e10e869b4ae8fc37db51abde63e323d19d9ebf4ba33523f5f9
   patches:
-    - osx-64-pick-discrete.patch  # [osx]
-    - mkl.patch                   # [blas_impl == "mkl"]
+    - patches/test_exe_threads.patch      # [linux]
+    - patches/mkl.patch                   # [blas_impl == "mkl"]
+    - patches/metal_gpu_selection.patch   # [osx]
 
 build:
-  number: 0
-  skip: true # [not (linux and x86_64) or (cuda_compiler_version == "None")]
-  string: cuda{{ cuda_compiler_version | replace('.', '') }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version != "None"]
-  string: cpu_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                 # [(osx and x86_64) or cuda_compiler_version == "None"]
-  string: mps_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                                 # [osx and arm64]
-  missing_dso_whitelist:
-    - "**/libcuda.so*"
- 
-  script:
-    - LLAMA_ARGS="-DLLAMA_BUILD_TESTS=OFF"              # [unix]
-    - set LLAMA_ARGS=-DLLAMA_BUILD_TESTS=OFF            # [win]
-    {% macro llama_args(value) -%}
-    - LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_{{ value }}"    # [unix]
-    - set LLAMA_ARGS=%LLAMA_ARGS% -DLLAMA_{{ value }}   # [win]
-    {%- endmacro %}
-    {% macro cmake_args(value) -%}
-    - LLAMA_ARGS="${LLAMA_ARGS} -D{{ value }}"          # [unix]
-    - set LLAMA_ARGS=%LLAMA_ARGS% -D{{ value }}         # [win]
-    {%- endmacro %}
-
-    {{ cmake_args("BUILD_SHARED_LIBS=ON") }}
-
-    {{ llama_args("NATIVE=OFF") }}      # [cpu_variant == "main_channel_default"]
-    {{ llama_args("AVX=OFF") }}         # [osx and arm64]
-    {{ llama_args("AVX2=OFF") }}        # [osx and arm64]
-    {{ llama_args("FMA=OFF") }}         # [osx and arm64]
-    {{ llama_args("F16C=OFF") }}        # [osx and arm64]
-    {{ llama_args("METAL=ON") }}        # [osx and arm64]
-    {{ llama_args("METAL=OFF") }}       # [osx and x86_64]
-    {{ llama_args("ACCELERATE=ON") }}   # [osx]
-
-    {{ llama_args("CUBLAS=ON") }}                     # [cuda_compiler_version != "None"]
-    {{ cmake_args("CMAKE_CUDA_ARCHITECTURES=all") }}  # [cuda_compiler_version != "None"]
-
-    {{ llama_args("BLAS=ON") }}                     # [not osx and cuda_compiler_version == "None"]
-    {{ llama_args("BLAS_VENDOR=Intel10_64_dyn") }}  # [not osx and cuda_compiler_version == "None" and blas_impl == "mkl"]
-
-    - echo $LLAMA_ARGS  # [unix]
-    - set LLAMA_ARGS    # [win]
-
-    - export CUDACXX=/usr/local/cuda/bin/nvcc   # [cuda_compiler_version != "None" and not (cuda_compiler_version or "").startswith("12")]
-    - export CUDAHOSTCXX="${CXX}"               # [cuda_compiler_version != "None" and not (cuda_compiler_version or "").startswith("12")]
-    - export LDFLAGS="$LDFLAGS -Wl,-rpath-link,/usr/lib64"    # [(cuda_compiler_version or "").startswith("12")]
-
-    - cmake -S . -B build -G Ninja %CMAKE_ARGS% %LLAMA_ARGS%    # [win]
-    - cmake -S . -B build -G Ninja ${CMAKE_ARGS} ${LLAMA_ARGS}  # [unix]
-    - cmake --build build
-    - cmake --install build 
-
+  # skip_cuda_prefect is set through abs.yaml for use in prefect only
+  skip: true # [skip_cuda_prefect and (gpu_variant or "").startswith('cuda')]
+  skip: true # [s390x]
+  # Use a build number difference to ensure that the GPU
+  # variant is slightly preferred by conda's solver, so that it's preferentially
+  # installed where the platform supports it.
+  number: {{ build_number + 200 }}  # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11")]
+  number: {{ build_number + 100 }}  # [(gpu_variant == "cuda-11") or (gpu_variant == "metal")]
+  number: {{ build_number }}        # [gpu_variant == "none"]
+  string: cuda{{ cuda_compiler_version | replace('.', '') }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [(gpu_variant or "").startswith('cuda')]
+  string: cpu_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                 # [gpu_variant == "none"]
+  string: mps_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                                 # [gpu_variant == "metal"]
+  missing_dso_whitelist:                                                                         # [s390x or (gpu_variant or "").startswith('cuda')]
+    - "**/libcuda.so*"                                                                           # [(gpu_variant or "").startswith('cuda')]
+    - '$RPATH/ld64.so.1'  # [s390x]
+  
 requirements:
   build:
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
-    - {{ compiler('cuda') }}                        # [(cuda_compiler_version or "").startswith("12")]
+    - {{ compiler('cuda') }}                              # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11")]
     - cmake
-    - git
-    - ninja
+    - ninja-base
     - pkgconfig
+    - patch     # [unix]
+    - m2-patch  # [win]
   host:
-    - cudatoolkit      {{ cuda_compiler_version }}  # [cuda_compiler_version != "None" and not (cuda_compiler_version or "").startswith("12")]
-    - cuda-version     {{ cuda_compiler_version }}  # [cuda_compiler_version != "None"]
-    - cuda-cudart-dev  {{ cuda_compiler_version }}  # [(cuda_compiler_version or "").startswith("12")]
-    - libcublas-dev    {{ cuda_compiler_version }}  # [(cuda_compiler_version or "").startswith("12")]
-
-    - blas-devel * *{{ blas_impl }}                 # [not osx and cuda_compiler_version == "None" and blas_impl == "mkl"]
-    - mkl-devel {{ mkl }}                           # [not osx and cuda_compiler_version == "None" and blas_impl == "mkl"]
+    - cudatoolkit      {{ cuda_compiler_version }}        # [gpu_variant == "cuda-11"]
+    - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
+    - cuda-cudart-dev  {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11")]
+    - libcublas-dev    {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11")]
+    - openblas-devel {{ openblas }}                       # [blas_impl == "openblas"]
+    - mkl-devel {{ mkl }}                                 # [blas_impl == "mkl"]
   run:
-    - {{ pin_compatible('cudatoolkit', max_pin='x.x') }}  # [cuda_compiler_version != "None" and not (cuda_compiler_version or "").startswith("12")]
-    - {{ pin_compatible('cuda-version', max_pin='x.x') }} # [cuda_compiler_version != "None"]
-
-    - llvm-openmp                                   # [linux and cuda_compiler_version == "None" and blas_impl == "mkl"]
-    - __cuda >={{ cuda_compiler_version }}          # [cuda_compiler_version != "None" and not (cuda_compiler_version or "").startswith("12")]
+    - {{ pin_compatible('cudatoolkit', max_pin='x.x') }}  # [gpu_variant == "cuda-11"]
+    - {{ pin_compatible('cuda-version', max_pin='x.x') }} # [(gpu_variant or "").startswith('cuda')]
+    - __osx >={{ MACOSX_DEPLOYMENT_TARGET|default("10.12") }}  # [osx and x86_64]
 
 test:
   commands:
     - main --help
     - server --help
+    - test -f $PREFIX/include/llama.h    # [unix]
+    - test -f $PREFIX/bin/main           # [unix]
+    - test -f $PREFIX/bin/server         # [unix]
+    - test -f $PREFIX/lib/libllama.so    # [linux]
+    - test -f $PREFIX/lib/libllama.dylib # [osx]
+    - if not exist %PREFIX%/Library/include/llama.h exit 1  # [win]
+    - if not exist %PREFIX%/Library/lib/llama.lib exit 1    # [win]
+    - if not exist %PREFIX%/Library/bin/llama.dll exit 1    # [win]
+    - if not exist %PREFIX%/Library/bin/main.exe exit 1     # [win]
+    - if not exist %PREFIX%/Library/bin/server.exe exit 1   # [win]
 
 about:
   home: https://github.com/ggerganov/llama.cpp
-  summary: Port of Facebook's LLaMA model in C/C++
+  summary: LLM inference in C/C++
+  description: |
+    Inference of Meta's LLaMA model (and others) in pure C/C++
   license: MIT
   license_family: MIT
   license_file: LICENSE
+  dev_url: https://github.com/ggerganov/llama.cpp
+  doc_url: https://github.com/ggerganov/llama.cpp
 
 extra:
   recipe-maintainers:
     - sodre
+    - cbouss
