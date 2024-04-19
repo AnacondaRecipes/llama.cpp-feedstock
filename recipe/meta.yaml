@@ -18,6 +18,7 @@ build:
   # skip_cuda_prefect is set through abs.yaml for use in prefect only
   skip: true # [skip_cuda_prefect and (gpu_variant or "").startswith('cuda')]
   skip: true # [s390x]
+  skip: true # [gpu_variant == "cuda-11"]
   # Use a build number difference to ensure that the GPU
   # variant is slightly preferred by conda's solver, so that it's preferentially
   # installed where the platform supports it.
