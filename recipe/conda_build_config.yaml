@@ -15,6 +15,7 @@ blas_impl:
   - mkl                        # [(x86 or x86_64) and not osx]
   - openblas                   # [not win and not osx]
   - accelerate                 # [osx]
+  - cublas                     # [win or (linux and x86_64)]
 
 gpu_variant:
   - none

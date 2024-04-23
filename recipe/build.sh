@@ -3,11 +3,11 @@ set -ex
 
 if [[ ${gpu_variant:-} = "cuda-12" ]]; then
     CMAKE_ARGS="${CMAKE_ARGS} -DCMAKE_CUDA_ARCHITECTURES=all"
-    LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_CUBLAS=ON"
+    LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_CUDA=ON"
     export LDFLAGS="$LDFLAGS -Wl,-rpath-link,/usr/lib64"
 elif [[ ${gpu_variant:-} = "cuda-11" ]]; then
     CMAKE_ARGS="${CMAKE_ARGS} -DCMAKE_CUDA_ARCHITECTURES=all"
-    LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_CUBLAS=ON"
+    LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_CUDA=ON"
     export CUDACXX=/usr/local/cuda/bin/nvcc
     export CUDAHOSTCXX="${CXX}"
 fi
@@ -37,6 +37,8 @@ elif [[ ${blas_impl:-} = "openblas" ]]; then
     LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_BLAS=ON"
     LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_ACCELERATE=OFF"
     LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_BLAS_VENDOR=OpenBLAS"
+else
+    LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_BLAS=OFF"
 fi
 
 cmake -S . -B build \
