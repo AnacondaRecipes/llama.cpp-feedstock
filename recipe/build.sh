@@ -1,13 +1,13 @@
 #!/bin/bash
 set -ex
 
-if [[ ${gpu_variant:-} = "cuda-12" ]]; then
+if [[ ${gpu_variant:0:5} = "cuda-" ]]; then
     CMAKE_ARGS="${CMAKE_ARGS} -DCMAKE_CUDA_ARCHITECTURES=all"
     LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_CUDA=ON"
-    export LDFLAGS="$LDFLAGS -Wl,-rpath-link,/usr/lib64"
-elif [[ ${gpu_variant:-} = "cuda-11" ]]; then
-    CMAKE_ARGS="${CMAKE_ARGS} -DCMAKE_CUDA_ARCHITECTURES=all"
-    LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_CUDA=ON"
+elif [[ ${gpu_variant:-} = "none" ]]; then
+    LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_CUDA=OFF"
+fi
+if [[ ${gpu_variant:-} = "cuda-11" ]]; then
     export CUDACXX=/usr/local/cuda/bin/nvcc
     export CUDAHOSTCXX="${CXX}"
 fi
