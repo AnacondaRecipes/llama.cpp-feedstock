@@ -1,5 +1,5 @@
 {% set name = "llama.cpp" %}
-{% set version = "0.0.2687" %}
+{% set version = "0.0.2724" %}
 {% set build_number = 0 %}
 
 package:
@@ -8,7 +8,7 @@ package:
 
 source:
   url: https://github.com/ggerganov/llama.cpp/archive/b{{ version.split(".")[-1] }}.tar.gz
-  sha256: 02be686a82e267e10e869b4ae8fc37db51abde63e323d19d9ebf4ba33523f5f9
+  sha256: 5f2bae5b5e7dbbff45c60485a149ee769cbd5cdf05839e115571d16373f11f27
   patches:
     - patches/test_exe_threads.patch      # [linux]
     - patches/mkl.patch                   # [blas_impl == "mkl"]
