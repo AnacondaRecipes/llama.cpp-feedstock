@@ -4,12 +4,15 @@ set -ex
 if [[ ${gpu_variant:0:5} = "cuda-" ]]; then
     CMAKE_ARGS="${CMAKE_ARGS} -DCMAKE_CUDA_ARCHITECTURES=all"
     LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_CUDA=ON"
+    if [[ ${gpu_variant:-} = "cuda-11" ]]; then
+        export CUDACXX=/usr/local/cuda/bin/nvcc
+        export CUDAHOSTCXX="${CXX}"
+    else
+        LDFLAGS="$LDFLAGS -Wl,-rpath-link,${PREFIX}/lib/stubs/"
+        ln -s ${PREFIX}/lib/stubs/libcuda.so ${PREFIX}/lib/stubs/libcuda.so.1
+    fi
 elif [[ ${gpu_variant:-} = "none" ]]; then
     LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_CUDA=OFF"
-fi
-if [[ ${gpu_variant:-} = "cuda-11" ]]; then
-    export CUDACXX=/usr/local/cuda/bin/nvcc
-    export CUDAHOSTCXX="${CXX}"
 fi
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
