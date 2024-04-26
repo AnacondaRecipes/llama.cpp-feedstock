@@ -13,7 +13,6 @@ source:
     - patches/test_exe_threads.patch      # [linux]
     - patches/mkl.patch                   # [blas_impl == "mkl"]
     - patches/metal_gpu_selection.patch   # [osx]
-    - patches/skip_mul_mat_tests.patch    # [linux and (gpu_variant or "").startswith('cuda')]
 
 build:
   # skip_cuda_prefect is set through abs.yaml for use in prefect only
