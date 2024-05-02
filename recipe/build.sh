@@ -9,6 +9,8 @@ if [[ ${gpu_variant:0:5} = "cuda-" ]]; then
         export CUDAHOSTCXX="${CXX}"
     else
         LDFLAGS="$LDFLAGS -Wl,-rpath-link,${PREFIX}/lib/stubs/"
+        # TODO: This is a workaround. In the future, consider using cuda-compat instead of 
+        # cuda-driver-dev to provide libcuda.so.1
         ln -s ${PREFIX}/lib/stubs/libcuda.so ${PREFIX}/lib/stubs/libcuda.so.1
     fi
 elif [[ ${gpu_variant:-} = "none" ]]; then
@@ -66,6 +68,10 @@ cmake --build build --config Release --verbose
 cmake --install build
 pushd build/tests
 if [[ ${gpu_variant:0:5} = "cuda-" ]]; then
+    # Tests failures around some quantization types (F32, IQ2_XXS) and batch matrix multiplication (ggml_mul_mat)
+    # Possibly due to simd feature not supported by our hardware (Maxwell).
+    # To revisit cuda build if this package is to be used with models requiring these features.
+    # Possiblity linked to https://github.com/ggerganov/llama.cpp/issues/6825
     ctest --output-on-failure build -j${CPU_COUNT} || true
 else
     ctest --output-on-failure build -j${CPU_COUNT}
