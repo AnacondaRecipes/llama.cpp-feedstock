@@ -8,10 +8,10 @@ Subject: [PATCH] link tests to pthread
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/tests/CMakeLists.txt b/tests/CMakeLists.txt
-index 89f23ca2..ed7aab3e 100644
+index d23e7f77..61b41830 100644
 --- a/tests/CMakeLists.txt
 +++ b/tests/CMakeLists.txt
-@@ -25,7 +25,7 @@ function(llama_test source)
+@@ -55,7 +55,7 @@ function(llama_target_and_test source)
  
      add_executable(${TEST_TARGET} ${source} get-model.cpp)
      install(TARGETS ${TEST_TARGET} RUNTIME)
@@ -20,6 +20,30 @@ index 89f23ca2..ed7aab3e 100644
      add_test(
          NAME ${TEST_TARGET}
          WORKING_DIRECTORY ${LLAMA_TEST_WORKING_DIRECTORY}
--- 
-2.39.3 (Apple Git-146)
-
+@@ -67,7 +67,7 @@ endfunction()
+ 
+ # build test-tokenizer-0 target once and add many tests
+ add_executable(test-tokenizer-0 test-tokenizer-0.cpp)
+-target_link_libraries(test-tokenizer-0 PRIVATE common)
++target_link_libraries(test-tokenizer-0 PRIVATE Threads::Threads common)
+ install(TARGETS test-tokenizer-0 RUNTIME)
+ 
+ llama_test(test-tokenizer-0 NAME test-tokenizer-0-llama-spm         ARGS ${CMAKE_CURRENT_SOURCE_DIR}/../models/ggml-vocab-llama-spm.gguf)
+@@ -84,7 +84,7 @@ llama_test(test-tokenizer-0 NAME test-tokenizer-0-gpt-2             ARGS ${CMAKE
+ 
+ # build test-tokenizer-1-bpe target once and add many tests
+ add_executable(test-tokenizer-1-bpe test-tokenizer-1-bpe.cpp)
+-target_link_libraries(test-tokenizer-1-bpe PRIVATE common)
++target_link_libraries(test-tokenizer-1-bpe PRIVATE Threads::Threads common)
+ install(TARGETS test-tokenizer-1-bpe RUNTIME)
+ 
+ # TODO: disabled due to slowness
+@@ -101,7 +101,7 @@ install(TARGETS test-tokenizer-1-bpe RUNTIME)
+ 
+ # build test-tokenizer-1-spm target once and add many tests
+ add_executable(test-tokenizer-1-spm test-tokenizer-1-spm.cpp)
+-target_link_libraries(test-tokenizer-1-spm PRIVATE common)
++target_link_libraries(test-tokenizer-1-spm PRIVATE Threads::Threads common)
+ install(TARGETS test-tokenizer-1-spm RUNTIME)
+ 
+ llama_test(test-tokenizer-1-spm  NAME test-tokenizer-1-llama-spm ARGS ${CMAKE_CURRENT_SOURCE_DIR}/../models/ggml-vocab-llama-spm.gguf)

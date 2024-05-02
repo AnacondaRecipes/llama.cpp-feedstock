@@ -17,6 +17,9 @@ if "%blas_impl%"=="mkl" (
     set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_ACCELERATE=OFF
     set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_BLAS_VENDOR=OpenBLAS
 ) else (
+    REM Note: LLAMA_CUDA=ON enables cublas.
+    REM Tests fail when both mkl and cublas are used.
+    REM This has also been reported here: https://github.com/ggerganov/llama.cpp/issues/4626
     set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_BLAS=OFF
 )
 
