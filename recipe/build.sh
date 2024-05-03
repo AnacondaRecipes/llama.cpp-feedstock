@@ -68,10 +68,29 @@ cmake --build build --config Release --verbose
 cmake --install build
 pushd build/tests
 if [[ ${gpu_variant:0:5} = "cuda-" ]]; then
-    # Tests failures around some quantization types (F32, IQ2_XXS) and batch matrix multiplication (ggml_mul_mat)
-    # Possibly due to simd feature not supported by our hardware (Maxwell).
-    # To revisit cuda build if this package is to be used with models requiring these features.
-    # Possiblity linked to https://github.com/ggerganov/llama.cpp/issues/6825
+    # Tests failures around batch matrix multiplication (ggml_mul_mat) due to our hardware (Maxwell) not supporting 
+    # f16 CUDA intrinsics (available from 60 - Pascal), and us compiling with CUDA architectures all.
+    # See https://github.com/ggerganov/llama.cpp/blob/b2781/CMakeLists.txt#L439-L451
+    # LLAMA_CUDA_F16 is optional, but the corresponding tests are not skipped by default.
+    #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=1,k=256,bs=[10,1],nr=[1,1]): [MUL_MAT] NMSE = 0.995356906 > 0.0005000
+    # 00 FAIL
+    #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=1,k=256,bs=[10,1],nr=[2,1]): [MUL_MAT] NMSE = 0.999567945 > 0.0005000
+    # 00 FAIL
+    #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=1,k=256,bs=[10,10],nr=[1,1]): [MUL_MAT] inf mismatch: CUDA0=-inf CPU=
+    # 3.371366 FAIL
+    #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=1,k=256,bs=[10,10],nr=[2,1]): [MUL_MAT] inf mismatch: CUDA0=-inf CPU=
+    # 6.707091 FAIL
+    #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=1,k=256,bs=[10,10],nr=[1,2]): not supported [CUDA0]
+    #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=1,k=256,bs=[10,10],nr=[2,2]): not supported [CUDA0]
+    #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=16,k=256,bs=[1,1],nr=[1,1]): OK
+    #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=16,k=256,bs=[10,1],nr=[1,1]): [MUL_MAT] NMSE = 1.002334163 > 0.000500
+    # 000 FAIL
+    #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=16,k=256,bs=[10,1],nr=[2,1]): [MUL_MAT] NMSE = 1.000352589 > 0.000500
+    # 000 FAIL
+    #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=16,k=256,bs=[10,10],nr=[1,1]): [MUL_MAT] NMSE = 1.000091733 > 0.00050
+    # 0000 FAIL
+    #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=16,k=256,bs=[10,10],nr=[2,1]): [MUL_MAT] NMSE = 1.000184368 > 0.00050
+    # 0000 FAIL
     ctest --output-on-failure build -j${CPU_COUNT} || true
 else
     ctest --output-on-failure build -j${CPU_COUNT}
