@@ -7,11 +7,6 @@ if [[ ${gpu_variant:0:5} = "cuda-" ]]; then
     if [[ ${gpu_variant:-} = "cuda-11" ]]; then
         export CUDACXX=/usr/local/cuda/bin/nvcc
         export CUDAHOSTCXX="${CXX}"
-    else
-        LDFLAGS="$LDFLAGS -Wl,-rpath-link,${PREFIX}/lib/stubs/"
-        # TODO: This is a workaround. In the future, consider using cuda-compat instead of 
-        # cuda-driver-dev to provide libcuda.so.1
-        ln -s ${PREFIX}/lib/stubs/libcuda.so ${PREFIX}/lib/stubs/libcuda.so.1
     fi
 elif [[ ${gpu_variant:-} = "none" ]]; then
     LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_CUDA=OFF"
