@@ -38,6 +38,7 @@ cmake -S . -B build ^
     -DLLAMA_AVX512=OFF ^
     -DLLAMA_AVX512_VBMI=OFF ^
     -DLLAMA_AVX512_VNNI=OFF ^
+    -DLLAMA_AVX512_BF16=OFF ^
     -DLLAMA_FMA=OFF
 if errorlevel 1 exit 1
 
