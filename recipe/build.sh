@@ -7,6 +7,9 @@ if [[ ${gpu_variant:0:5} = "cuda-" ]]; then
     if [[ ${gpu_variant:-} = "cuda-11" ]]; then
         export CUDACXX=/usr/local/cuda/bin/nvcc
         export CUDAHOSTCXX="${CXX}"
+    else
+        # cuda-compat provided libcuda.so.1
+        LDFLAGS="$LDFLAGS -Wl,-rpath-link,${PREFIX}/cuda-compat/"
     fi
 elif [[ ${gpu_variant:-} = "none" ]]; then
     LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_CUDA=OFF"
@@ -67,25 +70,14 @@ if [[ ${gpu_variant:0:5} = "cuda-" ]]; then
     # f16 CUDA intrinsics (available from 60 - Pascal), and us compiling with CUDA architectures all.
     # See https://github.com/ggerganov/llama.cpp/blob/b2781/CMakeLists.txt#L439-L451
     # LLAMA_CUDA_F16 is optional, but the corresponding tests are not skipped by default.
-    #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=1,k=256,bs=[10,1],nr=[1,1]): [MUL_MAT] NMSE = 0.995356906 > 0.0005000
-    # 00 FAIL
-    #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=1,k=256,bs=[10,1],nr=[2,1]): [MUL_MAT] NMSE = 0.999567945 > 0.0005000
-    # 00 FAIL
-    #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=1,k=256,bs=[10,10],nr=[1,1]): [MUL_MAT] inf mismatch: CUDA0=-inf CPU=
-    # 3.371366 FAIL
-    #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=1,k=256,bs=[10,10],nr=[2,1]): [MUL_MAT] inf mismatch: CUDA0=-inf CPU=
-    # 6.707091 FAIL
-    #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=1,k=256,bs=[10,10],nr=[1,2]): not supported [CUDA0]
-    #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=1,k=256,bs=[10,10],nr=[2,2]): not supported [CUDA0]
-    #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=16,k=256,bs=[1,1],nr=[1,1]): OK
-    #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=16,k=256,bs=[10,1],nr=[1,1]): [MUL_MAT] NMSE = 1.002334163 > 0.000500
-    # 000 FAIL
-    #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=16,k=256,bs=[10,1],nr=[2,1]): [MUL_MAT] NMSE = 1.000352589 > 0.000500
-    # 000 FAIL
-    #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=16,k=256,bs=[10,10],nr=[1,1]): [MUL_MAT] NMSE = 1.000091733 > 0.00050
-    # 0000 FAIL
-    #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=16,k=256,bs=[10,10],nr=[2,1]): [MUL_MAT] NMSE = 1.000184368 > 0.00050
-    # 0000 FAIL
+    #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=1,k=256,bs=[10,1],nr=[1,1]): [MUL_MAT] NMSE = 0.993871958 > 0.000500000 FAIL
+    #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=1,k=256,bs=[10,1],nr=[2,1]): [MUL_MAT] NMSE = 1.002262239 > 0.000500000 FAIL
+    #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=1,k=256,bs=[10,10],nr=[1,1]): [MUL_MAT] inf mismatch: CUDA0=-inf CPU=9.985199 FAIL
+    #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=1,k=256,bs=[10,10],nr=[2,1]): [MUL_MAT] inf mismatch: CUDA0=-inf CPU=-4.107816 FAIL
+    #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=16,k=256,bs=[10,1],nr=[1,1]): [MUL_MAT] NMSE = 1.002217055 > 0.000500000 FAIL
+    #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=16,k=256,bs=[10,1],nr=[2,1]): [MUL_MAT] NMSE = 1.001445591 > 0.000500000 FAIL
+    #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=16,k=256,bs=[10,10],nr=[1,1]): [MUL_MAT] NMSE = 1.000128216 > 0.000500000 FAIL
+    #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=16,k=256,bs=[10,10],nr=[2,1]): [MUL_MAT] NMSE = 1.000069965 > 0.000500000 FAIL
     ctest --output-on-failure build -j${CPU_COUNT} || true
 else
     ctest --output-on-failure build -j${CPU_COUNT}
