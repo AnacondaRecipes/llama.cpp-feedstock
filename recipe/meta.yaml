@@ -1,5 +1,5 @@
 {% set name = "llama.cpp" %}
-{% set version = "0.0.2956" %}
+{% set version = "0.0.3131" %}
 {% set build_number = 0 %}
 
 package:
@@ -8,7 +8,7 @@ package:
 
 source:
   url: https://github.com/ggerganov/llama.cpp/archive/b{{ version.split(".")[-1] }}.tar.gz
-  sha256: a91b894ecb9c8a46b07f2b648098770cfab9820a2ae8739a96ea8d68ee7a45ec
+  sha256: 7efc9f88853aa791dbfcc832d207c270ff209009e03a151571f7709a8052035c
   patches:
     - patches/test_exe_threads.patch      # [linux]
     - patches/mkl.patch                   # [blas_impl == "mkl"]
@@ -44,6 +44,7 @@ requirements:
     - pkgconfig
     - patch     # [unix]
     - m2-patch  # [win]
+    - llvm-openmp  # [osx]
   host:
     - cudatoolkit      {{ cuda_compiler_version }}        # [gpu_variant == "cuda-11"]
     - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
@@ -52,9 +53,13 @@ requirements:
     - cuda-compat      {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11") and linux]
     - openblas-devel {{ openblas }}                       # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "openblas"]
     - mkl-devel {{ mkl }}                                 # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
+    - intel-openmp {{ mkl }}                              # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
+    - llvm-openmp                                         # [osx]
   run:
     - {{ pin_compatible('cudatoolkit', max_pin='x.x') }}  # [gpu_variant == "cuda-11"]
     - {{ pin_compatible('cuda-version', max_pin='x.x') }} # [(gpu_variant or "").startswith('cuda')]
+    - {{ pin_compatible('intel-openmp') }}                # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
+    - llvm-openmp                                         # [osx]
     - __osx >={{ MACOSX_DEPLOYMENT_TARGET|default("10.12") }}  # [osx and x86_64]
 
 test:
