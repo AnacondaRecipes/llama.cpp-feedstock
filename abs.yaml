@@ -8,3 +8,6 @@ build_parameters:
 # destination upon merge
 upload_channels:
   - ai-staging
+
+extra_labels_for_os:
+  osx-arm64: [ventura]
