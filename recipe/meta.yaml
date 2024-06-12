@@ -65,9 +65,13 @@ requirements:
 
 test:
   commands:
-    - main --help
-    - server --help || true      # [not win]
-    - server --help || (exit 1)  # [win]
+    # clients now return 1 for after printing help...
+    # see https://github.com/ggerganov/llama.cpp/pull/7675
+    # see https://github.com/ggerganov/llama.cpp/blob/b3131/examples/main/main.cpp#L120-L127
+    - main --help   || true               # [not win]
+    - main --help   || cmd /c "exit /B 0" # [win]
+    - server --help || true               # [not win]
+    - server --help || cmd /c "exit /B 0" # [win]
     - test -f $PREFIX/include/llama.h    # [unix]
     - test -f $PREFIX/bin/main           # [unix]
     - test -f $PREFIX/bin/server         # [unix]
