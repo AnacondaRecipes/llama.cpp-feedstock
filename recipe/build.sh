@@ -7,9 +7,6 @@ if [[ ${gpu_variant:0:5} = "cuda-" ]]; then
     if [[ ${gpu_variant:-} = "cuda-11" ]]; then
         export CUDACXX=/usr/local/cuda/bin/nvcc
         export CUDAHOSTCXX="${CXX}"
-    else
-        # cuda-compat provided libcuda.so.1
-        LDFLAGS="$LDFLAGS -Wl,-rpath-link,${PREFIX}/cuda-compat/"
     fi
 elif [[ ${gpu_variant:-} = "none" ]]; then
     LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_CUDA=OFF"
@@ -30,8 +27,9 @@ fi
 
 # TODO: implement test that detects whether the correct BLAS is actually used
 if [[ ${blas_impl:-} = "accelerate" ]]; then
-    LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_BLAS=OFF"
+    LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_BLAS=ON"
     LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_ACCELERATE=ON"
+    LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_BLAS_VENDOR=Apple"
 elif [[ ${blas_impl:-} = "mkl" ]]; then
     LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_BLAS=ON"
     LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_ACCELERATE=OFF"
