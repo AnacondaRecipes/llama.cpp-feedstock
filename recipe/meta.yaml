@@ -51,7 +51,7 @@ requirements:
     - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
     - cuda-cudart-dev  {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11")]
     - libcublas-dev    {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11")]
-    - cuda-driver-dev      {{ cuda_compiler_version }}    # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11") and linux]
+    - cuda-compat      {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11") and linux]
     - openblas-devel {{ openblas }}                       # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "openblas"]
     - mkl-devel {{ mkl }}                                 # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
     - intel-openmp {{ mkl }}                              # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
