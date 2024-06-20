@@ -1,5 +1,5 @@
 {% set name = "llama.cpp" %}
-{% set version = "0.0.2956" %}
+{% set version = "0.0.3184" %}
 {% set build_number = 0 %}
 
 package:
@@ -8,11 +8,12 @@ package:
 
 source:
   url: https://github.com/ggerganov/llama.cpp/archive/b{{ version.split(".")[-1] }}.tar.gz
-  sha256: a91b894ecb9c8a46b07f2b648098770cfab9820a2ae8739a96ea8d68ee7a45ec
+  sha256: fae8f4db68602a07203443a06395dc81138a356db1c75c597419b616e542639a
   patches:
     - patches/test_exe_threads.patch      # [linux]
     - patches/mkl.patch                   # [blas_impl == "mkl"]
     - patches/metal_gpu_selection.patch   # [osx]
+    - patches/loosen-max_nmse_err.patch   # [osx]
 
 build:
   # skip_cuda_prefect is set through abs.yaml for use in prefect only
@@ -52,25 +53,35 @@ requirements:
     - cuda-compat      {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11") and linux]
     - openblas-devel {{ openblas }}                       # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "openblas"]
     - mkl-devel {{ mkl }}                                 # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
+    - intel-openmp {{ mkl }}                              # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
+    - llvm-openmp 14.0.6                                  # [osx]
   run:
     - {{ pin_compatible('cudatoolkit', max_pin='x.x') }}  # [gpu_variant == "cuda-11"]
     - {{ pin_compatible('cuda-version', max_pin='x.x') }} # [(gpu_variant or "").startswith('cuda')]
+    - {{ pin_compatible('intel-openmp') }}                # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
+    - llvm-openmp                                         # [osx] bounds through run_exports
+    - _openmp_mutex                                       # [linux]
     - __osx >={{ MACOSX_DEPLOYMENT_TARGET|default("10.12") }}  # [osx and x86_64]
 
 test:
   commands:
-    - main --help
-    - server --help
+    # clients now return 1 for after printing help...
+    # see https://github.com/ggerganov/llama.cpp/pull/7675
+    # see https://github.com/ggerganov/llama.cpp/blob/b3131/examples/main/main.cpp#L120-L127
+    - llama-cli --help   || true               # [not win]
+    - llama-cli --help   || cmd /c "exit /B 0" # [win]
+    - llama-server --help || true               # [not win]
+    - llama-server --help || cmd /c "exit /B 0" # [win]
     - test -f $PREFIX/include/llama.h    # [unix]
-    - test -f $PREFIX/bin/main           # [unix]
-    - test -f $PREFIX/bin/server         # [unix]
+    - test -f $PREFIX/bin/llama-cli       # [unix]
+    - test -f $PREFIX/bin/llama-server   # [unix]
     - test -f $PREFIX/lib/libllama.so    # [linux]
     - test -f $PREFIX/lib/libllama.dylib # [osx]
     - if not exist %PREFIX%/Library/include/llama.h exit 1  # [win]
     - if not exist %PREFIX%/Library/lib/llama.lib exit 1    # [win]
     - if not exist %PREFIX%/Library/bin/llama.dll exit 1    # [win]
-    - if not exist %PREFIX%/Library/bin/main.exe exit 1     # [win]
-    - if not exist %PREFIX%/Library/bin/server.exe exit 1   # [win]
+    - if not exist %PREFIX%/Library/bin/llama-cli.exe exit 1      # [win]
+    - if not exist %PREFIX%/Library/bin/llama-server.exe exit 1   # [win]
 
 about:
   home: https://github.com/ggerganov/llama.cpp

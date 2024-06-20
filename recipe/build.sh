@@ -30,8 +30,9 @@ fi
 
 # TODO: implement test that detects whether the correct BLAS is actually used
 if [[ ${blas_impl:-} = "accelerate" ]]; then
-    LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_BLAS=OFF"
+    LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_BLAS=ON"
     LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_ACCELERATE=ON"
+    LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_BLAS_VENDOR=Apple"
 elif [[ ${blas_impl:-} = "mkl" ]]; then
     LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_BLAS=ON"
     LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_ACCELERATE=OFF"
