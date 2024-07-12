@@ -22,14 +22,18 @@ build:
   skip: true # [gpu_variant == "cuda-11"]
   # do not mix cublas and mkl/openblas
   skip: true # [((gpu_variant or "").startswith('cuda') and (blas_impl != "cublas")) or (not (gpu_variant or "").startswith('cuda') and (blas_impl == "cublas"))]
+  # do not mix CPU optimization with cublas
+  skip: true # [x86_64_opt == "v3" and gpu_variant != "none"]
   # Use a build number difference to ensure that the GPU
   # variant is slightly preferred by conda's solver, so that it's preferentially
   # installed where the platform supports it.
   number: {{ build_number + 200 }}  # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11")]
   number: {{ build_number + 100 }}  # [(gpu_variant == "cuda-11") or (gpu_variant == "metal")]
-  number: {{ build_number }}        # [gpu_variant == "none"]
+  number: {{ build_number + 50 }}   # [gpu_variant == "none" and x86_64_opt == "v3"]
+  number: {{ build_number }}        # [gpu_variant == "none" and x86_64_opt == "none"]
   string: cuda{{ cuda_compiler_version | replace('.', '') }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [(gpu_variant or "").startswith('cuda')]
-  string: cpu_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                 # [gpu_variant == "none"]
+  string: cpu_v3_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                              # [gpu_variant == "none" and x86_64_opt == "v3"]
+  string: cpu_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                 # [gpu_variant == "none" and x86_64_opt == "none"]
   string: mps_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                                 # [gpu_variant == "metal"]
   missing_dso_whitelist:                                                                         # [s390x or (gpu_variant or "").startswith('cuda')]
     - "**/libcuda.so*"                                                                           # [(gpu_variant or "").startswith('cuda')]
@@ -62,6 +66,7 @@ requirements:
     - llvm-openmp                                         # [osx] bounds through run_exports
     - _openmp_mutex                                       # [linux]
     - __osx >={{ MACOSX_DEPLOYMENT_TARGET|default("10.12") }}  # [osx and x86_64]
+    - _x86_64-microarch-level >=3                         # [x86_64_opt == "v3"]
 
 test:
   commands:
