@@ -27,8 +27,8 @@ build:
   # installed where the platform supports it.
   number: {{ build_number + 250 }}  # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11") and (x86_64_opt == "v3")]
   number: {{ build_number + 200 }}  # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11") and (x86_64_opt == "none")]
-  number: {{ build_number + 150 }}  # [(gpu_variant == "cuda-11") or (gpu_variant == "metal") and (x86_64_opt == "v3")]
-  number: {{ build_number + 100 }}  # [(gpu_variant == "cuda-11") or (gpu_variant == "metal") and (x86_64_opt == "none")]
+  number: {{ build_number + 150 }}  # [((gpu_variant == "cuda-11") and (x86_64_opt == "v3"))]
+  number: {{ build_number + 100 }}  # [((gpu_variant == "cuda-11") and (x86_64_opt == "none")) or (gpu_variant == "metal")]
   number: {{ build_number + 50 }}   # [gpu_variant == "none" and x86_64_opt == "v3"]
   number: {{ build_number }}        # [gpu_variant == "none" and x86_64_opt == "none"]
   string: cuda{{ cuda_compiler_version | replace('.', '') }}_v3_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [(gpu_variant or "").startswith('cuda') and (x86_64_opt == "v3")]
