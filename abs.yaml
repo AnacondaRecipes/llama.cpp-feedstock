@@ -8,3 +8,6 @@ build_parameters:
 # destination upon merge
 upload_channels:
   - ai-staging
+
+channels:
+  - https://staging.continuum.io/prefect/fs/microarch-level-feedstock/pr1/c4e2ed2
