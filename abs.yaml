@@ -5,9 +5,9 @@ build_parameters:
   - "--error-overlinking"
   - "--variants \"{skip_cuda_prefect: True}\""
 
+channels:
+  - ai-staging
+
 # destination upon merge
 upload_channels:
   - ai-staging
-
-channels:
-  - https://staging.continuum.io/prefect/fs/microarch-level-feedstock/pr1/c4e2ed2
