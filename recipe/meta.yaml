@@ -1,6 +1,6 @@
 {% set name = "llama.cpp" %}
 {% set version = "0.0.3184" %}
-{% set build_number = 0 %}
+{% set build_number = 1 %}
 
 package:
   name: {{ name|lower }}
