@@ -23,6 +23,14 @@ if "%blas_impl%"=="mkl" (
     set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_BLAS=OFF
 )
 
+if "%x86_64_opt%"=="v3" (
+    set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_AVX=ON
+    set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_AVX2=ON
+) else (
+    set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_AVX=OFF
+    set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_AVX2=OFF
+)
+
 cmake -S . -B build ^
     -G Ninja ^
     !CMAKE_ARGS! ^
@@ -33,8 +41,6 @@ cmake -S . -B build ^
     -DLLAMA_BUILD_TESTS=ON  ^
     -DBUILD_SHARED_LIBS=ON  ^
     -DLLAMA_NATIVE=OFF ^
-    -DLLAMA_AVX=OFF ^
-    -DLLAMA_AVX2=OFF ^
     -DLLAMA_AVX512=OFF ^
     -DLLAMA_AVX512_VBMI=OFF ^
     -DLLAMA_AVX512_VNNI=OFF ^

@@ -45,6 +45,12 @@ else
     LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_BLAS=OFF"
 fi
 
+if [[ ${x86_64_opt:-} = "v3" ]]; then
+    export CXXFLAGS="${CXXFLAGS/march=nocona/march=x86-64-v3}"
+    export CFLAGS="${CFLAGS/march=nocona/march=x86-64-v3}"
+    export CPPFLAGS="${CPPFLAGS/march=nocona/march=x86-64-v3}"
+fi
+
 cmake -S . -B build \
     -G Ninja \
     ${CMAKE_ARGS} \
