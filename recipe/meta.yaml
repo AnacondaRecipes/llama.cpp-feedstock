@@ -10,7 +10,6 @@ source:
   url: https://github.com/ggerganov/llama.cpp/archive/b{{ version.split(".")[-1] }}.tar.gz
   sha256: 87a5cdf70c78f89e1915946b814bdcda856c04cee745bc7544040d205ade0d67
   patches:
-    - patches/test_exe_threads.patch      # [linux]
     - patches/mkl.patch                   # [blas_impl == "mkl"]
     - patches/metal_gpu_selection.patch   # [osx]
     - patches/loosen-max_nmse_err.patch   # [osx]
