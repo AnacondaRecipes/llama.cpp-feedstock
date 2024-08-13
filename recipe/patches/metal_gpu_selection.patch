@@ -1,6 +1,6 @@
-From f9be8f9492ef7e92a5f169f13d6c4dab83686882 Mon Sep 17 00:00:00 2001
+From 33ec42d9dde59a313c6c0c4410d64a01108f84cc Mon Sep 17 00:00:00 2001
 From: Charles Bousseau <cbousseau@anaconda.com>
-Date: Wed, 17 Apr 2024 16:14:29 -0400
+Date: Tue, 13 Aug 2024 13:43:44 -0400
 Subject: [PATCH] metal gpu selection
 
 In macOS, in order for the system to provide a default Metal device object, you must link to the Core Graphics framework. 
@@ -11,14 +11,14 @@ https://developer.apple.com/documentation/metal/mtldevice/1433409-lowpower#discu
 
 I did try linking to CoreGraphics, but MTLCreateSystemDefaultDevice was still returning nil.
 ---
- ggml-metal.m | 38 ++++++++++++++++++++++++++++++++++++++
+ ggml/src/ggml-metal.m | 38 ++++++++++++++++++++++++++++++++++++++
  1 file changed, 38 insertions(+)
 
-diff --git a/ggml-metal.m b/ggml-metal.m
-index ae6ddeac..d1383c49 100644
---- a/ggml-metal.m
-+++ b/ggml-metal.m
-@@ -278,6 +278,25 @@ static void ggml_metal_log(enum ggml_log_level level, const char * format, ...){
+diff --git a/ggml/src/ggml-metal.m b/ggml/src/ggml-metal.m
+index aad18943..b7194a37 100644
+--- a/ggml/src/ggml-metal.m
++++ b/ggml/src/ggml-metal.m
+@@ -307,6 +307,25 @@ static void ggml_metal_log(enum ggml_log_level level, const char * format, ...){
  
      // Pick and show default Metal device
      id<MTLDevice> device = MTLCreateSystemDefaultDevice();
@@ -44,7 +44,7 @@ index ae6ddeac..d1383c49 100644
      GGML_METAL_LOG_INFO("%s: picking default device: %s\n", __func__, [[device name] UTF8String]);
  
      // Configure context
-@@ -2620,6 +2639,25 @@ static enum ggml_status ggml_metal_graph_compute(
+@@ -2894,6 +2913,25 @@ static enum ggml_status ggml_metal_graph_compute(
  static id<MTLDevice> ggml_backend_metal_get_device(void) {
      if (g_backend_device == nil) {
          g_backend_device = MTLCreateSystemDefaultDevice();
