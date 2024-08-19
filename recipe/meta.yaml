@@ -1,5 +1,5 @@
 {% set name = "llama.cpp" %}
-{% set version = "0.0.3580" %}
+{% set version = "0.0.3604" %}
 {% set build_number = 0 %}
 
 package:
@@ -8,7 +8,7 @@ package:
 
 source:
   url: https://github.com/ggerganov/llama.cpp/archive/b{{ version.split(".")[-1] }}.tar.gz
-  sha256: 87a5cdf70c78f89e1915946b814bdcda856c04cee745bc7544040d205ade0d67
+  sha256: cabd2074b1132dc89ec60b166a3b679d5ec747d50487f8b0dbf76497817ac4f5
   patches:
     - patches/mkl.patch                   # [blas_impl == "mkl"]
     - patches/metal_gpu_selection.patch   # [osx]
