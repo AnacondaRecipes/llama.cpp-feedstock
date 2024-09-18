@@ -1,6 +1,6 @@
 {% set name = "llama.cpp" %}
-{% set version = "0.0.3184" %}
-{% set build_number = 1 %}
+{% set version = "0.0.3747" %}
+{% set build_number = 0 %}
 
 package:
   name: {{ name|lower }}
@@ -8,9 +8,8 @@ package:
 
 source:
   url: https://github.com/ggerganov/llama.cpp/archive/b{{ version.split(".")[-1] }}.tar.gz
-  sha256: fae8f4db68602a07203443a06395dc81138a356db1c75c597419b616e542639a
+  sha256: 78b4df0666577b0501e23d4c10b9b2eb5eef9c3991cfeb43eb85eb039bb0cb5d
   patches:
-    - patches/test_exe_threads.patch      # [linux]
     - patches/mkl.patch                   # [blas_impl == "mkl"]
     - patches/metal_gpu_selection.patch   # [osx]
     - patches/loosen-max_nmse_err.patch   # [osx]
@@ -48,7 +47,7 @@ requirements:
     - cmake
     - ninja-base
     - pkgconfig
-    - patch     # [unix]
+    - patch     # [osx or (unix and blas_impl == "mkl")]
     - m2-patch  # [win]
   host:
     - cudatoolkit      {{ cuda_compiler_version }}        # [gpu_variant == "cuda-11"]

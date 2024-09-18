@@ -1,23 +1,23 @@
-From 93c8b7bd307013c00b4894c4f24abbf05ab5bb8a Mon Sep 17 00:00:00 2001
+From 5b4bf403848617690f92230afe1ae32d7a1876ca Mon Sep 17 00:00:00 2001
 From: Charles Bousseau <cbousseau@anaconda.com>
-Date: Wed, 17 Apr 2024 16:23:33 -0400
+Date: Tue, 13 Aug 2024 14:11:53 -0400
 Subject: [PATCH] mkl build
 
 Co-Authored-By: Patrick Sodré <psodre@gmail.com>
 ---
- CMakeLists.txt | 2 +-
+ ggml/src/CMakeLists.txt | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 2cc0df3f..3a8817bf 100644
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
-@@ -357,7 +357,7 @@ if (LLAMA_BLAS)
+diff --git a/ggml/src/CMakeLists.txt b/ggml/src/CMakeLists.txt
+index 425a2589..391fdca4 100644
+--- a/ggml/src/CMakeLists.txt
++++ b/ggml/src/CMakeLists.txt
+@@ -237,7 +237,7 @@ if (GGML_BLAS)
  
-         add_compile_definitions(GGML_USE_OPENBLAS)
+         list(APPEND GGML_CDEF_PUBLIC GGML_USE_BLAS)
  
--        if (${BLAS_INCLUDE_DIRS} MATCHES "mkl" AND (${LLAMA_BLAS_VENDOR} MATCHES "Generic" OR ${LLAMA_BLAS_VENDOR} MATCHES "Intel"))
-+        if ((${BLAS_INCLUDE_DIRS} MATCHES "mkl" AND ${LLAMA_BLAS_VENDOR} MATCHES "Generic") OR ${LLAMA_BLAS_VENDOR} MATCHES "Intel")
+-        if (${BLAS_INCLUDE_DIRS} MATCHES "mkl" AND (${GGML_BLAS_VENDOR} MATCHES "Generic" OR ${GGML_BLAS_VENDOR} MATCHES "Intel"))
++        if ((${BLAS_INCLUDE_DIRS} MATCHES "mkl" AND ${GGML_BLAS_VENDOR} MATCHES "Generic") OR ${GGML_BLAS_VENDOR} MATCHES "Intel")
              add_compile_definitions(GGML_BLAS_USE_MKL)
          endif()
  
