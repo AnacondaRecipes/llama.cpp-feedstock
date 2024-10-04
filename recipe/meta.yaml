@@ -48,7 +48,7 @@ requirements:
     - cmake
     - ninja-base
     - pkgconfig
-    - patch  # [osx or (unix and blas_impl == "mkl") or linux-aarch64]
+    - patch  # [osx or (unix and blas_impl == "mkl") or aarch64]
     - m2-patch  # [win]
   host:
     - cudatoolkit      {{ cuda_compiler_version }}        # [gpu_variant == "cuda-11"]
