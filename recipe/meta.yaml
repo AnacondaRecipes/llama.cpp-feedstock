@@ -13,6 +13,7 @@ source:
     - patches/mkl.patch                   # [blas_impl == "mkl"]
     - patches/metal_gpu_selection.patch   # [osx]
     - patches/loosen-max_nmse_err.patch   # [osx]
+    - patches/hwcap_sve_check.patch       # [aarch64]
 
 build:
   # skip_cuda_prefect is set through abs.yaml for use in prefect only

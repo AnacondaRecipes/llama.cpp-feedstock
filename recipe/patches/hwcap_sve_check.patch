@@ -1,0 +1,15 @@
+diff --git a/ggml/src/ggml.c b/ggml/src/ggml.c
+index xxxxxxx..yyyyyyy 100644
+--- a/ggml/src/ggml.c
++++ b/ggml/src/ggml.c
+@@ -3737,7 +3737,11 @@ static void ggml_init_arm_arch_features(void) {
+     ggml_arm_arch_features.has_neon = !!(hwcap & HWCAP_NEON);
+     ggml_arm_arch_features.has_fp16 = !!(hwcap & HWCAP_FPHP);
+     ggml_arm_arch_features.has_asimdhp = !!(hwcap & HWCAP_ASIMDHP);
++#ifdef HWCAP_SVE
+     ggml_arm_arch_features.has_sve  = !!(hwcap & HWCAP_SVE);
++#else
++    ggml_arm_arch_features.has_sve  = false;
++#endif
+ #endif
+ }
