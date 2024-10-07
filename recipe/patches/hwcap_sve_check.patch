@@ -1,0 +1,25 @@
+From: Jesse Noller <jnoller@anaconda.com>
+Date: Fri, 04 Oct 2024 14:25:40 -0400
+Subject: [PATCH] hwcap_sve_check
+
+In https://github.com/ggerganov/llama.cpp/pull/9331 upstream added sve support detection on aarch64.
+However, the check for HWCAP_SVE is not available on older kernels / libc.
+This patch adds a fallback for systems that lack the HWCAP_SVE check.
+---
+diff --git a/ggml/src/ggml.c b/ggml/src/ggml.c
+index 03b832d0..4885895d 100644
+--- a/ggml/src/ggml.c
++++ b/ggml/src/ggml.c
+@@ -3737,7 +3737,11 @@ static void ggml_init_arm_arch_features(void) {
+ 
+     ggml_arm_arch_features.has_neon = !!(hwcap & HWCAP_ASIMD);
+     ggml_arm_arch_features.has_i8mm = !!(hwcap2 & HWCAP2_I8MM);
+-    ggml_arm_arch_features.has_sve  = !!(hwcap & HWCAP_SVE);
++    #ifdef HWCAP_SVE
++        ggml_arm_arch_features.has_sve  = !!(hwcap & HWCAP_SVE);
++    #else
++        ggml_arm_arch_features.has_sve  = false;
++    #endif
+ 
+ #if defined(__ARM_FEATURE_SVE)
+     ggml_arm_arch_features.sve_cnt = PR_SVE_VL_LEN_MASK & prctl(PR_SVE_GET_VL);

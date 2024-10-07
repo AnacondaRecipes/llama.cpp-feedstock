@@ -1,5 +1,5 @@
 {% set name = "llama.cpp" %}
-{% set version = "0.0.3747" %}
+{% set version = "0.0.3880" %}
 {% set build_number = 0 %}
 
 package:
@@ -8,11 +8,12 @@ package:
 
 source:
   url: https://github.com/ggerganov/llama.cpp/archive/b{{ version.split(".")[-1] }}.tar.gz
-  sha256: 78b4df0666577b0501e23d4c10b9b2eb5eef9c3991cfeb43eb85eb039bb0cb5d
+  sha256: 3c93be382e7adab49b61c1ac225dd325eef24ef3ecfa875f03b9ddacdfebd31c
   patches:
     - patches/mkl.patch                   # [blas_impl == "mkl"]
     - patches/metal_gpu_selection.patch   # [osx]
     - patches/loosen-max_nmse_err.patch   # [osx]
+    - patches/hwcap_sve_check.patch       # [aarch64]
 
 build:
   # skip_cuda_prefect is set through abs.yaml for use in prefect only
@@ -47,7 +48,7 @@ requirements:
     - cmake
     - ninja-base
     - pkgconfig
-    - patch     # [osx or (unix and blas_impl == "mkl")]
+    - patch  # [osx or (unix and blas_impl == "mkl") or aarch64]
     - m2-patch  # [win]
   host:
     - cudatoolkit      {{ cuda_compiler_version }}        # [gpu_variant == "cuda-11"]
