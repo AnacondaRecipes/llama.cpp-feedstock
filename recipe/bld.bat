@@ -43,11 +43,15 @@ cmake -S . -B build ^
     -DLLAMA_BUILD_TESTS=ON  ^
     -DBUILD_SHARED_LIBS=ON  ^
     -DLLAMA_NATIVE=OFF ^
+    -DGGML_AVX=OFF ^
+    -DGGML_AVX2=OFF ^
     -DGGML_AVX512=OFF ^
     -DGGML_AVX512_VBMI=OFF ^
     -DGGML_AVX512_VNNI=OFF ^
     -DGGML_AVX512_BF16=OFF ^
-    -DGGML_FMA=OFF
+    -DGGML_FMA=OFF ^
+    -DGGML_F16C=OFF
+    
 if errorlevel 1 exit 1
 
 cmake --build build --config Release --verbose
