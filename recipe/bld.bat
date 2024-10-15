@@ -3,33 +3,35 @@ setlocal EnableDelayedExpansion
 
 if "%gpu_variant:~0,5%"=="cuda-" (
     set CMAKE_ARGS=!CMAKE_ARGS! -DCMAKE_CUDA_ARCHITECTURES=all
-    set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_CUDA=ON
+    set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_CUDA=ON
 ) else (
-    set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_CUDA=OFF
+    set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_CUDA=OFF
 )
 
 if "%blas_impl%"=="mkl" (
-    set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_BLAS=ON
-    set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_ACCELERATE=OFF
-    set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_BLAS_VENDOR=Intel10_64_dyn
+    set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_BLAS=ON
+    set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_ACCELERATE=OFF
+    set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_BLAS_VENDOR=Intel10_64_dyn
 ) else if "%blas_impl%"=="openblas" (
-    set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_BLAS=ON
-    set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_ACCELERATE=OFF
-    set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_BLAS_VENDOR=OpenBLAS
+    set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_BLAS=ON
+    set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_ACCELERATE=OFF
+    set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_BLAS_VENDOR=OpenBLAS
 ) else (
     REM Note: LLAMA_CUDA=ON enables cublas.
     REM Tests fail when both mkl and cublas are used.
     REM This has also been reported here: https://github.com/ggerganov/llama.cpp/issues/4626
-    set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_BLAS=OFF
+    set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_BLAS=OFF
 )
 
 if "%x86_64_opt%"=="v3" (
-    set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_AVX=ON
-    set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_AVX2=ON
+    set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX=ON
+    set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX2=ON
 ) else (
-    set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_AVX=OFF
-    set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_AVX2=OFF
+    set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX=OFF
+    set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX2=OFF
 )
+
+
 
 cmake -S . -B build ^
     -G Ninja ^
@@ -41,11 +43,11 @@ cmake -S . -B build ^
     -DLLAMA_BUILD_TESTS=ON  ^
     -DBUILD_SHARED_LIBS=ON  ^
     -DLLAMA_NATIVE=OFF ^
-    -DLLAMA_AVX512=OFF ^
-    -DLLAMA_AVX512_VBMI=OFF ^
-    -DLLAMA_AVX512_VNNI=OFF ^
-    -DLLAMA_AVX512_BF16=OFF ^
-    -DLLAMA_FMA=OFF
+    -DGGML_AVX512=OFF ^
+    -DGGML_AVX512_VBMI=OFF ^
+    -DGGML_AVX512_VNNI=OFF ^
+    -DGGML_AVX512_BF16=OFF ^
+    -DGGML_FMA=OFF
 if errorlevel 1 exit 1
 
 cmake --build build --config Release --verbose
