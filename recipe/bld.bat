@@ -23,6 +23,10 @@ if "%blas_impl%"=="mkl" (
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_BLAS=OFF
 )
 
+@REM For linux, the issue was that our compiler activation scripts set nocona in the flags.
+@REM so we set the flags using `CPPFLAGS="${CPPFLAGS/march=nocona/march=x86-64-v3}"` in the build script.
+@REM There is no such equivalent on our vs activation scripts though. So the GGML flags are enough.
+
 if "%x86_64_opt%"=="v3" (
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX=ON
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX2=ON
@@ -30,7 +34,6 @@ if "%x86_64_opt%"=="v3" (
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX=OFF
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX2=OFF
 )
-
 
 
 cmake -S . -B build ^
