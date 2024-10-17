@@ -2,7 +2,12 @@
 setlocal EnableDelayedExpansion
 
 if "%gpu_variant:~0,5%"=="cuda-" (
-    set CMAKE_ARGS=!CMAKE_ARGS! -DCMAKE_CUDA_ARCHITECTURES=all
+    @REM set CMAKE_ARGS=!CMAKE_ARGS! -DCMAKE_CUDA_ARCHITECTURES=all
+    @REM Instead of using `all` we explicitly list the architectures we want to support and include maxwell (50) on the list
+    @REM to support older GPUs such as those on the g4dn.xlarge instance type(s)
+    @REM See: https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/#gpu-generations
+    @REM https://github.com/ggerganov/llama.cpp/blob/3752217ed5a6a11864682fbf009bcb36afffd6bc/ggml/src/CMakeLists.txt#L284
+    set CMAKE_ARGS=!CMAKE_ARGS! -DCMAKE_CUDA_ARCHITECTURES=50;52;53;60;61;62;70;75
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_CUDA=ON
 ) else (
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_CUDA=OFF
@@ -23,7 +28,7 @@ if "%blas_impl%"=="mkl" (
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_BLAS=OFF
 )
 
-@REM For linux, the issue was that our compiler activation scripts set nocona in the flags.
+@REM For linux, the issue is that our compiler activation scripts set nocona in the flags.
 @REM so we set the flags using `CPPFLAGS="${CPPFLAGS/march=nocona/march=x86-64-v3}"` in the build script.
 @REM There is no such equivalent on our vs activation scripts though. So the GGML flags are enough.
 
