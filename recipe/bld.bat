@@ -7,7 +7,8 @@ if "%gpu_variant:~0,5%"=="cuda-" (
     @REM to support older GPUs such as those on the g4dn.xlarge instance type(s)
     @REM See: https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/#gpu-generations
     @REM https://github.com/ggerganov/llama.cpp/blob/3752217ed5a6a11864682fbf009bcb36afffd6bc/ggml/src/CMakeLists.txt#L284
-    set CMAKE_ARGS=!CMAKE_ARGS! -DCMAKE_CUDA_ARCHITECTURES=50;52;53;60;61;62;70;75
+    @REM set CMAKE_ARGS=!CMAKE_ARGS! -DCMAKE_CUDA_ARCHITECTURES=50;52;53;60;61;62;70;75;80;86;87;89;90
+    set CMAKE_ARGS=!CMAKE_ARGS! -DCMAKE_CUDA_ARCHITECTURES=all-major
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_CUDA=ON
 ) else (
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_CUDA=OFF
