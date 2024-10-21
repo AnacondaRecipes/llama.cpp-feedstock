@@ -50,8 +50,9 @@ cmake -S . -B build ^
     -DGGML_AVX512_VBMI=OFF ^
     -DGGML_AVX512_VNNI=OFF ^
     -DGGML_AVX512_BF16=OFF ^
-    -DGGML_FMA=OFF ^
-    -DGGML_F16C=OFF
+    -DGGML_FMA=OFF
+
+@REM in MSVC F16C is implied with AVX2/AVX512 
 
 if errorlevel 1 exit 1
 
