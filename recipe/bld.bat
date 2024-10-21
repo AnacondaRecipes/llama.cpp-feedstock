@@ -2,12 +2,6 @@
 setlocal EnableDelayedExpansion
 
 if "%gpu_variant:~0,5%"=="cuda-" (
-    @REM set CMAKE_ARGS=!CMAKE_ARGS! -DCMAKE_CUDA_ARCHITECTURES=all
-    @REM Instead of using `all` we explicitly list the architectures we want to support and include maxwell (50) on the list
-    @REM to support older GPUs such as those on the g4dn.xlarge instance type(s)
-    @REM See: https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/#gpu-generations
-    @REM https://github.com/ggerganov/llama.cpp/blob/3752217ed5a6a11864682fbf009bcb36afffd6bc/ggml/src/CMakeLists.txt#L284
-    @REM set CMAKE_ARGS=!CMAKE_ARGS! -DCMAKE_CUDA_ARCHITECTURES=50;52;53;60;61;62;70;75;80;86;87;89;90
     set CMAKE_ARGS=!CMAKE_ARGS! -DCMAKE_CUDA_ARCHITECTURES=all-major
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_CUDA=ON
 ) else (
@@ -49,9 +43,9 @@ cmake -S . -B build ^
     -DCMAKE_INSTALL_PREFIX=%LIBRARY_PREFIX% ^
     -DCMAKE_PREFIX_PATH=%LIBRARY_PREFIX% ^
     -DCMAKE_BUILD_TYPE=Release ^
-    -DLLAMA_BUILD_TESTS=ON  ^
+    -DGGML_BUILD_TESTS=ON  ^
     -DBUILD_SHARED_LIBS=ON  ^
-    -DLLAMA_NATIVE=OFF ^
+    -DGGML_NATIVE=OFF ^
     -DGGML_AVX512=OFF ^
     -DGGML_AVX512_VBMI=OFF ^
     -DGGML_AVX512_VNNI=OFF ^
