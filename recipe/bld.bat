@@ -29,7 +29,7 @@ if "%blas_impl%"=="mkl" (
 
 if "%x86_64_opt%"=="v3" (
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX=ON
-    set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX2=ON
+    set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX2=OFF
 ) else (
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX=OFF
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX2=OFF
