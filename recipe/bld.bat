@@ -29,7 +29,7 @@ if "%blas_impl%"=="mkl" (
 
 if "%x86_64_opt%"=="v3" (
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX=ON
-    set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX2=OFF
+    set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX2=ON
 ) else (
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX=OFF
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX2=OFF
@@ -50,7 +50,8 @@ cmake -S . -B build ^
     -DGGML_AVX512_VBMI=OFF ^
     -DGGML_AVX512_VNNI=OFF ^
     -DGGML_AVX512_BF16=OFF ^
-    -DGGML_FMA=OFF
+    -DGGML_FMA=OFF ^
+    -DGGML_CUDA_F16=OFF
 
 @REM in MSVC F16C is implied with AVX2/AVX512 
 
