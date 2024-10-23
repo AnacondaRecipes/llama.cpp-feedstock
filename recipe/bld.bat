@@ -23,18 +23,30 @@ if "%blas_impl%"=="mkl" (
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_BLAS=OFF
 )
 
-@REM For linux, the issue is that our compiler activation scripts set nocona in the flags.
-@REM so we set the flags using `CPPFLAGS="${CPPFLAGS/march=nocona/march=x86-64-v3}"` in the build script.
-@REM There is no such equivalent on our vs activation scripts though. So the GGML flags are enough.
+REM This section configures CPU optimization flags based on the x86_64_opt variable:
+REM - "v3" enables AVX and AVX2 for both GGML and MSVC (suitable for modern CPUs)
+REM - "v2" enables only AVX for both GGML and MSVC (for CPUs with AVX but not AVX2)
+REM - Any other value disables both AVX and AVX2 (for older or compatible builds)
+REM The ARCH_FLAG is set accordingly to ensure MSVC doesn't implicitly enable 
+REM higher instruction sets. AVX-512 is explicitly disabled in all cases.
 
 if "%x86_64_opt%"=="v3" (
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX=ON
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX2=ON
+    set ARCH_FLAG=/arch:AVX2
+) else if "%x86_64_opt%"=="v2" (
+    set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX=ON
+    set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX2=OFF
+    set ARCH_FLAG=/arch:AVX
 ) else (
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX=OFF
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX2=OFF
+    set ARCH_FLAG=/arch:SSE2
 )
 
+REM Explicitly set architecture flag and disable AVX-512
+set CXXFLAGS=!CXXFLAGS! !ARCH_FLAG!
+set CFLAGS=!CFLAGS! !ARCH_FLAG!
 
 cmake -S . -B build ^
     -G Ninja ^
