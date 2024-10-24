@@ -30,23 +30,34 @@ REM - Any other value disables both AVX and AVX2 (for older or compatible builds
 REM The ARCH_FLAG is set accordingly to ensure MSVC doesn't implicitly enable 
 REM higher instruction sets. AVX-512 is explicitly disabled in all cases.
 
+REM AVX2 when enabled can implicitly enable AVX-512 instructions within msvc so 
+REM we disable AVX-512 explicitly and set AVX2 explicitly to ensure we don't get AVX-512.
+
+@REM if "%x86_64_opt%"=="v3" (
+@REM     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX=ON
+@REM     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX2=ON
+@REM     set ARCH_FLAG=/arch:AVX2
+@REM ) else if "%x86_64_opt%"=="v2" (
+@REM     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX=ON
+@REM     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX2=OFF
+@REM     set ARCH_FLAG=/arch:AVX
+@REM ) else (
+@REM     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX=OFF
+@REM     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX2=OFF
+@REM     set ARCH_FLAG=/arch:SSE2
+@REM )
+
+REM Explicitly set architecture flag and disable AVX-512
+@REM set CXXFLAGS=!CXXFLAGS! !ARCH_FLAG!
+@REM set CFLAGS=!CFLAGS! !ARCH_FLAG!
+
 if "%x86_64_opt%"=="v3" (
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX=ON
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX2=ON
-    set ARCH_FLAG=/arch:AVX2
-) else if "%x86_64_opt%"=="v2" (
-    set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX=ON
-    set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX2=OFF
-    set ARCH_FLAG=/arch:AVX
 ) else (
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX=OFF
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX2=OFF
-    set ARCH_FLAG=/arch:SSE2
 )
-
-REM Explicitly set architecture flag and disable AVX-512
-set CXXFLAGS=!CXXFLAGS! !ARCH_FLAG!
-set CFLAGS=!CFLAGS! !ARCH_FLAG!
 
 cmake -S . -B build ^
     -G Ninja ^
