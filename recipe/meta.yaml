@@ -1,6 +1,6 @@
 {% set name = "llama.cpp" %}
 {% set version = "0.0.3880" %}
-{% set build_number = 2 %}
+{% set build_number = 0 %}
 
 package:
   name: {{ name|lower }}
@@ -26,14 +26,19 @@ build:
   # variant is slightly preferred by conda's solver, so that it's preferentially
   # installed where the platform supports it.
   number: {{ build_number + 250 }}  # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11") and (x86_64_opt == "v3")]
+  number: {{ build_number + 240 }}  # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11") and (x86_64_opt == "v2")]
   number: {{ build_number + 200 }}  # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11") and (x86_64_opt == "none")]
   number: {{ build_number + 150 }}  # [((gpu_variant == "cuda-11") and (x86_64_opt == "v3"))]
+  number: {{ build_number + 140 }}  # [((gpu_variant == "cuda-11") and (x86_64_opt == "v2"))]
   number: {{ build_number + 100 }}  # [((gpu_variant == "cuda-11") and (x86_64_opt == "none")) or (gpu_variant == "metal")]
   number: {{ build_number + 50 }}   # [gpu_variant == "none" and x86_64_opt == "v3"]
+  number: {{ build_number + 40 }}   # [gpu_variant == "none" and x86_64_opt == "v2"]
   number: {{ build_number }}        # [gpu_variant == "none" and x86_64_opt == "none"]
   string: cuda{{ cuda_compiler_version | replace('.', '') }}_v3_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [(gpu_variant or "").startswith('cuda') and (x86_64_opt == "v3")]
+  string: cuda{{ cuda_compiler_version | replace('.', '') }}_v2_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [(gpu_variant or "").startswith('cuda') and (x86_64_opt == "v2")]
   string: cuda{{ cuda_compiler_version | replace('.', '') }}_v1_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [(gpu_variant or "").startswith('cuda') and (x86_64_opt == "none")]
   string: cpu_v3_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                              # [gpu_variant == "none" and x86_64_opt == "v3"]
+  string: cpu_v2_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                              # [gpu_variant == "none" and x86_64_opt == "v2"]
   string: cpu_v1_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                              # [gpu_variant == "none" and x86_64_opt == "none"]
   string: mps_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                                 # [gpu_variant == "metal"]
   missing_dso_whitelist:                                                                         # [s390x or (gpu_variant or "").startswith('cuda')]

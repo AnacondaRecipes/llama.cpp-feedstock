@@ -36,18 +36,17 @@ REM we disable AVX-512 explicitly and set AVX2 explicitly to ensure we don't get
 if "%x86_64_opt%"=="v3" (
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX=ON
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX2=ON
-    set ARCH_FLAG=/arch:AVX2
+    REM set ARCH_FLAG=/arch:AVX2
 ) else if "%x86_64_opt%"=="v2" (
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX=ON
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX2=OFF
-    set ARCH_FLAG=/arch:AVX
+    REM set ARCH_FLAG=/arch:AVX
 ) else (
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX=OFF
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX2=OFF
-    set ARCH_FLAG=/arch:SSE2
+    REM set ARCH_FLAG=/arch:SSE2
 )
 
-REM Explicitly set architecture flag and disable AVX-512
 set CXXFLAGS=!CXXFLAGS! !ARCH_FLAG!
 set CFLAGS=!CFLAGS! !ARCH_FLAG!
 
@@ -68,7 +67,7 @@ cmake -S . -B build ^
     -DGGML_FMA=OFF ^
     -DGGML_CUDA_F16=OFF
 
-@REM in MSVC F16C is implied with AVX2/AVX512 
+REM in MSVC F16C is implied with AVX2/AVX512 so we can't enable/disable it via cmake
 
 if errorlevel 1 exit 1
 

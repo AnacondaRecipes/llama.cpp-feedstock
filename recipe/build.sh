@@ -2,7 +2,7 @@
 set -ex
 
 if [[ ${gpu_variant:0:5} = "cuda-" ]]; then
-    CMAKE_ARGS="${CMAKE_ARGS} -DCMAKE_CUDA_ARCHITECTURES=all"
+    CMAKE_ARGS="${CMAKE_ARGS} -DCMAKE_CUDA_ARCHITECTURES=all-major"
     LLAMA_ARGS="${LLAMA_ARGS} -DGGML_CUDA=ON"
     if [[ ${gpu_variant:-} = "cuda-11" ]]; then
         export CUDACXX=/usr/local/cuda/bin/nvcc
@@ -45,10 +45,20 @@ else
     LLAMA_ARGS="${LLAMA_ARGS} -DGGML_BLAS=OFF"
 fi
 
+# Configure CPU optimization flags based on the x86_64_opt variable:
+# - "v3" sets march=x86-64-v3, enabling AVX, AVX2, and other extensions (suitable for modern CPUs)
+# - "v2" sets march=x86-64-v2, enabling AVX and other extensions (for CPUs with AVX but not AVX2)
+# - Any other value (or unset) keeps the default march=nocona (for older CPUs or maximum compatibility)
+# This affects CXXFLAGS, CFLAGS, and CPPFLAGS to ensure consistent optimization across all compilations.
+
 if [[ ${x86_64_opt:-} = "v3" ]]; then
     export CXXFLAGS="${CXXFLAGS/march=nocona/march=x86-64-v3}"
     export CFLAGS="${CFLAGS/march=nocona/march=x86-64-v3}"
     export CPPFLAGS="${CPPFLAGS/march=nocona/march=x86-64-v3}"
+elif [[ ${x86_64_opt:-} = "v2" ]]; then
+    export CXXFLAGS="${CXXFLAGS/march=nocona/march=x86-64-v2}"
+    export CFLAGS="${CFLAGS/march=nocona/march=x86-64-v2}"
+    export CPPFLAGS="${CPPFLAGS/march=nocona/march=x86-64-v2}"
 fi
 
 cmake -S . -B build \
@@ -61,6 +71,7 @@ cmake -S . -B build \
     -DLLAMA_BUILD_TESTS=ON  \
     -DBUILD_SHARED_LIBS=ON  \
     -DGGML_NATIVE=OFF \
+    -DGGML_NO_LLAMAFILE=ON \
     -DGGML_AVX=OFF \
     -DGGML_AVX2=OFF \
     -DGGML_AVX512=OFF \
