@@ -206,16 +206,18 @@ outputs:
         - gguf-dump = scripts:gguf_dump_entrypoint
         - gguf-set-metadata = scripts:gguf_set_metadata_entrypoint
         - gguf-new-metadata = scripts:gguf_new_metadata_entrypoint
+      script: |
+        cd gguf-py
+        pip install . -vv --no-deps --no-build-isolation
       skip: True # [py<39]
-      script: cd gguf-py && pip install . -vv --no-deps --no-build-isolation
 
     requirements:
       host:
-        - python
+        - python >=3.9
         - poetry-core >=1.0.0
         - pip
       run:
-        - python
+        - python >=3.9
         - numpy >=1.17
         - tqdm >=4.27
         - pyyaml >=5.1
