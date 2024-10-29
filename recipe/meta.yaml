@@ -64,6 +64,7 @@ outputs:
         - pkgconfig
         - patch  # [osx or (unix and blas_impl == "mkl") or aarch64]
         - m2-patch  # [win]
+        - git
       host:
         - cudatoolkit      {{ cuda_compiler_version }}        # [gpu_variant == "cuda-11"]
         - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
