@@ -1,5 +1,5 @@
 {% set name = "llama.cpp-meta" %}
-{% set version = "0.0.3985" %}
+{% set version = "0.0.3989" %}
 {% set build_number = 0 %}
 
 package:

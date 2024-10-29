@@ -1,5 +1,6 @@
 x86_64_opt:
   - none
+  - v2                         # [(x86 or x86_64) and not osx]
   - v3                         # [(x86 or x86_64) and not osx]
 blas_impl:
   - mkl                        # [(x86 or x86_64) and not osx]
