@@ -199,16 +199,15 @@ outputs:
         - cbouss
         - jnoller
 
-  - name: gguf 
+  - name: gguf
+    script: build-gguf.sh   # [not win]
+    script: bld-gguf.bat    # [win]
     build:
       entry_points:
         - gguf-convert-endian = scripts:gguf_convert_endian_entrypoint
         - gguf-dump = scripts:gguf_dump_entrypoint
         - gguf-set-metadata = scripts:gguf_set_metadata_entrypoint
         - gguf-new-metadata = scripts:gguf_new_metadata_entrypoint
-      script: |
-        cd gguf-py
-        pip install . -vv --no-deps --no-build-isolation
       skip: True # [py<39]
 
     requirements:
