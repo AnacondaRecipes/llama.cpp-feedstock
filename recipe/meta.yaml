@@ -1,5 +1,6 @@
 {% set name = "llama.cpp-meta" %}
 {% set version = "0.0.3989" %}
+{% set gguf_version = "0.10.0"%}
 {% set build_number = 0 %}
 
 package:
@@ -167,7 +168,7 @@ outputs:
         - pytorch >=2.0.0
         - tqdm >=4.66.5
         - transformers >=4.44.1
-        - {{ pin_subpackage('gguf') }}
+        - {{ pin_subpackage('gguf', exact=True) }}
 
     test:
       imports:
@@ -203,6 +204,7 @@ outputs:
   - name: gguf
     script: build-gguf.sh   # [not win]
     script: bld-gguf.bat    # [win]
+    version: {{ gguf_version }}
     build:
       entry_points:
         - gguf-convert-endian = scripts:gguf_convert_endian_entrypoint
