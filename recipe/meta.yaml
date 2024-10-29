@@ -7,7 +7,7 @@ package:
   version: {{ version }}
 
 source:
-  git_url: git://github.com/ggerganov/llama.cpp.git
+  git_url: https://github.com/ggerganov/llama.cpp.git
   git_rev: b{{ version.split(".")[-1] }}
   folder: llama.cpp
   # url: https://github.com/ggerganov/llama.cpp/archive/b{{ version.split(".")[-1] }}.tar.gz
@@ -21,7 +21,7 @@ source:
 requirements:
   build:
     - git
-    
+
   host:
     - git
 
