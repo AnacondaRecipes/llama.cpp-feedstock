@@ -121,7 +121,7 @@ outputs:
 
   - name: llama.cpp-tools
     script: build-llama-cpp-tools.sh   # [not win]
-    script: build-llama-cpp-tools.bat  # [win]
+    script: bld-llama-cpp-tools.bat  # [win]
     version: {{ version }}
 
     build:
