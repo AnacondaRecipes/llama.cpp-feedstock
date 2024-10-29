@@ -167,7 +167,7 @@ outputs:
         - pytorch >=2.0.0
         - tqdm >=4.66.5
         - transformers >=4.44.1
-        - {{ pin_subpackage('gguf', max_pin='x.x.x') }}
+        - {{ pin_subpackage('gguf') }}
 
     test:
       imports:
