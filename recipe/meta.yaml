@@ -18,6 +18,13 @@ source:
     - patches/hwcap_sve_check.patch       # [aarch64]
     - patches/fix-convert_lora_to_gguf.patch
 
+requirements:
+  build:
+    - git
+    
+  host:
+    - git
+
 outputs:
   - name: llama.cpp
     script: build-llama-cpp.sh   # [not win]
@@ -64,7 +71,7 @@ outputs:
         - pkgconfig
         - patch  # [osx or (unix and blas_impl == "mkl") or aarch64]
         - m2-patch  # [win]
-        - git
+
       host:
         - cudatoolkit      {{ cuda_compiler_version }}        # [gpu_variant == "cuda-11"]
         - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
@@ -75,7 +82,7 @@ outputs:
         - mkl-devel {{ mkl }}                                 # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
         - intel-openmp {{ mkl }}                              # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
         - llvm-openmp 14.0.6                                  # [osx]
-        - git
+
       run:
         - {{ pin_compatible('cudatoolkit', max_pin='x.x') }}  # [gpu_variant == "cuda-11"]
         - {{ pin_compatible('cuda-version', max_pin='x.x') }} # [(gpu_variant or "").startswith('cuda')]
