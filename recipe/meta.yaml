@@ -9,7 +9,6 @@ package:
 source:
   git_url: https://github.com/ggerganov/llama.cpp.git
   git_rev: b{{ version.split(".")[-1] }}
-  folder: llama-cpp
   # url: https://github.com/ggerganov/llama.cpp/archive/b{{ version.split(".")[-1] }}.tar.gz
   # sha256: 64aaf58532c62eac4eb17007a0239546591ebc87e284e0a8235ced4987582531
   patches:
@@ -20,20 +19,11 @@ source:
 
 requirements:
   build:
-    - {{ compiler('c') }}
-    - {{ compiler('cxx') }}
-    - {{ compiler('cuda') }} # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11")]
-    - cmake
-    - ninja-base
-    - pkgconfig
+    - git
     - patch  # [osx or (unix and blas_impl == "mkl") or aarch64]
     - m2-patch  # [win]
-    - git
 
   host:
-    - python
-    - poetry-core >=1.0.0
-    - pip
     - git
 
 outputs:
