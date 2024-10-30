@@ -169,7 +169,6 @@ outputs:
         - tqdm >=4.66.5
         - transformers >=4.44.1
         - {{ pin_subpackage('gguf', exact=True) }}
-        - {{ pin_subpackage('llama.cpp', exact=True) }}
 
     test:
       imports:
