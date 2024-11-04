@@ -18,6 +18,9 @@ source:
     - patches/hwcap_sve_check.patch       # [aarch64]
     - patches/fix-convert_lora_to_gguf.patch
 
+build:
+  number: {{ build_number }}
+
 requirements:
   build:
     - git  # [osx or (unix and blas_impl == "mkl") or aarch64]
