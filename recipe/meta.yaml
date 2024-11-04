@@ -23,9 +23,9 @@ build:
 
 requirements:
   build:
-    - git  # [osx or (unix and blas_impl == "mkl") or aarch64]
+    - git  # [osx or unix or aarch64]
     - m2-git  # [win]
-    - patch  # [osx or (unix and blas_impl == "mkl") or aarch64]
+    - patch  # [osx or unix or aarch64]
     - m2-patch  # [win]
 
 about:
