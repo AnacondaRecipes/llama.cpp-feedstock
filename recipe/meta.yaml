@@ -8,11 +8,10 @@ package:
   version: {{ version }}
 
 source:
-  # git_url: https://github.com/ggerganov/llama.cpp.git
-  # git_rev: b{{ version.split(".")[-1] }}
-  # folder: llama.cpp
-  url: https://github.com/ggerganov/llama.cpp/archive/b{{ version.split(".")[-1] }}.tar.gz
-  sha256: 1043b53327e3a0ef2387e0267f3fcac00722bd7b8b6109198a8f1548983a9cb6
+  git_url: https://github.com/ggerganov/llama.cpp.git
+  git_rev: b{{ version.split(".")[-1] }}
+  # url: https://github.com/ggerganov/llama.cpp/archive/b{{ version.split(".")[-1] }}.tar.gz
+  # sha256: 1043b53327e3a0ef2387e0267f3fcac00722bd7b8b6109198a8f1548983a9cb6
   patches:
     - patches/mkl.patch                   # [blas_impl == "mkl"]
     - patches/loosen-max_nmse_err.patch   # [osx]
@@ -21,12 +20,14 @@ source:
 
 requirements:
   build:
-    - git
+    - git  # [osx or (unix and blas_impl == "mkl") or aarch64]
+    - m2-git  # [win]
     - patch  # [osx or (unix and blas_impl == "mkl") or aarch64]
     - m2-patch  # [win]
   
   host:
-    - git
+    - git  # [osx or (unix and blas_impl == "mkl") or aarch64]
+    - m2-git  # [win]
 
 about:
   home: https://github.com/ggerganov/llama.cpp
@@ -157,7 +158,7 @@ outputs:
         - llama-lava-surgery_v2 = llama_cpp_tools.examples.llava.llava_surgery_v2:main
         - llama-convert-image-encoder-to-gguf = llama_cpp_tools.examples.llava.convert_image_encoder_to_gguf:main
       skip: True # [py<39]
-      number: 0
+      number: {{ build_number }}
 
     requirements:
       host:
@@ -224,6 +225,7 @@ outputs:
         - gguf-set-metadata = scripts:gguf_set_metadata_entrypoint
         - gguf-new-metadata = scripts:gguf_new_metadata_entrypoint
       skip: True # [py<39]
+      number: {{ build_number }}
 
     requirements:
       host:
