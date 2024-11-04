@@ -20,6 +20,7 @@ source:
 
 requirements:
   build:
+    - git
     - patch  # [osx or (unix and blas_impl == "mkl") or aarch64]
     - m2-patch  # [win]
 
