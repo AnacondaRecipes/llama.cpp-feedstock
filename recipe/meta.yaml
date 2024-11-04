@@ -104,6 +104,7 @@ outputs:
         - llvm-openmp                                         # [osx] bounds through run_exports
         - _openmp_mutex                                       # [linux]
         - __osx >={{ MACOSX_DEPLOYMENT_TARGET|default("10.12") }}  # [osx and x86_64]
+        - _x86_64-microarch-level >=2                         # [x86_64_opt == "v2"]
         - _x86_64-microarch-level >=3                         # [x86_64_opt == "v3"]
 
     test:
