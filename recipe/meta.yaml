@@ -219,6 +219,11 @@ outputs:
     script: bld-gguf.bat    # [win]
     version: {{ gguf_version }}
     build:
+      entry_points:
+        - gguf-convert-endian = scripts:gguf_convert_endian_entrypoint
+        - gguf-dump = scripts:gguf_dump_entrypoint
+        - gguf-set-metadata = scripts:gguf_set_metadata_entrypoint
+        - gguf-new-metadata = scripts:gguf_new_metadata_entrypoint
       skip: True # [py<39]
       number: {{ build_number }}
 
