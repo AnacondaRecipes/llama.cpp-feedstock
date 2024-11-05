@@ -1,5 +1,5 @@
 {% set name = "llama.cpp-meta" %}
-{% set version = "0.0.3989" %}
+{% set version = "0.0.4027" %}
 {% set gguf_version = "0.10.0"%}
 {% set build_number = 0 %}
 
@@ -12,7 +12,7 @@ source:
   # git_rev: b{{ version.split(".")[-1] }}
   # folder: llama.cpp
   url: https://github.com/ggerganov/llama.cpp/archive/b{{ version.split(".")[-1] }}.tar.gz
-  sha256: 1043b53327e3a0ef2387e0267f3fcac00722bd7b8b6109198a8f1548983a9cb6
+  sha256: 4886b1e1db28fa9cb2a5b70fb9e8a1800b995b5b51db1b7b5b8d1413f94b3492
   patches:
     - patches/mkl.patch                   # [blas_impl == "mkl"]
     - patches/loosen-max_nmse_err.patch   # [osx]
