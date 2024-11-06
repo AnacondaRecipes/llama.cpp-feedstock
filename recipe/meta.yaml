@@ -41,17 +41,6 @@ requirements:
     - patch  # [osx or unix or aarch64]
     - m2-patch  # [win]
 
-about:
-  home: https://github.com/ggerganov/llama.cpp
-  license: MIT
-  license_family: MIT
-  license_file: LICENSE
-  dev_url: https://github.com/ggerganov/llama.cpp
-  doc_url: https://github.com/ggerganov/llama.cpp
-  summary: LLM inference in C/C++ and GGML conversion tools
-  description: |
-    Inference of Meta's LLaMA model (and others) in pure C/C++ and GGML conversion tools
-
 outputs:
   - name: llama.cpp
     script: build-llama-cpp.sh   # [not win]
@@ -280,3 +269,14 @@ outputs:
         - sodre
         - cbouss
         - jnoller
+
+about:
+  home: https://github.com/ggerganov/llama.cpp
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  dev_url: https://github.com/ggerganov/llama.cpp
+  doc_url: https://github.com/ggerganov/llama.cpp
+  summary: LLM inference in C/C++ and GGML conversion tools
+  description: |
+    Inference of Meta's LLaMA model (and others) in pure C/C++ and GGML conversion tools
