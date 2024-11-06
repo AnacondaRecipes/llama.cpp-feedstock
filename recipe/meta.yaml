@@ -3,6 +3,19 @@
 {% set gguf_version = "0.10.0"%}
 {% set build_number = 0 %}
 
+# `llama.cpp-meta` is a meta-package that includes the `llama.cpp`, `llama.cpp-tools` and `gguf` packages:
+#
+# `llama.cpp` is the main package for inference of Meta's LLaMA model (and others) in pure C/C++
+# `llama.cpp-tools` is a package that includes scripts and conversion tools that ship with llama.cpp
+# `gguf` is a package that includes tools for reading and writing ML models in GGUF for GGML
+#
+# Note: This package is not intended to be installed directly. Instead, install the `llama.cpp`, `llama.cpp-tools` 
+# and `gguf` packages.
+#
+# Upstream llama.cpp does not follow python/packaging conventions and the pyproject.toml files are not 
+# consistently maintained. This feedstock allows us to build all 3 packages in a single build process from the 
+# same source version, bypassing the broken/unmaintained python package code in the upstream repo.
+
 package:
   name: {{ name|lower }}
   version: {{ version }}
@@ -10,8 +23,6 @@ package:
 source:
   git_url: https://github.com/ggerganov/llama.cpp.git
   git_rev: b{{ version.split(".")[-1] }}
-  # url: https://github.com/ggerganov/llama.cpp/archive/b{{ version.split(".")[-1] }}.tar.gz
-  # sha256: 1043b53327e3a0ef2387e0267f3fcac00722bd7b8b6109198a8f1548983a9cb6
   patches:
     - patches/mkl.patch                   # [blas_impl == "mkl"]
     - patches/loosen-max_nmse_err.patch   # [osx]
@@ -19,6 +30,8 @@ source:
     - patches/fix-convert_lora_to_gguf.patch
 
 build:
+  skip: true # [skip_cuda_prefect and (gpu_variant or "").startswith('cuda')]
+  skip: true # [s390x]
   number: {{ build_number }}
 
 requirements:
