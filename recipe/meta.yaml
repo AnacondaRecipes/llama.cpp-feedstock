@@ -168,7 +168,7 @@ outputs:
         - poetry-core >=1.0.0
         - pip
       run:
-        - python >=3.9
+        - python
         # requirements/requirements-convert_legacy_llama.txt
         - numpy ~=1.26.4
         - sentencepiece >=0.1.98,<0.2.0
