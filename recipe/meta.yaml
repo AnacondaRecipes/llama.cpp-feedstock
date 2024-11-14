@@ -1,106 +1,280 @@
-{% set name = "llama.cpp" %}
-{% set version = "0.0.3880" %}
+{% set name = "llama.cpp-meta" %}
+{% set version = "0.0.3989" %}
+{% set gguf_version = "0.10.0"%}
 {% set build_number = 0 %}
+
+# `llama.cpp-meta` is a meta-package that includes the `llama.cpp`, `llama.cpp-tools` and `gguf` packages:
+#
+# `llama.cpp` is the main package for inference of Meta's LLaMA model (and others) in pure C/C++
+# `llama.cpp-tools` is a package that includes scripts and conversion tools that ship with llama.cpp
+# `gguf` is a package that includes tools for reading and writing ML models in GGUF for GGML
+#
+# Note: This package is not intended to be installed directly. Instead, install the `llama.cpp`, `llama.cpp-tools` 
+# and `gguf` packages.
+#
+# Upstream llama.cpp does not follow python/packaging conventions and the pyproject.toml files are not 
+# consistently maintained. This feedstock allows us to build all 3 packages in a single build process from the 
+# same source version, bypassing the broken/unmaintained python package code in the upstream repo.
 
 package:
   name: {{ name|lower }}
   version: {{ version }}
 
 source:
-  url: https://github.com/ggerganov/llama.cpp/archive/b{{ version.split(".")[-1] }}.tar.gz
-  sha256: 3c93be382e7adab49b61c1ac225dd325eef24ef3ecfa875f03b9ddacdfebd31c
+  git_url: https://github.com/ggerganov/llama.cpp.git
+  git_rev: b{{ version.split(".")[-1] }}
   patches:
     - patches/mkl.patch                   # [blas_impl == "mkl"]
-    - patches/metal_gpu_selection.patch   # [osx]
     - patches/loosen-max_nmse_err.patch   # [osx]
     - patches/hwcap_sve_check.patch       # [aarch64]
+    - patches/fix-convert_lora_to_gguf.patch
 
 build:
-  # skip_cuda_prefect is set through abs.yaml for use in prefect only
   skip: true # [skip_cuda_prefect and (gpu_variant or "").startswith('cuda')]
   skip: true # [s390x]
-  skip: true # [gpu_variant == "cuda-11"]
-  # do not mix cublas and mkl/openblas
-  skip: true # [((gpu_variant or "").startswith('cuda') and (blas_impl != "cublas")) or (not (gpu_variant or "").startswith('cuda') and (blas_impl == "cublas"))]
-  # Use a build number difference to ensure that the GPU
-  # variant is slightly preferred by conda's solver, so that it's preferentially
-  # installed where the platform supports it.
-  number: {{ build_number + 250 }}  # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11") and (x86_64_opt == "v3")]
-  number: {{ build_number + 200 }}  # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11") and (x86_64_opt == "none")]
-  number: {{ build_number + 150 }}  # [((gpu_variant == "cuda-11") and (x86_64_opt == "v3"))]
-  number: {{ build_number + 100 }}  # [((gpu_variant == "cuda-11") and (x86_64_opt == "none")) or (gpu_variant == "metal")]
-  number: {{ build_number + 50 }}   # [gpu_variant == "none" and x86_64_opt == "v3"]
-  number: {{ build_number }}        # [gpu_variant == "none" and x86_64_opt == "none"]
-  string: cuda{{ cuda_compiler_version | replace('.', '') }}_v3_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [(gpu_variant or "").startswith('cuda') and (x86_64_opt == "v3")]
-  string: cuda{{ cuda_compiler_version | replace('.', '') }}_v1_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [(gpu_variant or "").startswith('cuda') and (x86_64_opt == "none")]
-  string: cpu_v3_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                              # [gpu_variant == "none" and x86_64_opt == "v3"]
-  string: cpu_v1_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                              # [gpu_variant == "none" and x86_64_opt == "none"]
-  string: mps_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                                 # [gpu_variant == "metal"]
-  missing_dso_whitelist:                                                                         # [s390x or (gpu_variant or "").startswith('cuda')]
-    - "**/libcuda.so*"                                                                           # [(gpu_variant or "").startswith('cuda')]
-    - '$RPATH/ld64.so.1'  # [s390x]
-  
+  number: {{ build_number }}
+
 requirements:
   build:
-    - {{ compiler('c') }}
-    - {{ compiler('cxx') }}
-    - {{ compiler('cuda') }}                              # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11")]
-    - cmake
-    - ninja-base
-    - pkgconfig
-    - patch  # [osx or (unix and blas_impl == "mkl") or aarch64]
+    - git  # [osx or unix or aarch64]
+    - m2-git  # [win]
+    - patch  # [osx or unix or aarch64]
     - m2-patch  # [win]
-  host:
-    - cudatoolkit      {{ cuda_compiler_version }}        # [gpu_variant == "cuda-11"]
-    - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
-    - cuda-cudart-dev  {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11")]
-    - libcublas-dev    {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11")]
-    - cuda-compat      {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11") and linux]
-    - openblas-devel {{ openblas }}                       # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "openblas"]
-    - mkl-devel {{ mkl }}                                 # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
-    - intel-openmp {{ mkl }}                              # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
-    - llvm-openmp 14.0.6                                  # [osx]
-  run:
-    - {{ pin_compatible('cudatoolkit', max_pin='x.x') }}  # [gpu_variant == "cuda-11"]
-    - {{ pin_compatible('cuda-version', max_pin='x.x') }} # [(gpu_variant or "").startswith('cuda')]
-    - {{ pin_compatible('intel-openmp') }}                # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
-    - llvm-openmp                                         # [osx] bounds through run_exports
-    - _openmp_mutex                                       # [linux]
-    - __osx >={{ MACOSX_DEPLOYMENT_TARGET|default("10.12") }}  # [osx and x86_64]
-    - _x86_64-microarch-level >=3                         # [x86_64_opt == "v3"]
 
-test:
-  commands:
-    # clients now return 1 for after printing help...
-    # see https://github.com/ggerganov/llama.cpp/pull/7675
-    # see https://github.com/ggerganov/llama.cpp/blob/b3131/examples/main/main.cpp#L120-L127
-    - llama-cli --help   || true               # [not win]
-    - llama-cli --help   || cmd /c "exit /B 0" # [win]
-    - llama-server --help || true               # [not win]
-    - llama-server --help || cmd /c "exit /B 0" # [win]
-    - test -f $PREFIX/include/llama.h    # [unix]
-    - test -f $PREFIX/bin/llama-cli       # [unix]
-    - test -f $PREFIX/bin/llama-server   # [unix]
-    - test -f $PREFIX/lib/libllama.so    # [linux]
-    - test -f $PREFIX/lib/libllama.dylib # [osx]
-    - if not exist %PREFIX%/Library/include/llama.h exit 1  # [win]
-    - if not exist %PREFIX%/Library/lib/llama.lib exit 1    # [win]
-    - if not exist %PREFIX%/Library/bin/llama.dll exit 1    # [win]
-    - if not exist %PREFIX%/Library/bin/llama-cli.exe exit 1      # [win]
-    - if not exist %PREFIX%/Library/bin/llama-server.exe exit 1   # [win]
+outputs:
+  - name: llama.cpp
+    script: build-llama-cpp.sh   # [not win]
+    script: bld-llama-cpp.bat   # [win]
+    version: {{ version }}
+
+    build:
+      # skip_cuda_prefect is set through abs.yaml for use in prefect only
+      skip: true # [skip_cuda_prefect and (gpu_variant or "").startswith('cuda')]
+      skip: true # [s390x]
+      skip: true # [gpu_variant == "cuda-11"]
+      # do not mix cublas and mkl/openblas
+      skip: true # [((gpu_variant or "").startswith('cuda') and (blas_impl != "cublas")) or (not (gpu_variant or "").startswith('cuda') and (blas_impl == "cublas"))]
+      # Use a build number difference to ensure that the GPU
+      # variant is slightly preferred by conda's solver, so that it's preferentially
+      # installed where the platform supports it.
+      number: {{ build_number + 250 }}  # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11") and (x86_64_opt == "v3")]
+      number: {{ build_number + 240 }}  # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11") and (x86_64_opt == "v2")]
+      number: {{ build_number + 200 }}  # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11") and (x86_64_opt == "none")]
+      number: {{ build_number + 150 }}  # [((gpu_variant == "cuda-11") and (x86_64_opt == "v3"))]
+      number: {{ build_number + 140 }}  # [((gpu_variant == "cuda-11") and (x86_64_opt == "v2"))]
+      number: {{ build_number + 100 }}  # [((gpu_variant == "cuda-11") and (x86_64_opt == "none")) or (gpu_variant == "metal")]
+      number: {{ build_number + 50 }}   # [gpu_variant == "none" and x86_64_opt == "v3"]
+      number: {{ build_number + 40 }}   # [gpu_variant == "none" and x86_64_opt == "v2"]
+      number: {{ build_number }}        # [gpu_variant == "none" and x86_64_opt == "none"]
+      string: cuda{{ cuda_compiler_version | replace('.', '') }}_v3_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [(gpu_variant or "").startswith('cuda') and (x86_64_opt == "v3")]
+      string: cuda{{ cuda_compiler_version | replace('.', '') }}_v2_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [(gpu_variant or "").startswith('cuda') and (x86_64_opt == "v2")]
+      string: cuda{{ cuda_compiler_version | replace('.', '') }}_v1_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [(gpu_variant or "").startswith('cuda') and (x86_64_opt == "none")]
+      string: cpu_v3_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                              # [gpu_variant == "none" and x86_64_opt == "v3"]
+      string: cpu_v2_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                              # [gpu_variant == "none" and x86_64_opt == "v2"]
+      string: cpu_v1_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                              # [gpu_variant == "none" and x86_64_opt == "none"]
+      string: mps_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                                 # [gpu_variant == "metal"]
+      missing_dso_whitelist:                                                                         # [s390x or (gpu_variant or "").startswith('cuda')]
+        - "**/libcuda.so*"                                                                           # [(gpu_variant or "").startswith('cuda')]
+        - '$RPATH/ld64.so.1'  # [s390x]
+      
+    requirements:
+      build:
+        - {{ compiler('c') }}
+        - {{ compiler('cxx') }}
+        - {{ compiler('cuda') }}                              # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11")]
+        - cmake
+        - ninja-base
+        - pkgconfig
+        - patch  # [osx or (unix and blas_impl == "mkl") or aarch64]
+        - m2-patch  # [win]
+
+      host:
+        - cudatoolkit      {{ cuda_compiler_version }}        # [gpu_variant == "cuda-11"]
+        - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
+        - cuda-cudart-dev  {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11")]
+        - libcublas-dev    {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11")]
+        - cuda-compat      {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11") and linux]
+        - openblas-devel {{ openblas }}                       # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "openblas"]
+        - mkl-devel {{ mkl }}                                 # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
+        - intel-openmp {{ mkl }}                              # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
+        - llvm-openmp 14.0.6                                  # [osx]
+
+      run:
+        - {{ pin_compatible('cudatoolkit', max_pin='x.x') }}  # [gpu_variant == "cuda-11"]
+        - {{ pin_compatible('cuda-version', max_pin='x.x') }} # [(gpu_variant or "").startswith('cuda')]
+        - {{ pin_compatible('intel-openmp') }}                # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
+        - llvm-openmp                                         # [osx] bounds through run_exports
+        - _openmp_mutex                                       # [linux]
+        - __osx >={{ MACOSX_DEPLOYMENT_TARGET|default("10.12") }}  # [osx and x86_64]
+        - _x86_64-microarch-level >=2                         # [x86_64_opt == "v2"]
+        - _x86_64-microarch-level >=3                         # [x86_64_opt == "v3"]
+
+    test:
+      commands:
+        # clients now return 1 for after printing help...
+        # see https://github.com/ggerganov/llama.cpp/pull/7675
+        # see https://github.com/ggerganov/llama.cpp/blob/b3131/examples/main/main.cpp#L120-L127
+        - llama-cli --help   || true               # [not win]
+        - llama-cli --help   || cmd /c "exit /B 0" # [win]
+        - llama-server --help || true               # [not win]
+        - llama-server --help || cmd /c "exit /B 0" # [win]
+        - test -f $PREFIX/include/llama.h    # [unix]
+        - test -f $PREFIX/bin/llama-cli       # [unix]
+        - test -f $PREFIX/bin/llama-server   # [unix]
+        - test -f $PREFIX/lib/libllama.so    # [linux]
+        - test -f $PREFIX/lib/libllama.dylib # [osx]
+        - if not exist %PREFIX%/Library/include/llama.h exit 1  # [win]
+        - if not exist %PREFIX%/Library/lib/llama.lib exit 1    # [win]
+        - if not exist %PREFIX%/Library/bin/llama.dll exit 1    # [win]
+        - if not exist %PREFIX%/Library/bin/llama-cli.exe exit 1      # [win]
+        - if not exist %PREFIX%/Library/bin/llama-server.exe exit 1   # [win]
+
+    about:
+      home: https://github.com/ggerganov/llama.cpp
+      summary: LLM inference in C/C++
+      description: |
+        Inference of Meta's LLaMA model (and others) in pure C/C++
+      license: MIT
+      license_family: MIT
+      license_file: LICENSE
+      dev_url: https://github.com/ggerganov/llama.cpp
+      doc_url: https://github.com/ggerganov/llama.cpp
+
+    extra:
+      recipe-maintainers:
+        - sodre
+        - cbouss
+        - jnoller
+
+  - name: llama.cpp-tools
+    script: build-llama-cpp-tools.sh   # [not win]
+    script: bld-llama-cpp-tools.bat  # [win]
+    version: {{ version }}
+
+    build:
+      entry_points:
+        - llama-convert-hf-to-gguf = llama_cpp_tools.convert_hf_to_gguf:main
+        - llama-convert-llama-ggml-to-gguf = llama_cpp_tools.convert_llama_ggml_to_gguf:main
+        - llama-convert-lora-to-gguf = llama_cpp_tools.convert_lora_to_gguf:main
+        - llama-lava-surgery = llama_cpp_tools.examples.llava.llava_surgery:main
+        - llama-lava-surgery_v2 = llama_cpp_tools.examples.llava.llava_surgery_v2:main
+        - llama-convert-image-encoder-to-gguf = llama_cpp_tools.examples.llava.convert_image_encoder_to_gguf:main
+      skip: True # [py<39]
+      number: {{ build_number }}
+
+    requirements:
+      host:
+        - python
+        - poetry-core >=1.0.0
+        - pip
+      run:
+        # This is an aggregate of requirements from multiple files in the llama.cpp-tools repo, see:
+        # https://github.com/ggerganov/llama.cpp/tree/master/requirements
+        - python
+        # requirements/requirements-convert_legacy_llama.txt
+        - numpy ~=1.26.4
+        - sentencepiece >=0.1.98,<0.2.0
+        - transformers >=4.44.1
+        - protobuf >=4.21.0,<5.0.0
+        # requirements/requirements-convert_hf_to_gguf.txt
+        - pytorch >=2.2.1
+        # examples/llava/requirements.txt
+        - pillow >=10.2.0,<10.3.0
+        - torchvision >=0.17.1
+        - {{ pin_subpackage('gguf', exact=True) }}
+
+    test:
+      imports:
+        - llama_cpp_tools
+        - llama_cpp_tools.examples.llava
+      commands:
+        - llama-convert-hf-to-gguf --help
+        - llama-convert-llama-ggml-to-gguf --help
+        - llama-convert-lora-to-gguf --help
+        - llama-lava-surgery --help
+        - llama-lava-surgery_v2 --help
+        - llama-convert-image-encoder-to-gguf --help
+      requires:
+        - pip
+
+    about:
+      home: https://github.com/ggerganov/llama.cpp
+      summary: Scripts and conversion tools that ship with llama.cpp
+      description: |
+        Scripts and conversion tools that ship with llama.cpp
+      license: MIT
+      license_family: MIT
+      license_file: LICENSE
+      dev_url: https://github.com/ggerganov/llama.cpp
+      doc_url: https://github.com/ggerganov/llama.cpp
+
+    extra:
+      recipe-maintainers:
+        - sodre
+        - cbouss
+        - jnoller
+
+  - name: gguf
+    script: build-gguf.sh   # [not win]
+    script: bld-gguf.bat    # [win]
+    version: {{ gguf_version }}
+    build:
+      entry_points:
+        - gguf-convert-endian = scripts:gguf_convert_endian_entrypoint
+        - gguf-dump = scripts:gguf_dump_entrypoint
+        - gguf-set-metadata = scripts:gguf_set_metadata_entrypoint
+        - gguf-new-metadata = scripts:gguf_new_metadata_entrypoint
+      skip: True # [py<39]
+      number: {{ build_number }}
+
+    requirements:
+      host:
+        - python
+        - poetry-core >=1.0.0
+        - pip
+      run:
+        - python
+        - numpy >=1.17
+        - tqdm >=4.27
+        - pyyaml >=5.1
+        - sentencepiece >=0.1.98,<0.2.0
+
+    test:
+      imports:
+        - gguf
+      commands:
+        - pip check
+        - gguf-convert-endian --help
+        - gguf-dump --help
+        - gguf-set-metadata --help
+        - gguf-new-metadata --help
+      requires:
+        - pip
+
+    about:
+      home: https://ggml.ai
+      summary: Read and write ML models in GGUF for GGML
+      description: |
+        Read and write ML models in GGUF for GGML
+      license: MIT
+      license_family: MIT
+      license_file: LICENSE
+      dev_url: https://github.com/ggerganov/llama.cpp/tree/master/gguf-py
+      doc_url: https://github.com/ggerganov/llama.cpp/tree/master/gguf-py
+
+    extra:
+      recipe-maintainers:
+        - sodre
+        - cbouss
+        - jnoller
 
 about:
   home: https://github.com/ggerganov/llama.cpp
-  summary: LLM inference in C/C++
-  description: |
-    Inference of Meta's LLaMA model (and others) in pure C/C++
   license: MIT
   license_family: MIT
   license_file: LICENSE
   dev_url: https://github.com/ggerganov/llama.cpp
   doc_url: https://github.com/ggerganov/llama.cpp
-
-extra:
-  recipe-maintainers:
-    - sodre
-    - cbouss
+  summary: LLM inference in C/C++ and GGML conversion tools
+  description: |
+    Inference of Meta's LLaMA model (and others) in pure C/C++ and GGML conversion tools
