@@ -5,22 +5,15 @@ Subject: [PATCH] mkl build
 
 Co-Authored-By: Patrick Sodré <psodre@gmail.com>
 ---
- ggml/src/CMakeLists.txt | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/ggml/src/CMakeLists.txt b/ggml/src/CMakeLists.txt
-index 425a2589..391fdca4 100644
---- a/ggml/src/CMakeLists.txt
-+++ b/ggml/src/CMakeLists.txt
-@@ -237,7 +237,7 @@ if (GGML_BLAS)
+diff --git a/ggml/src/ggml-blas/CMakeLists.txt b/ggml/src/ggml-blas/CMakeLists.txt
+index 0bf3c05d..a2efa938 100644
+--- a/ggml/src/ggml-blas/CMakeLists.txt
++++ b/ggml/src/ggml-blas/CMakeLists.txt
+@@ -74,7 +74,7 @@ if (BLAS_FOUND)
  
-         list(APPEND GGML_CDEF_PUBLIC GGML_USE_BLAS)
+     target_compile_options(ggml-blas PRIVATE ${BLAS_LINKER_FLAGS})
  
--        if (${BLAS_INCLUDE_DIRS} MATCHES "mkl" AND (${GGML_BLAS_VENDOR} MATCHES "Generic" OR ${GGML_BLAS_VENDOR} MATCHES "Intel"))
-+        if ((${BLAS_INCLUDE_DIRS} MATCHES "mkl" AND ${GGML_BLAS_VENDOR} MATCHES "Generic") OR ${GGML_BLAS_VENDOR} MATCHES "Intel")
-             add_compile_definitions(GGML_BLAS_USE_MKL)
-         endif()
- 
--- 
-2.39.3 (Apple Git-146)
-
+-    if (${BLAS_INCLUDE_DIRS} MATCHES "mkl" AND (${GGML_BLAS_VENDOR} MATCHES "Generic" OR ${GGML_BLAS_VENDOR} MATCHES "Intel"))
++    if ((${BLAS_INCLUDE_DIRS} MATCHES "mkl" AND ${GGML_BLAS_VENDOR} MATCHES "Generic") OR ${GGML_BLAS_VENDOR} MATCHES "Intel")
+         add_compile_definitions(GGML_BLAS_USE_MKL)
+     endif()
