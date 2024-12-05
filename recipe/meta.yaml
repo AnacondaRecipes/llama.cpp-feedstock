@@ -1,5 +1,5 @@
 {% set name = "llama.cpp-meta" %}
-{% set version = "0.0.4255" %}
+{% set version = "0.0.4273" %}
 {% set gguf_version = "0.10.0"%}
 {% set build_number = 0 %}
 
