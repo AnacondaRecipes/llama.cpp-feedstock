@@ -1,0 +1,46 @@
+From 33ec42d9dde59a313c6c0c4410d64a01108f84cc Mon Sep 17 00:00:00 2001
+From: Charles Bousseau <cbousseau@anaconda.com>
+Date: Tue, 13 Aug 2024 13:43:44 -0400
+Subject: [PATCH] metal gpu selection
+
+In macOS, in order for the system to provide a default Metal device object, you must link to the Core Graphics framework. 
+You usually need to do this explicitly if you’re writing apps that don’t use graphics by default, such as command line tools.
+https://developer.apple.com/documentation/metal/1433401-mtlcreatesystemdefaultdevice?language=objc
+Systems with Apple silicon only have one GPU, which removes the need to choose a GPU.
+https://developer.apple.com/documentation/metal/mtldevice/1433409-lowpower#discussion
+
+I did try linking to CoreGraphics, but MTLCreateSystemDefaultDevice was still returning nil.
+---
+diff --git a/ggml/src/ggml-metal/ggml-metal.m b/ggml/src/ggml-metal/ggml-metal.m
+index c247b50c..8028f700 100644
+--- a/ggml/src/ggml-metal/ggml-metal.m
++++ b/ggml/src/ggml-metal/ggml-metal.m
+@@ -59,6 +59,25 @@
+ 
+     if (ctx->mtl_device == nil) {
+         ctx->mtl_device = MTLCreateSystemDefaultDevice();
++        if (ctx->mtl_device == nil) {
++            /*
++            In macOS, in order for the system to provide a default Metal device object, you must link to the Core Graphics framework.
++            You usually need to do this explicitly if you're writing apps that don't use graphics by default, such as command line tools.
++            > https://developer.apple.com/documentation/metal/1433401-mtlcreatesystemdefaultdevice?language=objc
++            Systems with Apple silicon only have one GPU, which removes the need to choose a GPU.
++            > https://developer.apple.com/documentation/metal/mtldevice/1433409-lowpower#discussion
++            */
++            NSArray * devices = MTLCopyAllDevices();
++            for (id<MTLDevice> dev in devices) {
++                if (dev != nil) {
++                    if (ctx->mtl_device == nil) {
++                        ctx->mtl_device = dev;
++                    } else {
++                        [dev release];
++                    }
++                }
++            }
++        }
+ 
+         ctx->has_simdgroup_reduction  = [ctx->mtl_device supportsFamily:MTLGPUFamilyApple7];
+         ctx->has_simdgroup_reduction |= [ctx->mtl_device supportsFamily:MTLGPUFamilyMetal3_GGML];
+-- 
+2.39.3 (Apple Git-146)
+

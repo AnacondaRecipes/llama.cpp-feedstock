@@ -26,6 +26,7 @@ source:
   patches:
     - patches/mkl.patch                   # [blas_impl == "mkl"]
     - patches/loosen-max_nmse_err.patch   # [osx]
+    - patches/metal_gpu_selection.patch   # [osx]
     - patches/hwcap_sve_check.patch       # [aarch64]
     - patches/fix-convert_lora_to_gguf.patch
 

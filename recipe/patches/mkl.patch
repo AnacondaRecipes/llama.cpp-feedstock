@@ -17,3 +17,4 @@ index 0bf3c05d..a2efa938 100644
 +    if ((${BLAS_INCLUDE_DIRS} MATCHES "mkl" AND ${GGML_BLAS_VENDOR} MATCHES "Generic") OR ${GGML_BLAS_VENDOR} MATCHES "Intel")
          add_compile_definitions(GGML_BLAS_USE_MKL)
      endif()
+ 
