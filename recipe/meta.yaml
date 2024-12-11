@@ -1,7 +1,7 @@
 {% set name = "llama.cpp-meta" %}
-{% set version = "0.0.3989" %}
+{% set version = "0.0.4273" %}
 {% set gguf_version = "0.10.0"%}
-{% set build_number = 0 %}
+{% set build_number = 1 %}
 
 # `llama.cpp-meta` is a meta-package that includes the `llama.cpp`, `llama.cpp-tools` and `gguf` packages:
 #
@@ -26,6 +26,7 @@ source:
   patches:
     - patches/mkl.patch                   # [blas_impl == "mkl"]
     - patches/loosen-max_nmse_err.patch   # [osx]
+    - patches/metal_gpu_selection.patch   # [osx]
     - patches/hwcap_sve_check.patch       # [aarch64]
     - patches/fix-convert_lora_to_gguf.patch
 
