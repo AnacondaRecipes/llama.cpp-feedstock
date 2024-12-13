@@ -1,7 +1,7 @@
 {% set name = "llama.cpp-meta" %}
 {% set version = "0.0.4273" %}
 {% set gguf_version = "0.10.0"%}
-{% set build_number = 0 %}
+{% set build_number = 1 %}
 
 # `llama.cpp-meta` is a meta-package that includes the `llama.cpp`, `llama.cpp-tools` and `gguf` packages:
 #
