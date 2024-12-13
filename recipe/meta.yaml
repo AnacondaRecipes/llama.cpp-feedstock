@@ -1,6 +1,13 @@
 {% set name = "llama.cpp-meta" %}
-{% set version = "0.0.4273" %}
-{% set gguf_version = "0.10.0"%}
+{% set upstream_release = "4273" %}
+{% set version = "0.0." + upstream_release %}
+# the `gguf_version` should match gguf-py/pyproject.toml's version number but append the upstream release 
+# number, remember to check the upstream pyproject.toml file for new version numbers when doing a feedstock 
+# update.
+#
+# This is due to upstream making changes to the gguf-py package without incrementing the version number, we add
+# the upstream release number to the version number to ensure that the version number is incremented.
+{% set gguf_version = "0.10." + upstream_release %}
 {% set build_number = 1 %}
 
 # `llama.cpp-meta` is a meta-package that includes the `llama.cpp`, `llama.cpp-tools` and `gguf` packages:
