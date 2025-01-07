@@ -78,6 +78,6 @@ cmake --install build
 if errorlevel 1 exit 1
 
 pushd build\tests
-ctest --output-on-failure build -j%CPU_COUNT%
+ctest --output-on-failure build -j%CPU_COUNT% --test-dir build/tests
 if errorlevel 1 exit 1
 popd
