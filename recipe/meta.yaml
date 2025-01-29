@@ -30,6 +30,8 @@ package:
 source:
   git_url: https://github.com/ggerganov/llama.cpp.git
   git_rev: b{{ version.split(".")[-1] }}
+  git_depth: 1  # Shallow clone
+  git_submodules: []  # Don't fetch any submodules since we don't need them
   patches:
     - patches/mkl.patch                   # [blas_impl == "mkl"]
     - patches/loosen-max_nmse_err.patch   # [osx]
