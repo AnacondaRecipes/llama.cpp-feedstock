@@ -1,5 +1,5 @@
 {% set name = "llama.cpp-meta" %}
-{% set upstream_release = "4418" %}
+{% set upstream_release = "4575" %}
 {% set version = "0.0." + upstream_release %}
 # the `gguf_version` should match gguf-py/pyproject.toml's version number but append the upstream release 
 # number, remember to check the upstream pyproject.toml file for new version numbers when doing a feedstock 
@@ -7,7 +7,7 @@
 #
 # This is due to upstream making changes to the gguf-py package without incrementing the version number, we add
 # the upstream release number to the version number to ensure that the version number is incremented.
-{% set gguf_version = "0.13." + upstream_release %}
+{% set gguf_version = "0.15." + upstream_release %}
 {% set build_number = 0 %}
 
 # `llama.cpp-meta` is a meta-package that includes the `llama.cpp`, `llama.cpp-tools` and `gguf` packages:
@@ -93,6 +93,7 @@ outputs:
         - cmake
         - ninja-base
         - pkgconfig
+        - git  # [osx or unix or aarch64]
         - patch  # [osx or (unix and blas_impl == "mkl") or aarch64]
         - m2-patch  # [win]
 
@@ -228,10 +229,10 @@ outputs:
     version: {{ gguf_version }}
     build:
       entry_points:
-        - gguf-convert-endian = scripts:gguf_convert_endian_entrypoint
-        - gguf-dump = scripts:gguf_dump_entrypoint
-        - gguf-set-metadata = scripts:gguf_set_metadata_entrypoint
-        - gguf-new-metadata = scripts:gguf_new_metadata_entrypoint
+        - gguf-convert-endian = gguf.scripts:gguf_convert_endian_entrypoint
+        - gguf-dump = gguf.scripts:gguf_dump_entrypoint
+        - gguf-set-metadata = gguf.scripts:gguf_set_metadata_entrypoint
+        - gguf-new-metadata = gguf.scripts:gguf_new_metadata_entrypoint
       skip: True # [py<39]
       number: {{ build_number }}
 
