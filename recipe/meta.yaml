@@ -1,41 +1,29 @@
 {% set name = "llama.cpp-meta" %}
-{% set upstream_release = "4575" %}
-{% set version = "0.0." + upstream_release %}
-# the `gguf_version` should match gguf-py/pyproject.toml's version number but append the upstream release 
-# number, remember to check the upstream pyproject.toml file for new version numbers when doing a feedstock 
-# update.
-#
-# This is due to upstream making changes to the gguf-py package without incrementing the version number, we add
-# the upstream release number to the version number to ensure that the version number is incremented.
-{% set gguf_version = "0.15." + upstream_release %}
+{% set upstream_release = "b4575" %}
+{% set version = "0.0." + upstream_release[1:] %}
+{% set gguf_version = "0.15." + upstream_release[1:] %}
 {% set build_number = 0 %}
 
-# `llama.cpp-meta` is a meta-package that includes the `llama.cpp`, `llama.cpp-tools` and `gguf` packages:
-#
-# `llama.cpp` is the main package for inference of Meta's LLaMA model (and others) in pure C/C++
-# `llama.cpp-tools` is a package that includes scripts and conversion tools that ship with llama.cpp
-# `gguf` is a package that includes tools for reading and writing ML models in GGUF for GGML
-#
-# Note: This package is not intended to be installed directly. Instead, install the `llama.cpp`, `llama.cpp-tools` 
-# and `gguf` packages.
-#
-# Upstream llama.cpp does not follow python/packaging conventions and the pyproject.toml files are not 
-# consistently maintained. This feedstock allows us to build all 3 packages in a single build process from the 
-# same source version, bypassing the broken/unmaintained python package code in the upstream repo.
+# REMEMBER TO UPDATE THE VERSION NUMBER AND COMMIT IN THE PATCH FILES:
+# - patches/build_version.patch
+# - patches/ggml_version.patch
 
 package:
   name: {{ name|lower }}
   version: {{ version }}
 
 source:
-  git_url: https://github.com/ggerganov/llama.cpp.git
-  git_rev: b{{ version.split(".")[-1] }}
+  url: https://github.com/ggerganov/llama.cpp/archive/{{ upstream_release }}.tar.gz
+  sha256: fdbca405fb9bc8af2a1dd566aed52bbb38ce3e05813d8a23bc43c3fd6b29a0c8
+
   patches:
     - patches/mkl.patch                   # [blas_impl == "mkl"]
     - patches/loosen-max_nmse_err.patch   # [osx]
     - patches/metal_gpu_selection.patch   # [osx]
     - patches/hwcap_sve_check.patch       # [aarch64]
     - patches/fix-convert_lora_to_gguf.patch
+    - patches/build_version.patch
+    - patches/ggml_version.patch
 
 build:
   skip: true # [skip_cuda_prefect and (gpu_variant or "").startswith('cuda')]
@@ -107,6 +95,7 @@ outputs:
         - mkl-devel {{ mkl }}                                 # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
         - intel-openmp {{ mkl }}                              # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
         - llvm-openmp 14.0.6                                  # [osx]
+        - libcurl >=8.11.0
 
       run:
         - {{ pin_compatible('cudatoolkit', max_pin='x.x') }}  # [gpu_variant == "cuda-11"]
@@ -117,6 +106,7 @@ outputs:
         - __osx >={{ MACOSX_DEPLOYMENT_TARGET|default("10.12") }}  # [osx and x86_64]
         - _x86_64-microarch-level >=2                         # [x86_64_opt == "v2"]
         - _x86_64-microarch-level >=3                         # [x86_64_opt == "v3"]
+        - libcurl >=8.11.0
 
     test:
       commands:
@@ -155,7 +145,7 @@ outputs:
         - cbouss
         - jnoller
 
-  - name: llama.cpp-tools
+  {# - name: llama.cpp-tools
     script: build-llama-cpp-tools.sh   # [not win]
     script: bld-llama-cpp-tools.bat  # [win]
     version: {{ version }}
@@ -275,7 +265,7 @@ outputs:
       recipe-maintainers:
         - sodre
         - cbouss
-        - jnoller
+        - jnoller #}
 
 about:
   home: https://github.com/ggerganov/llama.cpp

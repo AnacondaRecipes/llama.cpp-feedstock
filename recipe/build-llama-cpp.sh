@@ -73,7 +73,8 @@ cmake -S . -B build \
     -DGGML_AVX512_VNNI=OFF \
     -DGGML_AVX512_BF16=OFF \
     -DGGML_FMA=OFF \
-    -DGGML_F16C=OFF
+    -DGGML_F16C=OFF \
+    -DLLAMA_CURL=ON
 
 cmake --build build --config Release --verbose
 cmake --install build
