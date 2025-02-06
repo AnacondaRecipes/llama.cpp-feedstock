@@ -78,5 +78,7 @@ if errorlevel 1 exit 1
 cmake --install build
 if errorlevel 1 exit 1
 
+pushd build
 ctest --output-on-failure build -j%CPU_COUNT% --test-dir build/tests
 if errorlevel 1 exit 1
+popd

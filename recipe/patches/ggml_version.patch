@@ -13,51 +13,53 @@ in incorrect version numbers in the binaries.
 This patch removes the git commands and hardcodes the values.
 ---
 diff --git a/ggml/CMakeLists.txt b/ggml/CMakeLists.txt
-index 7c069e42..10ab2069 100644
+index 75b5ea3b..9e421b1c 100644
 --- a/ggml/CMakeLists.txt
 +++ b/ggml/CMakeLists.txt
-@@ -272,24 +272,27 @@ endif()
+@@ -272,26 +272,28 @@ endif()
  # Create CMake package
  #
  
--# Generate version info based on git commit.
--
--find_program(GIT_EXE NAMES git git.exe REQUIRED NO_CMAKE_FIND_ROOT_PATH)
--execute_process(COMMAND ${GIT_EXE} rev-list --count HEAD
--    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
--    OUTPUT_VARIABLE GGML_BUILD_NUMBER
--    OUTPUT_STRIP_TRAILING_WHITESPACE
--)
--
--if(GGML_BUILD_NUMBER EQUAL 1)
--    message(WARNING "GGML build version fixed at 1 likely due to a shallow clone.")
--endif()
-+set(GGML_BUILD_NUMBER 4575)
-+set(GGML_BUILD_COMMIT "cae9fb4361138b937464524eed907328731b81f6")
++set(GGML_BUILD_NUMBER 4651)
++set(GGML_BUILD_COMMIT "c0d4843225eed38903ea71ef302a02fa0b27f048")
+ # Generate version info based on git commit.
  
--execute_process(COMMAND ${GIT_EXE} rev-parse --short HEAD
--    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
--    OUTPUT_VARIABLE GGML_BUILD_COMMIT
--    OUTPUT_STRIP_TRAILING_WHITESPACE
--)
-+# Generate version info based on git commit.
-+#
-+# find_program(GIT_EXE NAMES git git.exe REQUIRED NO_CMAKE_FIND_ROOT_PATH)
-+# execute_process(COMMAND ${GIT_EXE} rev-list --count HEAD
-+#     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-+#     OUTPUT_VARIABLE GGML_BUILD_NUMBER
-+#     OUTPUT_STRIP_TRAILING_WHITESPACE
-+# )
-+#
-+# if(GGML_BUILD_NUMBER EQUAL 1)
-+#     message(WARNING "GGML build version fixed at 1 likely due to a shallow clone.")
+-if(NOT DEFINED GGML_BUILD_NUMBER)
+-    find_program(GIT_EXE NAMES git git.exe REQUIRED NO_CMAKE_FIND_ROOT_PATH)
+-    execute_process(COMMAND ${GIT_EXE} rev-list --count HEAD
+-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+-        OUTPUT_VARIABLE GGML_BUILD_NUMBER
+-        OUTPUT_STRIP_TRAILING_WHITESPACE
+-    )
+-
+-    if(GGML_BUILD_NUMBER EQUAL 1)
+-        message(WARNING "GGML build version fixed at 1 likely due to a shallow clone.")
+-    endif()
+-
+-    execute_process(COMMAND ${GIT_EXE} rev-parse --short HEAD
+-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+-        OUTPUT_VARIABLE GGML_BUILD_COMMIT
+-        OUTPUT_STRIP_TRAILING_WHITESPACE
+-    )
+-endif()
++# if(NOT DEFINED GGML_BUILD_NUMBER)
++#     find_program(GIT_EXE NAMES git git.exe REQUIRED NO_CMAKE_FIND_ROOT_PATH)
++#     execute_process(COMMAND ${GIT_EXE} rev-list --count HEAD
++#         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
++#         OUTPUT_VARIABLE GGML_BUILD_NUMBER
++#         OUTPUT_STRIP_TRAILING_WHITESPACE
++#     )
++
++#     if(GGML_BUILD_NUMBER EQUAL 1)
++#         message(WARNING "GGML build version fixed at 1 likely due to a shallow clone.")
++#     endif()
++
++#     execute_process(COMMAND ${GIT_EXE} rev-parse --short HEAD
++#         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
++#         OUTPUT_VARIABLE GGML_BUILD_COMMIT
++#         OUTPUT_STRIP_TRAILING_WHITESPACE
++#     )
 +# endif()
-+#
-+# execute_process(COMMAND ${GIT_EXE} rev-parse --short HEAD
-+#     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-+#     OUTPUT_VARIABLE GGML_BUILD_COMMIT
-+#     OUTPUT_STRIP_TRAILING_WHITESPACE
-+# )
+ 
  
  # Capture variables prefixed with GGML_.
- 

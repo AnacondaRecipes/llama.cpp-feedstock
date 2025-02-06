@@ -78,10 +78,12 @@ cmake -S . -B build \
 
 cmake --build build --config Release --verbose
 cmake --install build
+ 
+# Tests like test_chat use relative paths to load the model template files that break when run from a different 
+# parent directory. Tests (per upstream CI workflows) should be run from the build directory.
+# See: https://github.com/ggerganov/llama.cpp/blob/master/.github/workflows/build.yml
 
-# Do not change dir into the tests subdirectory, it breaks the relative paths the cmake targets use all over in
-# upstream llama.cpp and causes the tests to segfault vs failing with "unable to open file @path...".
-
+pushd build
 if [[ ${gpu_variant:0:5} = "cuda-" ]]; then
     # Tests failures around batch matrix multiplication (ggml_mul_mat) due to our hardware (Maxwell) not supporting 
     # f16 CUDA intrinsics (available from 60 - Pascal), and us compiling with CUDA architectures all.
@@ -97,5 +99,6 @@ if [[ ${gpu_variant:0:5} = "cuda-" ]]; then
     #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=16,k=256,bs=[10,10],nr=[2,1]): [MUL_MAT] NMSE = 1.000069965 > 0.000500000 FAIL
     ctest --output-on-failure build -j${CPU_COUNT} --test-dir build/tests || true
 else
-    ctest --output-on-failure build -j${CPU_COUNT} --test-dir build/tests
+    ctest --output-on-failure -j${CPU_COUNT}
 fi
+popd

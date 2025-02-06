@@ -1,5 +1,5 @@
 {% set name = "llama.cpp-meta" %}
-{% set upstream_release = "b4575" %}
+{% set upstream_release = "b4651" %}
 {% set version = "0.0." + upstream_release[1:] %}
 {% set gguf_version = "0.15." + upstream_release[1:] %}
 {% set build_number = 0 %}
@@ -14,7 +14,7 @@ package:
 
 source:
   url: https://github.com/ggerganov/llama.cpp/archive/{{ upstream_release }}.tar.gz
-  sha256: fdbca405fb9bc8af2a1dd566aed52bbb38ce3e05813d8a23bc43c3fd6b29a0c8
+  sha256: 314064e1b3d7bef4b7a6d5bc1c883d1e87c833241ebaf8ae68befec9b3eea9ee
 
   patches:
     - patches/mkl.patch                   # [blas_impl == "mkl"]
@@ -145,7 +145,7 @@ outputs:
         - cbouss
         - jnoller
 
-  {# - name: llama.cpp-tools
+  - name: llama.cpp-tools
     script: build-llama-cpp-tools.sh   # [not win]
     script: bld-llama-cpp-tools.bat  # [win]
     version: {{ version }}
@@ -265,7 +265,7 @@ outputs:
       recipe-maintainers:
         - sodre
         - cbouss
-        - jnoller #}
+        - jnoller
 
 about:
   home: https://github.com/ggerganov/llama.cpp
