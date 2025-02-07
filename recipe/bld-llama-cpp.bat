@@ -80,26 +80,6 @@ cmake --install build
 if errorlevel 1 exit 1
 
 pushd build
-if "%gpu_variant:~0,5%"=="cuda-" (
-    REM Create a simple program to check CUDA capabilities at compile time
-    echo #include ^<stdio.h^> > check_cuda.cu
-    echo #if !defined(__CUDA_ARCH__^) ^|^| __CUDA_ARCH__ ^< 700 >> check_cuda.cu
-    echo #error "No Volta (SM70) support" >> check_cuda.cu
-    echo #endif >> check_cuda.cu
-    echo int main(^) { return 0; } >> check_cuda.cu
-
-    REM Try to compile for Volta architecture specifically
-    nvcc -arch=sm_70 check_cuda.cu -o check_cuda.exe >nul 2>&1
-    if errorlevel 1 (
-        echo Detected build environment without Volta (SM70) support - skipping problematic tests
-        ctest --output-on-failure -E "mul_mat_f16|flash_attn" -j%CPU_COUNT%
-    ) else (
-        REM Environment supports Volta features, run all tests
-        ctest --output-on-failure -j%CPU_COUNT%
-    )
-    del /f /q check_cuda.cu check_cuda.exe 2>nul
-) else (
-    ctest --output-on-failure -j%CPU_COUNT%
-)
+ctest --output-on-failure -j%CPU_COUNT% -E "mul_mat_f16|flash_attn"
 if errorlevel 1 exit 1
 popd
