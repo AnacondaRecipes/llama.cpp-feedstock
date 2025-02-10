@@ -69,8 +69,6 @@ cmake -S . -B build ^
     -DGGML_CUDA_DMMV_F16=OFF ^
     -DLLAMA_CURL=ON
 
-REM in MSVC F16C is implied with AVX2/AVX512 so we can't enable/disable it via cmake
-
 if errorlevel 1 exit 1
 
 cmake --build build --config Release --verbose
@@ -80,6 +78,6 @@ cmake --install build
 if errorlevel 1 exit 1
 
 pushd build
-ctest --output-on-failure -j%CPU_COUNT% -E "mul_mat_f16|flash_attn"
+ctest -L main --output-on-failure -j%CPU_COUNT%
 if errorlevel 1 exit 1
 popd
