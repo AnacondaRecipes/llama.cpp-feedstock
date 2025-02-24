@@ -20,7 +20,7 @@ index 75b5ea3b..9e421b1c 100644
  # Create CMake package
  #
  
-+set(GGML_BUILD_NUMBER 4651)
++set(GGML_BUILD_NUMBER 4747)
 +set(GGML_BUILD_COMMIT "c0d4843225eed38903ea71ef302a02fa0b27f048")
  # Generate version info based on git commit.
  
