@@ -78,6 +78,6 @@ cmake --install build
 if errorlevel 1 exit 1
 
 pushd build
-ctest -L main -E flash_attn --output-on-failure -j%CPU_COUNT%
+ctest -L main --output-on-failure -j%CPU_COUNT%
 if errorlevel 1 exit 1
 popd
