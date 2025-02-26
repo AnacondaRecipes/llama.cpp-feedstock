@@ -22,7 +22,6 @@ source:
     - patches/metal_gpu_selection.patch   # [osx]
     - patches/hwcap_sve_check.patch       # [aarch64]
     - patches/fix-convert_lora_to_gguf.patch
-    - patches/remove_test_flash_attn_ext.patch # [win or linux]
     - patches/build_version.patch
     - patches/ggml_version.patch
 
