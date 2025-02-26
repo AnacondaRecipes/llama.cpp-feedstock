@@ -1,5 +1,5 @@
 {% set name = "llama.cpp-meta" %}
-{% set upstream_release = "b4651" %}
+{% set upstream_release = "b4783" %}
 {% set version = "0.0." + upstream_release[1:] %}
 {% set gguf_version = "0.15." + upstream_release[1:] %}
 {% set build_number = 0 %}
@@ -14,7 +14,7 @@ package:
 
 source:
   url: https://github.com/ggerganov/llama.cpp/archive/{{ upstream_release }}.tar.gz
-  sha256: 314064e1b3d7bef4b7a6d5bc1c883d1e87c833241ebaf8ae68befec9b3eea9ee
+  sha256: 8e2334f9ae7d5774d1f06ea79763cb6a51f96a110d47380c077c55e4a84b4417
 
   patches:
     - patches/mkl.patch                   # [blas_impl == "mkl"]
