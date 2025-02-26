@@ -21,6 +21,9 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
         LLAMA_ARGS="${LLAMA_ARGS} -DGGML_METAL=ON"
         LLAMA_ARGS="${LLAMA_ARGS} -DGGML_METAL_EMBED_LIBRARY=ON"
     fi
+else
+    # Enable all CPU variants on non-macOS systems - llama.cpp will automatically select the best one at runtime
+    LLAMA_ARGS="${LLAMA_ARGS} -DGGML_CPU_ALL_VARIANTS=ON"
 fi
 
 # TODO: implement test that detects whether the correct BLAS is actually used
@@ -40,22 +43,6 @@ else
     LLAMA_ARGS="${LLAMA_ARGS} -DGGML_BLAS=OFF"
 fi
 
-# Configure CPU optimization flags based on the x86_64_opt variable:
-# - "v3" sets march=x86-64-v3, enabling AVX, AVX2, and other extensions (suitable for modern CPUs)
-# - "v2" sets march=x86-64-v2, enabling AVX and other extensions (for CPUs with AVX but not AVX2)
-# - Any other value (or unset) keeps the default march=nocona (for older CPUs or maximum compatibility)
-# This affects CXXFLAGS, CFLAGS, and CPPFLAGS to ensure consistent optimization across all compilations.
-
-if [[ ${x86_64_opt:-} = "v3" ]]; then
-    export CXXFLAGS="${CXXFLAGS/march=nocona/march=x86-64-v3}"
-    export CFLAGS="${CFLAGS/march=nocona/march=x86-64-v3}"
-    export CPPFLAGS="${CPPFLAGS/march=nocona/march=x86-64-v3}"
-elif [[ ${x86_64_opt:-} = "v2" ]]; then
-    export CXXFLAGS="${CXXFLAGS/march=nocona/march=x86-64-v2}"
-    export CFLAGS="${CFLAGS/march=nocona/march=x86-64-v2}"
-    export CPPFLAGS="${CPPFLAGS/march=nocona/march=x86-64-v2}"
-fi
-
 cmake -S . -B build \
     -G Ninja \
     ${CMAKE_ARGS} \
@@ -65,16 +52,6 @@ cmake -S . -B build \
     -DCMAKE_BUILD_TYPE=Release \
     -DLLAMA_BUILD_TESTS=ON  \
     -DBUILD_SHARED_LIBS=ON  \
-    -DGGML_NATIVE=OFF \
-    -DGGML_AVX=OFF \
-    -DGGML_AVX2=OFF \
-    -DGGML_AVX512=OFF \
-    -DGGML_AVX512_VBMI=OFF \
-    -DGGML_AVX512_VNNI=OFF \
-    -DGGML_AVX512_BF16=OFF \
-    -DGGML_FMA=OFF \
-    -DGGML_F16C=OFF \
-    -DGGML_CUDA_DMMV_F16=OFF \
     -DLLAMA_CURL=ON
 
 cmake --build build --config Release --verbose

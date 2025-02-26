@@ -52,24 +52,13 @@ outputs:
       # do not mix cublas and mkl/openblas
       skip: true # [((gpu_variant or "").startswith('cuda') and (blas_impl != "cublas")) or (not (gpu_variant or "").startswith('cuda') and (blas_impl == "cublas"))]
       # Use a build number difference to ensure that the GPU
-      # variant is slightly preferred by conda's solver, so that it's preferentially
-      # installed where the platform supports it.
-      number: {{ build_number + 250 }}  # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11") and (x86_64_opt == "v3")]
-      number: {{ build_number + 240 }}  # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11") and (x86_64_opt == "v2")]
-      number: {{ build_number + 200 }}  # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11") and (x86_64_opt == "none")]
-      number: {{ build_number + 150 }}  # [((gpu_variant == "cuda-11") and (x86_64_opt == "v3"))]
-      number: {{ build_number + 140 }}  # [((gpu_variant == "cuda-11") and (x86_64_opt == "v2"))]
-      number: {{ build_number + 100 }}  # [((gpu_variant == "cuda-11") and (x86_64_opt == "none")) or (gpu_variant == "metal")]
-      number: {{ build_number + 50 }}   # [gpu_variant == "none" and x86_64_opt == "v3"]
-      number: {{ build_number + 40 }}   # [gpu_variant == "none" and x86_64_opt == "v2"]
-      number: {{ build_number }}        # [gpu_variant == "none" and x86_64_opt == "none"]
-      string: cuda{{ cuda_compiler_version | replace('.', '') }}_v3_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [(gpu_variant or "").startswith('cuda') and (x86_64_opt == "v3")]
-      string: cuda{{ cuda_compiler_version | replace('.', '') }}_v2_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [(gpu_variant or "").startswith('cuda') and (x86_64_opt == "v2")]
-      string: cuda{{ cuda_compiler_version | replace('.', '') }}_v1_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [(gpu_variant or "").startswith('cuda') and (x86_64_opt == "none")]
-      string: cpu_v3_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                              # [gpu_variant == "none" and x86_64_opt == "v3"]
-      string: cpu_v2_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                              # [gpu_variant == "none" and x86_64_opt == "v2"]
-      string: cpu_v1_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                              # [gpu_variant == "none" and x86_64_opt == "none"]
-      string: mps_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                                 # [gpu_variant == "metal"]
+      # variant is slightly preferred by conda's solver
+      number: {{ build_number + 200 }}  # [(gpu_variant or "").startswith('cuda')]
+      number: {{ build_number + 100 }}  # [gpu_variant == "metal"]
+      number: {{ build_number }}        # [gpu_variant == "none"]
+      string: cuda{{ cuda_compiler_version | replace('.', '') }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [(gpu_variant or "").startswith('cuda')]
+      string: cpu_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                              # [gpu_variant == "none"]
+      string: mps_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                             # [gpu_variant == "metal"]
       missing_dso_whitelist:                                                                         # [s390x or (gpu_variant or "").startswith('cuda')]
         - "**/libcuda.so*"                                                                           # [(gpu_variant or "").startswith('cuda')]
         - '$RPATH/ld64.so.1'  # [s390x]
@@ -105,8 +94,6 @@ outputs:
         - llvm-openmp                                         # [osx] bounds through run_exports
         - _openmp_mutex                                       # [linux]
         - __osx >={{ MACOSX_DEPLOYMENT_TARGET|default("10.12") }}  # [osx and x86_64]
-        - _x86_64-microarch-level >=2                         # [x86_64_opt == "v2"]
-        - _x86_64-microarch-level >=3                         # [x86_64_opt == "v3"]
         - libcurl >=8.11.0
 
     test:
