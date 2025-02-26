@@ -23,7 +23,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     fi
 else
     # Enable all CPU variants on non-macOS systems - llama.cpp will automatically select the best one at runtime
-    LLAMA_ARGS="${LLAMA_ARGS} -DGGML_CPU_ALL_VARIANTS=ON"
+    LLAMA_ARGS="${LLAMA_ARGS} -DGGML_BACKEND_DL=ON -DGGML_CPU_ALL_VARIANTS=ON"
 fi
 
 # TODO: implement test that detects whether the correct BLAS is actually used
@@ -52,6 +52,7 @@ cmake -S . -B build \
     -DCMAKE_BUILD_TYPE=Release \
     -DLLAMA_BUILD_TESTS=ON  \
     -DBUILD_SHARED_LIBS=ON  \
+    # -DGGML_CUDA_F16=OFF \ check upstream defaults; is this needed?
     -DLLAMA_CURL=ON
 
 cmake --build build --config Release --verbose

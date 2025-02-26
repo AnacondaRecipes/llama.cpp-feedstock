@@ -24,7 +24,7 @@ if "%blas_impl%"=="mkl" (
 )
 
 REM Enable all CPU variants - llama.cpp will automatically select the best one at runtime
-set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_CPU_ALL_VARIANTS=ON
+set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_BACKEND_DL=ON -DGGML_CPU_ALL_VARIANTS=ON
 
 cmake -S . -B build ^
     -G Ninja ^
