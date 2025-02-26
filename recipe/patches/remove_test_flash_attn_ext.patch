@@ -3,89 +3,23 @@ from the test suite; it can not be easily skipped via ctest regex as the problem
 in a large file of tests without structure/organization.
 ---
 diff --git a/tests/test-backend-ops.cpp b/tests/test-backend-ops.cpp
-index 1bfd4125..1810a57f 100644
+index 1bfd4125..9e5d1dde 100644
 --- a/tests/test-backend-ops.cpp
 +++ b/tests/test-backend-ops.cpp
-@@ -3114,82 +3114,7 @@ struct test_leaky_relu : public test_case {
+@@ -4272,6 +4272,8 @@ static std::vector<std::unique_ptr<test_case>> make_test_cases_eval() {
+     test_cases.emplace_back(new test_timestep_embedding());
+     test_cases.emplace_back(new test_leaky_relu());
+ 
++    // disabled due to disabling f16 support in build
++    #if 0
+     for (int hs : { 64, 80, 128, 256, }) {
+         for (bool mask : { true, false } ) {
+             for (float max_bias : { 0.0f, 8.0f }) {
+@@ -4295,6 +4297,7 @@ static std::vector<std::unique_ptr<test_case>> make_test_cases_eval() {
+             }
+         }
      }
- };
++    #endif
  
--// GGML_OP_FLASH_ATTN_EXT
--struct test_flash_attn_ext : public test_case {
--    const int64_t hs; // head size
--    const int64_t nh; // num heads
--    const int64_t kv; // kv size
--    const int64_t nb; // batch size
- 
--    const bool mask; // use mask
--
--    const float max_bias; // ALiBi
--    const float logit_softcap; // Gemma 2
--
--    const ggml_type type_KV;
--    std::array<int32_t, 4> permute;
--
--    std::string vars() override {
--        return VARS_TO_STR9(hs, nh, kv, nb, mask, max_bias, logit_softcap, type_KV, permute);
--    }
--
--    double max_nmse_err() override {
--        return 5e-4;
--    }
--
--    uint64_t op_flops(ggml_tensor * t) override {
--        GGML_UNUSED(t);
--        // Just counting matmul costs:
--        // Q*K^T is nb x hs x kv, P*V is nb x kv x hs, per head
--        return 2 * 2 * nh * nb * hs * kv;
--    }
--
--    test_flash_attn_ext(int64_t hs = 128, int64_t nh = 32, int64_t kv = 96, int64_t nb = 8,
--                        bool mask = true, float max_bias = 0.0f, float logit_softcap = 0.0f, ggml_type type_KV = GGML_TYPE_F16,
--                        std::array<int32_t, 4> permute = {0, 1, 2, 3})
--        : hs(hs), nh(nh), kv(kv), nb(nb), mask(mask), max_bias(max_bias), logit_softcap(logit_softcap), type_KV(type_KV), permute(permute) {}
--
--    ggml_tensor * build_graph(ggml_context * ctx) override {
--        const int64_t hs_padded = GGML_PAD(hs, ggml_blck_size(type_KV));
--
--        auto const &create_permuted = [&](ggml_type type, int64_t ne0, int64_t ne1, int64_t ne2, int64_t ne3) -> ggml_tensor * {
--            int64_t ne[4] = {ne0, ne1, ne2, ne3};
--            int64_t ne_perm[4];
--            for (int i = 0; i < 4; ++i) {
--                ne_perm[permute[i]] = ne[i];
--            }
--            ggml_tensor * t = ggml_new_tensor_4d(ctx, type, ne_perm[0], ne_perm[1], ne_perm[2], ne_perm[3]);
--            if (permute != std::array<int32_t, 4>{0, 1, 2, 3}) {
--                t = ggml_permute(ctx, t, permute[0], permute[1], permute[2], permute[3]);
--            }
--            return t;
--        };
--
--        ggml_tensor * q = create_permuted(GGML_TYPE_F32, hs_padded, nb, nh, 1);
--        ggml_set_name(q, "q");
--
--        ggml_tensor * k = create_permuted(type_KV,       hs_padded, kv, nh, 1);
--        ggml_set_name(k, "k");
--
--        ggml_tensor * v = create_permuted(type_KV,       hs_padded, kv, nh, 1);
--        ggml_set_name(v, "v");
--
--        ggml_tensor * m = nullptr;
--        if (mask) {
--            m = ggml_new_tensor_4d(ctx, GGML_TYPE_F16, kv, GGML_PAD(nb, GGML_KQ_MASK_PAD), 1, 1);
--            ggml_set_name(m, "m");
--        }
--
--        ggml_tensor * out = ggml_flash_attn_ext(ctx, q, k, v, m, 1.0f/sqrtf(hs), max_bias, logit_softcap);
--        ggml_set_name(out, "out");
--
--        return out;
--    }
--
--    bool grad_precise() override {
--        return true;
--    }
--};
- 
- // GGML_OP_CROSS_ENTROPY_LOSS
- struct test_cross_entropy_loss : public test_case {
+     test_cases.emplace_back(new test_cross_entropy_loss     (GGML_TYPE_F32, {   10, 5, 4, 3}));
+     test_cases.emplace_back(new test_cross_entropy_loss     (GGML_TYPE_F32, {30000, 1, 1, 1}));
