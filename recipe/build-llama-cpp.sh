@@ -76,7 +76,7 @@ if [[ ${gpu_variant:0:5} = "cuda-" ]]; then
     #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=16,k=256,bs=[10,1],nr=[2,1]): [MUL_MAT] NMSE = 1.001445591 > 0.000500000 FAIL
     #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=16,k=256,bs=[10,10],nr=[1,1]): [MUL_MAT] NMSE = 1.000128216 > 0.000500000 FAIL
     #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=16,k=256,bs=[10,10],nr=[2,1]): [MUL_MAT] NMSE = 1.000069965 > 0.000500000 FAIL
-    ctest --output-on-failure -L main -j${CPU_COUNT} || true
+    ctest --output-on-failure -L main -j${CPU_COUNT}
 else
     ctest --output-on-failure -L main -j${CPU_COUNT}
 fi
