@@ -133,7 +133,7 @@ outputs:
         - cbouss
         - jnoller
 
-  {# - name: llama.cpp-tools
+  - name: llama.cpp-tools
     script: build-llama-cpp-tools.sh   # [not win]
     script: bld-llama-cpp-tools.bat  # [win]
     version: {{ version }}
@@ -253,7 +253,7 @@ outputs:
       recipe-maintainers:
         - sodre
         - cbouss
-        - jnoller #}
+        - jnoller
 
 about:
   home: https://github.com/ggerganov/llama.cpp
