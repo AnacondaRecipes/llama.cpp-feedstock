@@ -52,9 +52,10 @@ cmake -S . -B build \
     -DCMAKE_BUILD_TYPE=Release \
     -DLLAMA_BUILD_TESTS=ON  \
     -DBUILD_SHARED_LIBS=ON  \
-    -DLLAMA_CURL=ON \
     -DGGML_NATIVE=OFF \
-    -DGGML_CUDA_F16=OFF
+    -DDGGML_F16C=OFF \
+    -DLLAMA_CURL=ON 
+
 
 cmake --build build --config Release --verbose
 cmake --install build
