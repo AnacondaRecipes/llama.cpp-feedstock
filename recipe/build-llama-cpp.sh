@@ -52,8 +52,9 @@ cmake -S . -B build \
     -DCMAKE_BUILD_TYPE=Release \
     -DLLAMA_BUILD_TESTS=ON  \
     -DBUILD_SHARED_LIBS=ON  \
-    -DLLAMA_CURL=ON
-    # -DGGML_CUDA_F16=OFF \ check upstream defaults; is this needed?
+    -DLLAMA_CURL=ON \
+    -DGGML_NATIVE=OFF \
+    -DGGML_CUDA_F16=OFF
 
 cmake --build build --config Release --verbose
 cmake --install build
