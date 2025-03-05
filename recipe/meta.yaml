@@ -1,5 +1,5 @@
 {% set name = "llama.cpp-meta" %}
-{% set upstream_release = "b4783" %}
+{% set upstream_release = "b4831" %}
 {% set version = "0.0." + upstream_release[1:] %}
 {% set gguf_version = "0.16." + upstream_release[1:] %}
 {% set build_number = 0 %}
@@ -14,7 +14,7 @@ package:
 
 source:
   url: https://github.com/ggerganov/llama.cpp/archive/{{ upstream_release }}.tar.gz
-  sha256: 8e2334f9ae7d5774d1f06ea79763cb6a51f96a110d47380c077c55e4a84b4417
+  sha256: dc9904fd48c01914043f2efaf93d7d5d4148fc99efbe1eeddf4fe9cadf984a7d
 
   patches:
     - patches/mkl.patch                   # [blas_impl == "mkl"]
@@ -51,8 +51,7 @@ outputs:
       skip: true # [gpu_variant == "cuda-11"]
       # do not mix cublas and mkl/openblas
       skip: true # [((gpu_variant or "").startswith('cuda') and (blas_impl != "cublas")) or (not (gpu_variant or "").startswith('cuda') and (blas_impl == "cublas"))]
-      # Use a build number difference to ensure that the GPU
-      # variant is slightly preferred by conda's solver
+      # Use a build number difference to ensure that the GPU variant is slightly preferred by conda's solver
       number: {{ build_number + 200 }}  # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11")]
       number: {{ build_number + 100 }}  # [gpu_variant == "metal"]
       number: {{ build_number }}        # [gpu_variant == "none"]
