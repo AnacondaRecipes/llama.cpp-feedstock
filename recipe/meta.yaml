@@ -55,7 +55,7 @@ outputs:
       number: {{ build_number + 200 }}  # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11")]
       number: {{ build_number + 100 }}  # [gpu_variant == "metal"]
       number: {{ build_number }}        # [gpu_variant == "none"]
-      string: cuda{{ cuda_compiler_version | replace('.', '') }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [(gpu_variant or "").startswith('cuda')]
+      string: cuda{{ cuda_compiler_version | replace('.', '') }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11")]
       string: cpu_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                 # [gpu_variant == "none"]
       string: mps_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                                 # [gpu_variant == "metal"]
       missing_dso_whitelist:                                                                         # [s390x or (gpu_variant or "").startswith('cuda')]

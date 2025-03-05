@@ -54,7 +54,7 @@ cmake -S . -B build \
     -DBUILD_SHARED_LIBS=ON  \
     -DGGML_NATIVE=OFF \
     -DGGML_FMA=OFF \
-    -DDGGML_F16C=OFF \
+    -DGGML_F16C=OFF \
     -DLLAMA_CURL=ON 
 
 
