@@ -53,6 +53,7 @@ cmake -S . -B build \
     -DLLAMA_BUILD_TESTS=ON  \
     -DBUILD_SHARED_LIBS=ON  \
     -DGGML_NATIVE=OFF \
+    -DGGML_FMA=OFF \
     -DDGGML_F16C=OFF \
     -DLLAMA_CURL=ON 
 
