@@ -48,14 +48,58 @@ if [[ ${x86_64_opt:-} = "v4" ]]; then
     export CXXFLAGS="${CXXFLAGS/march=nocona/march=x86-64-v4}"
     export CFLAGS="${CFLAGS/march=nocona/march=x86-64-v4}"
     export CPPFLAGS="${CPPFLAGS/march=nocona/march=x86-64-v4}"
+    # Enable all instruction sets up to AVX512
+    LLAMA_ARGS="${LLAMA_ARGS} -DGGML_AVX=ON -DGGML_AVX2=ON -DGGML_FMA=ON -DGGML_F16C=ON"
+    LLAMA_ARGS="${LLAMA_ARGS} -DGGML_AVX512=ON -DGGML_AVX512_VBMI=ON -DGGML_AVX512_VNNI=ON -DGGML_AVX512_BF16=ON"
 elif [[ ${x86_64_opt:-} = "v3" ]]; then
     export CXXFLAGS="${CXXFLAGS/march=nocona/march=x86-64-v3}"
     export CFLAGS="${CFLAGS/march=nocona/march=x86-64-v3}"
     export CPPFLAGS="${CPPFLAGS/march=nocona/march=x86-64-v3}"
+    # Enable AVX, AVX2, FMA, and F16C which are part of v3
+    LLAMA_ARGS="${LLAMA_ARGS} -DGGML_AVX=ON -DGGML_AVX2=ON -DGGML_FMA=ON -DGGML_F16C=ON"
 elif [[ ${x86_64_opt:-} = "v2" ]]; then
     export CXXFLAGS="${CXXFLAGS/march=nocona/march=x86-64-v2}"
     export CFLAGS="${CFLAGS/march=nocona/march=x86-64-v2}"
     export CPPFLAGS="${CPPFLAGS/march=nocona/march=x86-64-v2}"
+    # v2 doesn't include AVX instructions, so keep them disabled
+fi
+
+# Set defaults for instruction sets if not already set
+if [[ ! "${LLAMA_ARGS}" =~ "-DGGML_AVX=" ]]; then
+    LLAMA_ARGS="${LLAMA_ARGS} -DGGML_AVX=OFF"
+fi
+if [[ ! "${LLAMA_ARGS}" =~ "-DGGML_AVX2=" ]]; then
+    LLAMA_ARGS="${LLAMA_ARGS} -DGGML_AVX2=OFF"
+fi
+if [[ ! "${LLAMA_ARGS}" =~ "-DGGML_AVX512=" ]]; then
+    LLAMA_ARGS="${LLAMA_ARGS} -DGGML_AVX512=OFF"
+fi
+if [[ ! "${LLAMA_ARGS}" =~ "-DGGML_AVX512_VBMI=" ]]; then
+    LLAMA_ARGS="${LLAMA_ARGS} -DGGML_AVX512_VBMI=OFF"
+fi
+if [[ ! "${LLAMA_ARGS}" =~ "-DGGML_AVX512_VNNI=" ]]; then
+    LLAMA_ARGS="${LLAMA_ARGS} -DGGML_AVX512_VNNI=OFF"
+fi
+if [[ ! "${LLAMA_ARGS}" =~ "-DGGML_AVX512_BF16=" ]]; then
+    LLAMA_ARGS="${LLAMA_ARGS} -DGGML_AVX512_BF16=OFF"
+fi
+if [[ ! "${LLAMA_ARGS}" =~ "-DGGML_AVX_VNNI=" ]]; then
+    LLAMA_ARGS="${LLAMA_ARGS} -DGGML_AVX_VNNI=OFF"
+fi
+if [[ ! "${LLAMA_ARGS}" =~ "-DGGML_FMA=" ]]; then
+    LLAMA_ARGS="${LLAMA_ARGS} -DGGML_FMA=OFF"
+fi
+if [[ ! "${LLAMA_ARGS}" =~ "-DGGML_F16C=" ]]; then
+    LLAMA_ARGS="${LLAMA_ARGS} -DGGML_F16C=OFF"
+fi
+if [[ ! "${LLAMA_ARGS}" =~ "-DGGML_AMX_TILE=" ]]; then
+    LLAMA_ARGS="${LLAMA_ARGS} -DGGML_AMX_TILE=OFF"
+fi
+if [[ ! "${LLAMA_ARGS}" =~ "-DGGML_AMX_INT8=" ]]; then
+    LLAMA_ARGS="${LLAMA_ARGS} -DGGML_AMX_INT8=OFF"
+fi
+if [[ ! "${LLAMA_ARGS}" =~ "-DGGML_AMX_BF16=" ]]; then
+    LLAMA_ARGS="${LLAMA_ARGS} -DGGML_AMX_BF16=OFF"
 fi
 
 cmake -S . -B build \
@@ -68,15 +112,7 @@ cmake -S . -B build \
     -DLLAMA_BUILD_TESTS=ON  \
     -DBUILD_SHARED_LIBS=ON  \
     -DGGML_NATIVE=OFF \
-    -DGGML_AVX=OFF \
-    -DGGML_AVX2=OFF \
-    -DGGML_AVX512=OFF \
-    -DGGML_AVX512_VBMI=OFF \
-    -DGGML_AVX512_VNNI=OFF \
-    -DGGML_AVX512_BF16=OFF \
-    -DGGML_FMA=OFF \
     -DLLAMA_CURL=ON
-    # May not need to add -DGGML_CUDA_F16=OFF / -DGGML_CUDA_DMMV_F16=OFF since they're off by default in upstream
 
 cmake --build build --config Release --verbose
 cmake --install build
