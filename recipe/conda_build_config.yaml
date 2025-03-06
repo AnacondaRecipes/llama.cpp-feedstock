@@ -7,7 +7,6 @@ blas_impl:
 gpu_variant:
   - none
   - metal                      # [osx and arm64]
-  - cuda-11                    # [linux and x86_64]
   - cuda-12                    # [win or (linux and x86_64)]
 
 cuda_compiler_version:         # [win or (linux and x86_64)]
