@@ -23,32 +23,32 @@ if "%blas_impl%"=="mkl" (
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_BLAS=OFF
 )
 
-REM This section configures CPU optimization flags based on the x86_64_opt variable:
-REM - "v3" enables AVX and AVX2 for both GGML and MSVC (suitable for modern CPUs)
-REM - "v2" enables only AVX for both GGML and MSVC (for CPUs with AVX but not AVX2)
-REM - Any other value disables both AVX and AVX2 (for older or compatible builds)
-REM The ARCH_FLAG is set accordingly to ensure MSVC doesn't implicitly enable 
-REM higher instruction sets. AVX-512 is explicitly disabled in all cases.
-
-REM AVX2 when enabled can implicitly enable AVX-512 instructions within msvc so 
-REM we disable AVX-512 explicitly and set AVX2 explicitly to ensure we don't get AVX-512.
-
-if "%x86_64_opt%"=="v3" (
-    set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX=ON
-    set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX2=ON
-    REM set ARCH_FLAG=/arch:AVX2
+REM Configure CPU optimization flags based on the x86_64_opt variable
+if "%x86_64_opt%"=="v4" (
+    set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX=ON -DGGML_AVX2=ON -DGGML_AVX512=ON
+    set ARCH_FLAG=/arch:AVX512
+) else if "%x86_64_opt%"=="v3" (
+    set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX=ON -DGGML_AVX2=ON
+    set ARCH_FLAG=/arch:AVX2
 ) else if "%x86_64_opt%"=="v2" (
-    set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX=ON
-    set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX2=OFF
-    REM set ARCH_FLAG=/arch:AVX
-) else (
-    set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX=OFF
-    set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX2=OFF
-    REM set ARCH_FLAG=/arch:SSE2
+    set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX=OFF -DGGML_AVX2=OFF
+    set ARCH_FLAG=/arch:SSE2
 )
 
 set CXXFLAGS=!CXXFLAGS! !ARCH_FLAG!
 set CFLAGS=!CFLAGS! !ARCH_FLAG!
+
+REM Set defaults for instruction sets if not already set
+if not "!LLAMA_ARGS!"==*"-DGGML_AVX="* set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX=OFF
+if not "!LLAMA_ARGS!"==*"-DGGML_AVX2="* set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX2=OFF
+if not "!LLAMA_ARGS!"==*"-DGGML_AVX512="* set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX512=OFF
+if not "!LLAMA_ARGS!"==*"-DGGML_AVX512_VBMI="* set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX512_VBMI=OFF
+if not "!LLAMA_ARGS!"==*"-DGGML_AVX512_VNNI="* set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX512_VNNI=OFF
+if not "!LLAMA_ARGS!"==*"-DGGML_AVX512_BF16="* set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX512_BF16=OFF
+if not "!LLAMA_ARGS!"==*"-DGGML_AVX_VNNI="* set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX_VNNI=OFF
+if not "!LLAMA_ARGS!"==*"-DGGML_AMX_TILE="* set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AMX_TILE=OFF
+if not "!LLAMA_ARGS!"==*"-DGGML_AMX_INT8="* set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AMX_INT8=OFF
+if not "!LLAMA_ARGS!"==*"-DGGML_AMX_BF16="* set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AMX_BF16=OFF
 
 cmake -S . -B build ^
     -G Ninja ^
@@ -60,11 +60,6 @@ cmake -S . -B build ^
     -DLLAMA_BUILD_TESTS=ON  ^
     -DBUILD_SHARED_LIBS=ON  ^
     -DGGML_NATIVE=OFF ^
-    -DGGML_AVX512=OFF ^
-    -DGGML_AVX512_VBMI=OFF ^
-    -DGGML_AVX512_VNNI=OFF ^
-    -DGGML_AVX512_BF16=OFF ^
-    -DGGML_FMA=OFF ^
     -DLLAMA_CURL=ON
 
 if errorlevel 1 exit 1
