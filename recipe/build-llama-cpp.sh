@@ -1,6 +1,8 @@
 #!/bin/bash
 set -ex
 
+ARCH=$(uname -m)
+
 if [[ ${gpu_variant:0:5} = "cuda-" ]]; then
     CMAKE_ARGS="${CMAKE_ARGS} -DCMAKE_CUDA_ARCHITECTURES=all-major"
     LLAMA_ARGS="${LLAMA_ARGS} -DGGML_CUDA=ON"
@@ -28,7 +30,7 @@ else
         #
         # This creates multiple CPU backend variants with different instruction sets (AVX, AVX2, AVX512, etc.)
         # The appropriate variant will be selected at runtime based on the CPU capabilities.
-        LLAMA_ARGS="${LLAMA_ARGS} -DGGML_CPU_ALL_VARIANTS=ON"
+        LLAMA_ARGS="${LLAMA_ARGS} -DGGML_BACKEND_DL=ON -DGGML_CPU_ALL_VARIANTS=ON"
     fi
 fi
 
