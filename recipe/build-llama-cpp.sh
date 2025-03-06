@@ -23,15 +23,6 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
         LLAMA_ARGS="${LLAMA_ARGS} -DGGML_METAL=ON"
         LLAMA_ARGS="${LLAMA_ARGS} -DGGML_METAL_EMBED_LIBRARY=ON"
     fi
-else
-    if [[ ${ARCH} == "x86_64" ]]; then
-        # For x86_64 Linux, we enable GGML_CPU_ALL_VARIANTS which will use the optimized backend for the local 
-        # architecture. See: https://github.com/ggml-org/llama.cpp/blob/master/ggml/src/CMakeLists.txt#L307
-        #
-        # This creates multiple CPU backend variants with different instruction sets (AVX, AVX2, AVX512, etc.)
-        # The appropriate variant will be selected at runtime based on the CPU capabilities.
-        LLAMA_ARGS="${LLAMA_ARGS} -DGGML_BACKEND_DL=ON -DGGML_CPU_ALL_VARIANTS=ON"
-    fi
 fi
 
 # TODO: implement test that detects whether the correct BLAS is actually used
@@ -51,6 +42,22 @@ else
     LLAMA_ARGS="${LLAMA_ARGS} -DGGML_BLAS=OFF"
 fi
 
+# Configure CPU optimization flags based on the x86_64_opt variable
+
+if [[ ${x86_64_opt:-} = "v4" ]]; then
+    export CXXFLAGS="${CXXFLAGS/march=nocona/march=x86-64-v4}"
+    export CFLAGS="${CFLAGS/march=nocona/march=x86-64-v4}"
+    export CPPFLAGS="${CPPFLAGS/march=nocona/march=x86-64-v4}"
+elif [[ ${x86_64_opt:-} = "v3" ]]; then
+    export CXXFLAGS="${CXXFLAGS/march=nocona/march=x86-64-v3}"
+    export CFLAGS="${CFLAGS/march=nocona/march=x86-64-v3}"
+    export CPPFLAGS="${CPPFLAGS/march=nocona/march=x86-64-v3}"
+elif [[ ${x86_64_opt:-} = "v2" ]]; then
+    export CXXFLAGS="${CXXFLAGS/march=nocona/march=x86-64-v2}"
+    export CFLAGS="${CFLAGS/march=nocona/march=x86-64-v2}"
+    export CPPFLAGS="${CPPFLAGS/march=nocona/march=x86-64-v2}"
+fi
+
 cmake -S . -B build \
     -G Ninja \
     ${CMAKE_ARGS} \
@@ -61,10 +68,15 @@ cmake -S . -B build \
     -DLLAMA_BUILD_TESTS=ON  \
     -DBUILD_SHARED_LIBS=ON  \
     -DGGML_NATIVE=OFF \
-    -DGGML_STATIC=OFF \
-    -DGGML_CUDA_F16=OFF \
-    -DGGML_CUDA_DMMV_F16=OFF \
+    -DGGML_AVX=OFF \
+    -DGGML_AVX2=OFF \
+    -DGGML_AVX512=OFF \
+    -DGGML_AVX512_VBMI=OFF \
+    -DGGML_AVX512_VNNI=OFF \
+    -DGGML_AVX512_BF16=OFF \
+    -DGGML_FMA=OFF \
     -DLLAMA_CURL=ON
+    # May not need to add -DGGML_CUDA_F16=OFF / -DGGML_CUDA_DMMV_F16=OFF since they're off by default in upstream
 
 cmake --build build --config Release --verbose
 cmake --install build
