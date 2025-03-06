@@ -22,9 +22,16 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
         LLAMA_ARGS="${LLAMA_ARGS} -DGGML_METAL_EMBED_LIBRARY=ON"
     fi
 else
-    # Enable all CPU variants on non-macOS systems - llama.cpp will automatically select the best one at runtime
+    # For linux variants, we enable GGML_CPU_ALL_VARIANTS which will use the optimized backend for the local 
+    # architecture. See: https://github.com/ggml-org/llama.cpp/blob/master/ggml/src/CMakeLists.txt#L307
+    #
+    # This creates multiple CPU backend variants with different instruction sets (AVX, AVX2, AVX512, etc.)
+    # The appropriate variant will be selected at runtime based on the CPU capabilities.
+    #
+    # Note this means these flags will be enabled in the variants regardless of what you set them to
     LLAMA_ARGS="${LLAMA_ARGS} -DGGML_BACKEND_DL=ON -DGGML_CPU_ALL_VARIANTS=ON"
 fi
+
 
 # TODO: implement test that detects whether the correct BLAS is actually used
 if [[ ${blas_impl:-} = "accelerate" ]]; then
@@ -53,9 +60,9 @@ cmake -S . -B build \
     -DLLAMA_BUILD_TESTS=ON  \
     -DBUILD_SHARED_LIBS=ON  \
     -DGGML_NATIVE=OFF \
-    -DGGML_FMA=OFF \
-    -DGGML_F16C=OFF \
-    -DLLAMA_CURL=ON 
+    -DGGML_STATIC=OFF \
+    -DLLAMA_CURL=ON \
+    -DDGGML_ALL_WARNINGS=ON
 
 
 cmake --build build --config Release --verbose
