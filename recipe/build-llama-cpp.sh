@@ -66,11 +66,6 @@ if [[ $ARCH = "x86_64" ]]; then
         export CFLAGS="${CFLAGS/march=nocona/march=x86-64-v2}"
         export CPPFLAGS="${CPPFLAGS/march=nocona/march=x86-64-v2}"
         LLAMA_ARGS="${LLAMA_ARGS} -DGGML_AVX=ON"
-    else
-        # Enable SSE2 (v1)
-        export CXXFLAGS="${CXXFLAGS/march=nocona/march=x86-64-v1}"
-        export CFLAGS="${CFLAGS/march=nocona/march=x86-64-v1}"
-        export CPPFLAGS="${CPPFLAGS/march=nocona/march=x86-64-v1}"
     fi
 fi
 
