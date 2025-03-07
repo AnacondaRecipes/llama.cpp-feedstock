@@ -50,7 +50,7 @@ if [[ ${x86_64_opt:-} = "v4" ]]; then
     export CXXFLAGS="${CXXFLAGS/march=nocona/march=x86-64-v4}"
     export CFLAGS="${CFLAGS/march=nocona/march=x86-64-v4}"
     export CPPFLAGS="${CPPFLAGS/march=nocona/march=x86-64-v4}"
-    LLAMA_ARGS="${LLAMA_ARGS} -DGGML_AVX=ON -DGGML_AVX2=ON -DGGML_AVX512=ON -DGGML_FMA=ON -DGGML_F16C=ON"
+    LLAMA_ARGS="${LLAMA_ARGS} -DGGML_AVX=ON -DGGML_AVX2=ON -DGGML_AVX512=ON"
     # TBD: -DGGML_AVX512_VBMI=ON -DGGML_AVX512_VNNI=ON -DGGML_AVX512_BF16=ON 
     # May not want to enable these additional AVX512 instructions for all x86_64 builds
 elif [[ ${x86_64_opt:-} = "v3" ]]; then
