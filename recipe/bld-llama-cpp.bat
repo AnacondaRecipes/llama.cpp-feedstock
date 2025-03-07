@@ -24,13 +24,19 @@ if "%blas_impl%"=="mkl" (
 )
 
 REM Configure CPU optimization flags based on the x86_64_opt variable
+REM Currently we only build for x86_64 windows; when arm64 is supported this will need to be updated
+REM to account for the architecture differences. 
 if "%x86_64_opt%"=="v4" (
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX=ON -DGGML_AVX2=ON -DGGML_AVX512=ON
     set ARCH_FLAG=/arch:AVX512
 ) else if "%x86_64_opt%"=="v3" (
+    REM In msvc, AVX2 implies FMA and F16C
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX=ON -DGGML_AVX2=ON
     set ARCH_FLAG=/arch:AVX2
 ) else if "%x86_64_opt%"=="v2" (
+    set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX=ON
+    set ARCH_FLAG=/arch:AVX
+) else (
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX=OFF -DGGML_AVX2=OFF
     set ARCH_FLAG=/arch:SSE2
 )
