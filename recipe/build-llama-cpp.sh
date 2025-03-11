@@ -63,11 +63,6 @@ elif [[ ${x86_64_opt:-} = "v2" ]]; then
     LLAMA_ARGS="${LLAMA_ARGS} -DGGML_AVX=ON"
 fi
 
-# If the architecture is arm64, enable runtime weight conversion of Q4_0 to Q4_X_X
-if [[ ${ARCH} = "arm64" ]]; then
-    LLAMA_ARGS="${LLAMA_ARGS} -DGGML_CPU_AARCH64=ON"
-fi
-
 # Set defaults for instruction sets if not already set
 if [[ ! "${LLAMA_ARGS}" =~ "-DGGML_AVX=" ]]; then
     LLAMA_ARGS="${LLAMA_ARGS} -DGGML_AVX=OFF"
@@ -108,9 +103,6 @@ fi
 if [[ ! "${LLAMA_ARGS}" =~ "-DGGML_CUDA_F16=" ]]; then
     LLAMA_ARGS="${LLAMA_ARGS} -DGGML_CUDA_F16=OFF"
 fi
-if [[ ! "${LLAMA_ARGS}" =~ "-DGGML_CPU_AARCH64=" ]]; then
-    LLAMA_ARGS="${LLAMA_ARGS} -DGGML_CPU_AARCH64=OFF"
-fi
 
 cmake -S . -B build \
     -G Ninja \
@@ -124,7 +116,7 @@ cmake -S . -B build \
     -DGGML_NATIVE=OFF \
     -DLLAMA_CURL=ON \
     -DGGML_BACKEND_DL=OFF \
-
+    -DGGML_CPU_AARCH64=OFF
 
 cmake --build build --config Release --verbose
 cmake --install build
