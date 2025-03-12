@@ -94,9 +94,9 @@ outputs:
       host:
         - cudatoolkit      {{ cuda_compiler_version }}        # [gpu_variant == "cuda-11"]
         - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
-        - cuda-cudart-dev  {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
-        - libcublas-dev    {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
-        - cuda-compat      {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda') and linux]
+        - cuda-cudart-dev  {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11")]
+        - libcublas-dev    {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11")]
+        - cuda-compat      {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda') and (gpu_variant != "cuda-11") and linux]
         - openblas-devel {{ openblas }}                       # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "openblas"]
         - mkl-devel {{ mkl }}                                 # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
         - intel-openmp {{ mkl }}                              # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
@@ -110,6 +110,9 @@ outputs:
         - llvm-openmp                                         # [osx] bounds through run_exports
         - _openmp_mutex                                       # [linux]
         - __osx >={{ MACOSX_DEPLOYMENT_TARGET|default("10.12") }}  # [osx and x86_64]
+        - _x86_64-microarch-level >=2                         # [x86_64_opt == "v2"]
+        - _x86_64-microarch-level >=3                         # [x86_64_opt == "v3"]
+        - _x86_64-microarch-level >=4                         # [x86_64_opt == "v4"]
         - libcurl >=8.11.0
 
     test:
