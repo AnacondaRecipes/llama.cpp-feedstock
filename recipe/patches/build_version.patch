@@ -1,0 +1,98 @@
+From 8f275a7c4593aa34147595a90282cf950a853690 Wed Nov 6 00:00:00 2001
+From: John Noller <jnoller@anaconda.com>
+Date: Wed Nov 6 14:25:40 2024 -0400
+Subject: [PATCH] fix cmake/build-info.cmake
+
+The build-info.cmake files in upstream attempts to use git to find the build number and commit hash. 
+This is not possible in a conda build environment where the source is not checked out from a git repo.
+
+Additionally the upstream logic is not compatible with how conda build clones the repo, it does tree
+and tag traversal and extraction to find the build number, commit hash and commit message which results
+in incorrect version numbers in the binaries.
+
+This patch removes the git commands and hardcodes the values.
+---
+diff --git a/cmake/build-info.cmake b/cmake/build-info.cmake
+index c1a456e1..bbbfb45a 100644
+--- a/cmake/build-info.cmake
++++ b/cmake/build-info.cmake
+@@ -1,43 +1,43 @@
+-set(BUILD_NUMBER 0)
+-set(BUILD_COMMIT "unknown")
++set(BUILD_NUMBER 4877)
++set(BUILD_COMMIT "363f8c5d67dcf80e00c39580dfa86dc2774d74c2")
+ set(BUILD_COMPILER "unknown")
+ set(BUILD_TARGET "unknown")
+ 
+-# Look for git
+-find_package(Git)
+-if(NOT Git_FOUND)
+-    find_program(GIT_EXECUTABLE NAMES git git.exe)
+-    if(GIT_EXECUTABLE)
+-        set(Git_FOUND TRUE)
+-        message(STATUS "Found Git: ${GIT_EXECUTABLE}")
+-    else()
+-        message(WARNING "Git not found. Build info will not be accurate.")
+-    endif()
+-endif()
++# # Look for git
++# find_package(Git)
++# if(NOT Git_FOUND)
++#     find_program(GIT_EXECUTABLE NAMES git git.exe)
++#     if(GIT_EXECUTABLE)
++#         set(Git_FOUND TRUE)
++#         message(STATUS "Found Git: ${GIT_EXECUTABLE}")
++#     else()
++#         message(WARNING "Git not found. Build info will not be accurate.")
++#     endif()
++# endif()
+ 
+-# Get the commit count and hash
+-if(Git_FOUND)
+-    execute_process(
+-        COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
+-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+-        OUTPUT_VARIABLE HEAD
+-        OUTPUT_STRIP_TRAILING_WHITESPACE
+-        RESULT_VARIABLE RES
+-    )
+-    if (RES EQUAL 0)
+-        set(BUILD_COMMIT ${HEAD})
+-    endif()
+-    execute_process(
+-        COMMAND ${GIT_EXECUTABLE} rev-list --count HEAD
+-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+-        OUTPUT_VARIABLE COUNT
+-        OUTPUT_STRIP_TRAILING_WHITESPACE
+-        RESULT_VARIABLE RES
+-    )
+-    if (RES EQUAL 0)
+-        set(BUILD_NUMBER ${COUNT})
+-    endif()
+-endif()
++# # Get the commit count and hash
++# if(Git_FOUND)
++#     execute_process(
++#         COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
++#         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
++#         OUTPUT_VARIABLE HEAD
++#         OUTPUT_STRIP_TRAILING_WHITESPACE
++#         RESULT_VARIABLE RES
++#     )
++#     if (RES EQUAL 0)
++#         set(BUILD_COMMIT ${HEAD})
++#     endif()
++#     execute_process(
++#         COMMAND ${GIT_EXECUTABLE} rev-list --count HEAD
++#         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
++#         OUTPUT_VARIABLE COUNT
++#         OUTPUT_STRIP_TRAILING_WHITESPACE
++#         RESULT_VARIABLE RES
++#     )
++#     if (RES EQUAL 0)
++#         set(BUILD_NUMBER ${COUNT})
++#     endif()
++# endif()
+ 
+ if(MSVC)
+     set(BUILD_COMPILER "${CMAKE_C_COMPILER_ID} ${CMAKE_C_COMPILER_VERSION}")

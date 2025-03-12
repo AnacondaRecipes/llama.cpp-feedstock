@@ -73,28 +73,16 @@ cmake -S . -B build \
     -DGGML_AVX512_VNNI=OFF \
     -DGGML_AVX512_BF16=OFF \
     -DGGML_FMA=OFF \
-    -DGGML_F16C=OFF
+    -DGGML_F16C=OFF \
+    -DLLAMA_CURL=ON
 
 cmake --build build --config Release --verbose
 cmake --install build
+ 
+# Tests like test_chat use relative paths to load the model template files that break when run from a different 
+# parent directory. Tests (per upstream CI workflows) should be run from the build directory.
+# See: https://github.com/ggerganov/llama.cpp/blob/master/.github/workflows/build.yml
 
-# Do not change dir into the tests subdirectory, it breaks the relative paths the cmake targets use all over in
-# upstream llama.cpp and causes the tests to segfault vs failing with "unable to open file @path...".
-
-if [[ ${gpu_variant:0:5} = "cuda-" ]]; then
-    # Tests failures around batch matrix multiplication (ggml_mul_mat) due to our hardware (Maxwell) not supporting 
-    # f16 CUDA intrinsics (available from 60 - Pascal), and us compiling with CUDA architectures all.
-    # See https://github.com/ggerganov/llama.cpp/blob/b2781/CMakeLists.txt#L439-L451
-    # LLAMA_CUDA_F16 is optional, but the corresponding tests are not skipped by default.
-    #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=1,k=256,bs=[10,1],nr=[1,1]): [MUL_MAT] NMSE = 0.993871958 > 0.000500000 FAIL
-    #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=1,k=256,bs=[10,1],nr=[2,1]): [MUL_MAT] NMSE = 1.002262239 > 0.000500000 FAIL
-    #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=1,k=256,bs=[10,10],nr=[1,1]): [MUL_MAT] inf mismatch: CUDA0=-inf CPU=9.985199 FAIL
-    #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=1,k=256,bs=[10,10],nr=[2,1]): [MUL_MAT] inf mismatch: CUDA0=-inf CPU=-4.107816 FAIL
-    #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=16,k=256,bs=[10,1],nr=[1,1]): [MUL_MAT] NMSE = 1.002217055 > 0.000500000 FAIL
-    #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=16,k=256,bs=[10,1],nr=[2,1]): [MUL_MAT] NMSE = 1.001445591 > 0.000500000 FAIL
-    #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=16,k=256,bs=[10,10],nr=[1,1]): [MUL_MAT] NMSE = 1.000128216 > 0.000500000 FAIL
-    #   MUL_MAT(type_a=f16,type_b=f16,m=16,n=16,k=256,bs=[10,10],nr=[2,1]): [MUL_MAT] NMSE = 1.000069965 > 0.000500000 FAIL
-    ctest --output-on-failure build -j${CPU_COUNT} --test-dir build/tests || true
-else
-    ctest --output-on-failure build -j${CPU_COUNT} --test-dir build/tests
-fi
+pushd build
+ctest --output-on-failure -L main -j${CPU_COUNT}
+popd
