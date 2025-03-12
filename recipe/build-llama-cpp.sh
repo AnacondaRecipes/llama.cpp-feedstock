@@ -104,7 +104,7 @@ if [[ ! "${LLAMA_ARGS}" =~ "-DGGML_CUDA_F16=" ]]; then
     LLAMA_ARGS="${LLAMA_ARGS} -DGGML_CUDA_F16=OFF"
 fi
 
-CMD=" cmake -S . -B build \
+cmake -S . -B build \
     -G Ninja \
     ${CMAKE_ARGS} \
     ${LLAMA_ARGS} \
@@ -116,11 +116,7 @@ CMD=" cmake -S . -B build \
     -DGGML_NATIVE=OFF \
     -DLLAMA_CURL=ON \
     -DGGML_BACKEND_DL=OFF \
-    -DGGML_CPU_AARCH64=OFF"
-
-echo "Constructed CMake command:"
-echo $CMD
-exit 1
+    -DGGML_CPU_AARCH64=OFF
 
 cmake --build build --config Release --verbose
 cmake --install build
