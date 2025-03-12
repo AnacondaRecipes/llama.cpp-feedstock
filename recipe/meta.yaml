@@ -45,7 +45,6 @@ outputs:
     version: {{ version }}
 
     build:
-    build:
       # skip_cuda_prefect is set through abs.yaml for use in prefect only
       skip: true # [skip_cuda_prefect and (gpu_variant or "").startswith('cuda')]
       skip: true # [s390x]
