@@ -23,16 +23,6 @@ if "%blas_impl%"=="mkl" (
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_BLAS=OFF
 )
 
-REM This section configures CPU optimization flags based on the x86_64_opt variable:
-REM - "v3" enables AVX and AVX2 for both GGML and MSVC (suitable for modern CPUs)
-REM - "v2" enables only AVX for both GGML and MSVC (for CPUs with AVX but not AVX2)
-REM - Any other value disables both AVX and AVX2 (for older or compatible builds)
-REM The ARCH_FLAG is set accordingly to ensure MSVC doesn't implicitly enable 
-REM higher instruction sets. AVX-512 is explicitly disabled in all cases.
-
-REM AVX2 when enabled can implicitly enable AVX-512 instructions within msvc so 
-REM we disable AVX-512 explicitly and set AVX2 explicitly to ensure we don't get AVX-512.
-
 if "%x86_64_opt%"=="v3" (
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX=ON
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX2=ON
@@ -42,12 +32,8 @@ if "%x86_64_opt%"=="v3" (
 ) else (
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX=OFF
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX2=OFF
+    set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_FMA=OFF
 )
-
-set CXXFLAGS=!CXXFLAGS! !ARCH_FLAG!
-set CFLAGS=!CFLAGS! !ARCH_FLAG!
-
-REM In MSVC F16C and FMA are implied when AVX2 or AVX512 are enabled. 
 
 cmake -S . -B build ^
     -G Ninja ^
