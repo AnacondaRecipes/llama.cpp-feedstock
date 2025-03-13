@@ -65,6 +65,7 @@ cmake -S . -B build \
     -DCMAKE_BUILD_TYPE=Release \
     -DLLAMA_BUILD_TESTS=ON  \
     -DBUILD_SHARED_LIBS=ON  \
+    -DLLAMA_BUILD_SERVER=ON \
     -DGGML_NATIVE=OFF \
     -DGGML_AVX=OFF \
     -DGGML_AVX2=OFF \
@@ -84,5 +85,5 @@ cmake --install build
 # See: https://github.com/ggerganov/llama.cpp/blob/master/.github/workflows/build.yml
 
 pushd build
-ctest --output-on-failure -L main -j${CPU_COUNT}
+ctest -L main -C Release --output-on-failure -j%CPU_COUNT% --timeout 900
 popd
