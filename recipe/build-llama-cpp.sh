@@ -85,5 +85,5 @@ cmake --install build
 # See: https://github.com/ggerganov/llama.cpp/blob/master/.github/workflows/build.yml
 
 pushd build
-ctest -L main -C Release --output-on-failure -j%CPU_COUNT% --timeout 900
+ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900
 popd
