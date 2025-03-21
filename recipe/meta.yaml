@@ -97,7 +97,7 @@ outputs:
         - mkl-devel {{ mkl }}                                 # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
         - intel-openmp {{ mkl }}                              # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
         - llvm-openmp 14.0.6                                  # [osx]
-        - libcurl >=8.11.0
+        - libcurl {{ libcurl }}
 
       run:
         - {{ pin_compatible('cudatoolkit', max_pin='x.x') }}  # [gpu_variant == "cuda-11"]
