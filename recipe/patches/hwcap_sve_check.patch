@@ -8,17 +8,18 @@ This patch adds a fallback for systems that lack the HWCAP_SVE check.
 This patch also fixes the HWCAP_ASIMDDP check logic (&& -> &)
 ---
 diff --git a/ggml/src/ggml-cpu/ggml-cpu.c b/ggml/src/ggml-cpu/ggml-cpu.c
-index b7fefb9d..4bf852a7 100644
+index f2ab4c5d..ee052a98 100644
 --- a/ggml/src/ggml-cpu/ggml-cpu.c
 +++ b/ggml/src/ggml-cpu/ggml-cpu.c
-@@ -2395,9 +2395,19 @@ static void ggml_init_arm_arch_features(void) {
+@@ -2615,11 +2615,21 @@ static void ggml_init_arm_arch_features(void) {
      uint32_t hwcap2 = getauxval(AT_HWCAP2);
  
-     ggml_arm_arch_features.has_neon = !!(hwcap & HWCAP_ASIMD);
+     ggml_arm_arch_features.has_neon    = !!(hwcap & HWCAP_ASIMD);
 -    ggml_arm_arch_features.has_dotprod = !!(hwcap & HWCAP_ASIMDDP);
-     ggml_arm_arch_features.has_i8mm = !!(hwcap2 & HWCAP2_I8MM);
--    ggml_arm_arch_features.has_sve  = !!(hwcap & HWCAP_SVE);
-+
+     ggml_arm_arch_features.has_i8mm    = !!(hwcap2 & HWCAP2_I8MM);
+-    ggml_arm_arch_features.has_sve     = !!(hwcap & HWCAP_SVE);
+     ggml_arm_arch_features.has_sme     = !!(hwcap2 & HWCAP2_SME);
+ 
 +    #if defined(HWCAP_ASIMDDP)
 +        ggml_arm_arch_features.has_dotprod = !!(hwcap & HWCAP_ASIMDDP);
 +    #else
@@ -30,6 +31,7 @@ index b7fefb9d..4bf852a7 100644
 +    #else
 +        ggml_arm_arch_features.has_sve  = false;
 +    #endif
- 
++
  #if defined(__ARM_FEATURE_SVE)
      ggml_arm_arch_features.sve_cnt = PR_SVE_VL_LEN_MASK & prctl(PR_SVE_GET_VL);
+ #endif

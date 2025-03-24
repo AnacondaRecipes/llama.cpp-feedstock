@@ -1,0 +1,65 @@
+From 8f275a7c4593aa34147595a90282cf950a853690 Wed Nov 6 00:00:00 2001
+From: John Noller <jnoller@anaconda.com>
+Date: Wed Nov 6 14:25:40 2024 -0400
+Subject: [PATCH] fix ggml/CMakeLists.txt
+
+The ggml/CMakeLists.txt file in upstream attempts to use git to find the build number and commit hash. 
+This is not possible in a conda build environment where the source is not checked out from a git repo.
+
+Additionally the upstream logic is not compatible with how conda build clones the repo, it does tree
+and tag traversal and extraction to find the build number, commit hash and commit message which results
+in incorrect version numbers in the binaries.
+
+This patch removes the git commands and hardcodes the values.
+---
+diff --git a/ggml/CMakeLists.txt b/ggml/CMakeLists.txt
+index 75b5ea3b..9e421b1c 100644
+--- a/ggml/CMakeLists.txt
++++ b/ggml/CMakeLists.txt
+@@ -272,26 +272,28 @@ endif()
+ # Create CMake package
+ #
+ 
++set(GGML_BUILD_NUMBER 4877)
++set(GGML_BUILD_COMMIT "363f8c5d67dcf80e00c39580dfa86dc2774d74c2")
+ # Generate version info based on git commit.
+ 
+-if(NOT DEFINED GGML_BUILD_NUMBER)
+-    find_program(GIT_EXE NAMES git git.exe REQUIRED NO_CMAKE_FIND_ROOT_PATH)
+-    execute_process(COMMAND ${GIT_EXE} rev-list --count HEAD
+-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+-        OUTPUT_VARIABLE GGML_BUILD_NUMBER
+-        OUTPUT_STRIP_TRAILING_WHITESPACE
+-    )
+-
+-    if(GGML_BUILD_NUMBER EQUAL 1)
+-        message(WARNING "GGML build version fixed at 1 likely due to a shallow clone.")
+-    endif()
+-
+-    execute_process(COMMAND ${GIT_EXE} rev-parse --short HEAD
+-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+-        OUTPUT_VARIABLE GGML_BUILD_COMMIT
+-        OUTPUT_STRIP_TRAILING_WHITESPACE
+-    )
+-endif()
++# if(NOT DEFINED GGML_BUILD_NUMBER)
++#     find_program(GIT_EXE NAMES git git.exe REQUIRED NO_CMAKE_FIND_ROOT_PATH)
++#     execute_process(COMMAND ${GIT_EXE} rev-list --count HEAD
++#         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
++#         OUTPUT_VARIABLE GGML_BUILD_NUMBER
++#         OUTPUT_STRIP_TRAILING_WHITESPACE
++#     )
++
++#     if(GGML_BUILD_NUMBER EQUAL 1)
++#         message(WARNING "GGML build version fixed at 1 likely due to a shallow clone.")
++#     endif()
++
++#     execute_process(COMMAND ${GIT_EXE} rev-parse --short HEAD
++#         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
++#         OUTPUT_VARIABLE GGML_BUILD_COMMIT
++#         OUTPUT_STRIP_TRAILING_WHITESPACE
++#     )
++# endif()
+ 
+ 
+ # Capture variables prefixed with GGML_.
