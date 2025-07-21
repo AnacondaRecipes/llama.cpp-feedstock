@@ -28,14 +28,14 @@ index 67369147c..956952ad4 100644
          has_i8mm    = !!(hwcap2 & HWCAP2_I8MM);
 -        has_sme     = !!(hwcap2 & HWCAP2_SME);
 +
-+    # not defined in kernel headers 4.18.0
++    // not defined in kernel headers 4.18.0
 +    #if defined(HWCAP2_SVE2)
 +        has_sve2 = !!(hwcap2 & HWCAP2_SVE2);
 +    #else
 +        has_sve2 = false;
 +    #endif
 +
-+    # not defined in kernel headers 4.18.0
++    // not defined in kernel headers 4.18.0
 +    #if defined(HWCAP2_SME)
 +        has_sme = !!(hwcap2 & HWCAP2_SME);
 +    #else
