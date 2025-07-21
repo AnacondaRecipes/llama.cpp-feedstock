@@ -23,16 +23,6 @@ if "%blas_impl%"=="mkl" (
     set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_BLAS=OFF
 )
 
-if "%x86_64_opt%"=="v3" (
-    set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX2=ON
-) else if "%x86_64_opt%"=="v2" (
-    set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX=ON
-) else (
-    set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX=OFF
-    set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_AVX2=OFF
-    set LLAMA_ARGS=!LLAMA_ARGS! -DGGML_FMA=OFF
-)
-
 cmake -S . -B build ^
     -G Ninja ^
     !CMAKE_ARGS! ^
@@ -43,12 +33,14 @@ cmake -S . -B build ^
     -DLLAMA_BUILD_TESTS=ON  ^
     -DBUILD_SHARED_LIBS=ON  ^
     -DLLAMA_BUILD_SERVER=ON ^
+    -DLLAMA_BUILD_NUMBER=%LLAMA_BUILD_NUMBER% ^
+    -DLLAMA_BUILD_COMMIT=%LLAMA_BUILD_COMMIT% ^
     -DGGML_NATIVE=OFF ^
-    -DGGML_AVX512=OFF ^
-    -DGGML_AVX512_VBMI=OFF ^
-    -DGGML_AVX512_VNNI=OFF ^
-    -DGGML_AVX512_BF16=OFF ^
+    -DGGML_CPU_ALL_VARIANTS=ON ^
+    -DGGML_BACKEND_DL=ON ^
     -DLLAMA_CURL=ON
+REM TODO add LLAMA_LLGUIDANCE?
+REM TODO add LLAMA_USE_SYSTEM_GGML?
 
 if errorlevel 1 exit 1
 
@@ -59,6 +51,7 @@ cmake --install build
 if errorlevel 1 exit 1
 
 pushd build
-ctest -L main -C Release --output-on-failure -j%CPU_COUNT% --timeout 900
+REM test-tokenizers-ggml-vocabs requires git-lfs to download the model files
+ctest -L main -C Release --output-on-failure -j%CPU_COUNT% --timeout 900 -E "test-tokenizers-ggml-vocabs"
 if errorlevel 1 exit 1
 popd

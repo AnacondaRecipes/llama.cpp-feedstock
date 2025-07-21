@@ -1,7 +1,10 @@
-x86_64_opt:
-  - none
-  - v2                         # [(x86 or x86_64) and not osx]
-  - v3                         # [(x86 or x86_64) and not osx]
+c_compiler_version:        # [osx or win]
+  - vs2022                 # [win]
+c_stdlib_version:          # [win]
+  - 2022.14                # [win]
+cxx_compiler_version:      # [osx or win]
+  - vs2022                 # [win]
+
 blas_impl:
   - mkl                        # [(x86 or x86_64) and not osx]
   - openblas                   # [not win and not osx]
@@ -11,12 +14,10 @@ blas_impl:
 gpu_variant:
   - none
   - metal                      # [osx and arm64]
-  - cuda-11                    # [linux and x86_64]
   - cuda-12                    # [win or (linux and x86_64)]
 
 cuda_compiler_version:         # [win or (linux and x86_64)]
   - none                       # [win or (linux and x86_64)]
-  - 11.8                       # [(linux and x86_64)]
   - 12.4                       # [win or (linux and x86_64)]
 
 cuda_compiler:                 # [win or (linux and x86_64)]
