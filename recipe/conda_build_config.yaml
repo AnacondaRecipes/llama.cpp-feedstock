@@ -1,9 +1,9 @@
-c_compiler_version:        # [osx or win]
-  - vs2022                 # [win]
-c_stdlib_version:          # [win]
-  - 2022.14                # [win]
-cxx_compiler_version:      # [osx or win]
-  - vs2022                 # [win]
+c_compiler:        # [win]
+  - vs2022         # [win]
+c_stdlib_version:  # [win]
+  - 2022.14        # [win]
+cxx_compiler:      # [win]
+  - vs2022         # [win]
 
 blas_impl:
   - mkl                        # [(x86 or x86_64) and not osx]
