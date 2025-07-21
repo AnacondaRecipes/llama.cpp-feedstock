@@ -14,9 +14,10 @@ source:
   sha256: abb05cabbb7f2b18e762f0db17c4842836a768e33c4a8b840a4d3dbf8cdc47d4
 
   patches:
-    - patches/mkl.patch                   # [blas_impl == "mkl"]
-    - patches/metal_gpu_selection.patch   # [osx]
-    - patches/hwcap_sve_check.patch       # [aarch64]
+    - patches/mkl.patch                     # [blas_impl == "mkl"]
+    - patches/metal_gpu_selection.patch     # [osx]
+    - patches/hwcap_sve_check.patch         # [linux and aarch64]
+    - patches/no-armv9-support-gcc11.patch  # [linux and aarch64]
     - patches/fix-convert_lora_to_gguf.patch
     - patches/remove_test_flash_attn_ext.patch # [(gpu_variant or "").startswith('cuda')]
 
