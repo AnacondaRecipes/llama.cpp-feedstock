@@ -1,0 +1,48 @@
+From 0c403734020fb0718dc940db80e302f010b78dc7 Mon Sep 17 00:00:00 2001
+From: John Noller <jnoller@anaconda.com>
+Date: Mon, 21 Jul 2025 15:34:44 -0400
+Subject: [PATCH] hwcap_sve_check
+
+Co-authored-by: Charles Bousseau <cbousseau@anaconda.com>
+
+In https://github.com/ggerganov/llama.cpp/pull/9331 upstream added sve support detection on aarch64.
+However, the checks for HWCAP_SVE and HWCAP_ASIMDDP are not available on older kernels / libc.
+This patch adds a fallback for systems that lack the HWCAP_SVE check.
+This patch also fixes the HWCAP_ASIMDDP check logic (&& -> &)
+---
+ ggml/src/ggml-cpu/arch/arm/cpu-feats.cpp | 15 +++++++++++++--
+ 1 file changed, 13 insertions(+), 2 deletions(-)
+
+diff --git a/ggml/src/ggml-cpu/arch/arm/cpu-feats.cpp b/ggml/src/ggml-cpu/arch/arm/cpu-feats.cpp
+index 67369147c..553b2f1d5 100644
+--- a/ggml/src/ggml-cpu/arch/arm/cpu-feats.cpp
++++ b/ggml/src/ggml-cpu/arch/arm/cpu-feats.cpp
+@@ -30,12 +30,23 @@ struct aarch64_features {
+         uint32_t hwcap = getauxval(AT_HWCAP);
+         uint32_t hwcap2 = getauxval(AT_HWCAP2);
+ 
+-        has_dotprod = !!(hwcap & HWCAP_ASIMDDP);
+         has_fp16_va = !!(hwcap & HWCAP_FPHP);
+-        has_sve     = !!(hwcap & HWCAP_SVE);
+         has_sve2    = !!(hwcap2 & HWCAP2_SVE2);
+         has_i8mm    = !!(hwcap2 & HWCAP2_I8MM);
+         has_sme     = !!(hwcap2 & HWCAP2_SME);
++
++        #if defined(HWCAP_ASIMDDP)
++            has_dotprod = !!(hwcap & HWCAP_ASIMDDP);
++        #else
++            has_dotprod = false;
++        #endif
++
++        #ifdef HWCAP_SVE
++            has_sve  = !!(hwcap & HWCAP_SVE);
++        #else
++            has_sve  = false;
++        #endif
++
+ #elif defined(__APPLE__)
+         int oldp = 0;
+         size_t size = sizeof(oldp);
+-- 
+2.39.5 (Apple Git-154)
+
