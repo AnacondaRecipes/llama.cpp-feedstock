@@ -141,6 +141,9 @@ outputs:
         # requirements/requirements-convert_lora_to_gguf.txt
         - pytorch >=2.2.1
         - {{ pin_subpackage('gguf', exact=True) }}
+      run_constrained:
+        # temporary until libtorch cuda gets corrected with a dependency on __cuda.
+        - libtorch=*=cpu_* # [not (gpu_variant or "").startswith('cuda')]
 
     test:
       imports:
