@@ -19,7 +19,6 @@ source:
     - patches/hwcap_sve_check.patch         # [linux and aarch64]
     - patches/no-armv9-support-gcc11.patch  # [linux and aarch64]
     - patches/fix-convert_lora_to_gguf.patch
-    - patches/remove_test_flash_attn_ext.patch # [(gpu_variant or "").startswith('cuda')]
 
 build:
   skip: true # [skip_cuda_prefect and (gpu_variant or "").startswith('cuda')]
@@ -68,7 +67,6 @@ outputs:
         - mkl-devel {{ mkl }}                                 # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
         - intel-openmp {{ mkl }}                              # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
         - llvm-openmp 14.0.6                                  # [osx]
-        #- libcxx 14.0.6                                       # [osx]
         - libcurl {{ libcurl }}
 
       run:
@@ -140,11 +138,13 @@ outputs:
         # requirements/requirements-convert_hf_to_gguf.txt
         # requirements/requirements-convert_llama_ggml_to_gguf.txt
         # requirements/requirements-convert_lora_to_gguf.txt
-        - pytorch >=2.2.1
+        - pytorch >=2.2.1=cpu_*  # [not (gpu_variant or "")]
+        - pytorch >=2.2.1=gpu_*  # [gpu_variant]
         - {{ pin_subpackage('gguf', exact=True) }}
       run_constrained:
-        # temporary until libtorch cuda gets corrected with a dependency on __cuda.
-        - libtorch=*=cpu_* # [not (gpu_variant or "").startswith('cuda')]
+        # temporary until pytorch gets constrained to the matching version of libtorch.
+        - libtorch=*=cpu_* # [not (gpu_variant or "")]
+        - libtorch=*=gpu_* # [gpu_variant]
 
     test:
       imports:
