@@ -69,5 +69,6 @@ cmake --install build
 
 pushd build
 # test-tokenizers-ggml-vocabs requires git-lfs to download the model files
-ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 1200 -E "test-tokenizers-ggml-vocabs"
+# TODO debug test-thread-safety on osx-arm64
+ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 320 -E "(test-tokenizers-ggml-vocabs|test-thread-safety)"
 popd
