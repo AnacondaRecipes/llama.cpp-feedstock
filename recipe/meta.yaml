@@ -85,10 +85,6 @@ outputs:
         - if not exist %PREFIX%/Library/include/llama.h exit 1  # [win]
         - if not exist %PREFIX%/Library/lib/llama.lib exit 1    # [win]
         - if not exist %PREFIX%/Library/bin/llama.dll exit 1    # [win]
-        - test ! -f $PREFIX/bin/llama-cli      # [unix]
-        - test ! -f $PREFIX/bin/llama-server   # [unix]
-        - if exist %PREFIX%/Library/bin/llama-cli.exe exit 1      # [win]
-        - if exist %PREFIX%/Library/bin/llama-server.exe exit 1   # [win]
 
     about:
       home: https://github.com/ggml-org/llama.cpp
@@ -163,12 +159,6 @@ outputs:
         - test -f $PREFIX/bin/llama-server   # [unix]
         - if not exist %PREFIX%/Library/bin/llama-cli.exe exit 1      # [win]
         - if not exist %PREFIX%/Library/bin/llama-server.exe exit 1   # [win]
-        - test ! -f $PREFIX/include/llama.h    # [unix]
-        - test ! -f $PREFIX/lib/libllama.so    # [linux]
-        - test ! -f $PREFIX/lib/libllama.dylib # [osx]
-        - if exist %PREFIX%/Library/include/llama.h exit 1  # [win]
-        - if exist %PREFIX%/Library/lib/llama.lib exit 1    # [win]
-        - if exist %PREFIX%/Library/bin/llama.dll exit 1    # [win]
 
     about:
       home: https://github.com/ggml-org/llama.cpp
@@ -237,16 +227,6 @@ outputs:
       commands:
         - test -f $PREFIX/bin/test-tokenizer-0                          # [unix]
         - if not exist %PREFIX%/Library/bin/test-tokenizer-0.exe exit 1 # [win]
-        - test ! -f $PREFIX/include/llama.h    # [unix]
-        - test ! -f $PREFIX/bin/llama-cli      # [unix]
-        - test ! -f $PREFIX/bin/llama-server   # [unix]
-        - test ! -f $PREFIX/lib/libllama.so    # [linux]
-        - test ! -f $PREFIX/lib/libllama.dylib # [osx]
-        - if exist %PREFIX%/Library/include/llama.h exit 1  # [win]
-        - if exist %PREFIX%/Library/lib/llama.lib exit 1    # [win]
-        - if exist %PREFIX%/Library/bin/llama.dll exit 1    # [win]
-        - if exist %PREFIX%/Library/bin/llama-cli.exe exit 1      # [win]
-        - if exist %PREFIX%/Library/bin/llama-server.exe exit 1   # [win]
 
     about:
       home: https://github.com/ggml-org/llama.cpp
