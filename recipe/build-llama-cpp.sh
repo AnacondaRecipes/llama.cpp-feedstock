@@ -47,10 +47,25 @@ fi
 # LLAMA build options
 LLAMA_ARGS="-DLLAMA_BUILD_NUMBER=${LLAMA_BUILD_NUMBER} -DLLAMA_BUILD_COMMIT=${LLAMA_BUILD_COMMIT}"
 LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_CURL=ON"
-LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_BUILD_SERVER=ON"
-LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_BUILD_TOOLS=ON"
-LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_BUILD_TESTS=ON"
-LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_BUILD_EXAMPLES=OFF"
+if [[ "$PKG_NAME" == "libllama" ]]; then
+    LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_BUILD_SERVER=OFF"
+    LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_BUILD_TOOLS=OFF"
+    LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_BUILD_TESTS=OFF"
+    LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_BUILD_EXAMPLES=OFF"
+elif [[ "$PKG_NAME" == "llama.cpp" ]]; then
+    LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_BUILD_SERVER=ON"
+    LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_BUILD_TOOLS=ON"
+    LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_BUILD_TESTS=OFF"
+    LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_BUILD_EXAMPLES=OFF"
+elif [[ "$PKG_NAME" == "llama.cpp-tests" ]]; then
+    LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_BUILD_SERVER=OFF"
+    LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_BUILD_TOOLS=OFF"
+    LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_BUILD_TESTS=ON"
+    LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_BUILD_EXAMPLES=OFF"
+else
+    echo "Invalid package name: $PKG_NAME"
+    exit 1
+fi
 # TODO add LLAMA_LLGUIDANCE? 
 # TODO set LLAMA_USE_SYSTEM_GGML once ggml gets its own feedstock
 
@@ -67,11 +82,13 @@ cmake -S . -B build \
 cmake --build build --config Release --verbose
 cmake --install build
  
-# Tests like test_chat use relative paths to load the model template files that break when run from a different 
-# parent directory. Tests (per upstream CI workflows) should be run from the build directory.
-# See: https://github.com/ggerganov/llama.cpp/blob/master/.github/workflows/build.yml
+if [[ "$PKG_NAME" == "llama-cpp-tests" ]]; then
+    # Tests like test_chat use relative paths to load the model template files that break when run from a different 
+    # parent directory. Tests (per upstream CI workflows) should be run from the build directory.
+    # See: https://github.com/ggerganov/llama.cpp/blob/master/.github/workflows/build.yml
 
-pushd build
-# test-tokenizers-ggml-vocabs requires git-lfs to download the model files
-ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs)"
-popd
+    pushd build
+    # test-tokenizers-ggml-vocabs requires git-lfs to download the model files
+    ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs)"
+    popd
+fi

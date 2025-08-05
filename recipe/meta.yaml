@@ -25,6 +25,82 @@ build:
   number: {{ build_number }}
 
 outputs:
+  - name: libllama
+    script: build-llama-cpp.sh   # [not win]
+    script: bld-llama-cpp.bat   # [win]
+    version: {{ version }}
+
+    build:
+      script_env:
+        - LLAMA_BUILD_NUMBER={{ upstream_release[1:] }}
+        - LLAMA_BUILD_COMMIT={{ upstream_commit}}  
+      # skip_cuda_prefect is set through abs.yaml for use in prefect only
+      skip: true # [skip_cuda_prefect and (gpu_variant or "").startswith('cuda')]
+      # do not mix cublas and mkl/openblas
+      skip: true # [((gpu_variant or "").startswith('cuda') and (blas_impl != "cublas")) or (not (gpu_variant or "").startswith('cuda') and (blas_impl == "cublas"))]
+      # Use a build number difference to ensure that the GPU
+      # variant is slightly preferred by conda's solver, so that it's preferentially
+      # installed where the platform supports it.
+      number: {{ build_number + 100 }}  # [(gpu_variant or "").startswith('cuda')]
+      number: {{ build_number }}        # [gpu_variant == "none"
+      string: cuda{{ cuda_compiler_version | replace('.', '') }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [(gpu_variant or "").startswith('cuda')]
+      string: cpu_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                 # [gpu_variant == "none"]
+      string: mps_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                                 # [gpu_variant == "metal"]
+      missing_dso_whitelist:                                                                         # [(gpu_variant or "").startswith('cuda')]
+        - "**/libcuda.so*"                                                                           # [(gpu_variant or "").startswith('cuda')]
+      run_exports:
+        - {{ pin_subpackage('libllama', exact=True) }}
+
+    requirements:
+      build:
+        - {{ stdlib('c')}}
+        - {{ compiler('c') }}
+        - {{ compiler('cxx') }}
+        - {{ compiler('cuda') }}                              # [(gpu_variant or "").startswith('cuda')]
+        - cmake
+        - ninja-base
+        - pkgconfig
+      host:
+        - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
+        - cuda-cudart-dev  {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
+        - libcublas-dev    {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
+        - cuda-compat      {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda') and linux]
+        - openblas-devel {{ openblas }}                       # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "openblas"]
+        - mkl-devel {{ mkl }}                                 # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
+        - intel-openmp {{ mkl }}                              # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
+        - llvm-openmp 17.0.6                                  # [osx]
+        - libcurl {{ libcurl }}
+      run:
+        - {{ pin_compatible('cuda-version', max_pin='x.x') }} # [(gpu_variant or "").startswith('cuda')]
+        - {{ pin_compatible('intel-openmp') }}                # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
+        - llvm-openmp                                         # [osx] bounds through run_exports
+        - _openmp_mutex                                       # [linux]
+        - libcurl # bounds through run_exports
+
+    test:
+      commands:
+        - test -f $PREFIX/include/llama.h    # [unix]
+        - test -f $PREFIX/lib/libllama.so    # [linux]
+        - test -f $PREFIX/lib/libllama.dylib # [osx]
+        - if not exist %PREFIX%/Library/include/llama.h exit 1  # [win]
+        - if not exist %PREFIX%/Library/lib/llama.lib exit 1    # [win]
+        - if not exist %PREFIX%/Library/bin/llama.dll exit 1    # [win]
+        - test ! -f $PREFIX/bin/llama-cli      # [unix]
+        - test ! -f $PREFIX/bin/llama-server   # [unix]
+        - if exist %PREFIX%/Library/bin/llama-cli.exe exit 1      # [win]
+        - if exist %PREFIX%/Library/bin/llama-server.exe exit 1   # [win]
+
+    about:
+      home: https://github.com/ggml-org/llama.cpp
+      summary: LLM inference in C/C++
+      description: |
+        Inference of Meta's LLaMA model (and others) in pure C/C++
+      license: MIT
+      license_family: MIT
+      license_file: LICENSE
+      dev_url: https://github.com/ggml-org/llama.cpp
+      doc_url: https://github.com/ggml-org/llama.cpp
+
   - name: llama.cpp
     script: build-llama-cpp.sh   # [not win]
     script: bld-llama-cpp.bat   # [win]
@@ -44,7 +120,87 @@ outputs:
       number: {{ build_number + 100 }}  # [(gpu_variant or "").startswith('cuda')]
       number: {{ build_number }}        # [gpu_variant == "none"
       string: cuda{{ cuda_compiler_version | replace('.', '') }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [(gpu_variant or "").startswith('cuda')]
-      string: cpu_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                              # [gpu_variant == "none"]
+      string: cpu_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                 # [gpu_variant == "none"]
+      string: mps_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                                 # [gpu_variant == "metal"]
+      missing_dso_whitelist:                                                                         # [(gpu_variant or "").startswith('cuda')]
+        - "**/libcuda.so*"                                                                           # [(gpu_variant or "").startswith('cuda')]
+      run_exports:
+        - {{ pin_subpackage('llama.cpp', exact=True) }}
+      
+    requirements:
+      build:
+        - {{ stdlib('c')}}
+        - {{ compiler('c') }}
+        - {{ compiler('cxx') }}
+        - {{ compiler('cuda') }}                              # [(gpu_variant or "").startswith('cuda')]
+        - cmake
+        - ninja-base
+        - pkgconfig
+      host:
+        - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
+        - cuda-cudart-dev  {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
+        - libcublas-dev    {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
+        - cuda-compat      {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda') and linux]
+        - openblas-devel {{ openblas }}                       # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "openblas"]
+        - mkl-devel {{ mkl }}                                 # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
+        - intel-openmp {{ mkl }}                              # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
+        - llvm-openmp 17.0.6                                  # [osx]
+        - libcurl {{ libcurl }}
+        - {{ pin_subpackage('libllama', exact=True) }}
+      run:
+        - {{ pin_subpackage('libllama', exact=True) }}
+        - {{ pin_compatible('cuda-version', max_pin='x.x') }} # [(gpu_variant or "").startswith('cuda')]
+        - {{ pin_compatible('intel-openmp') }}                # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
+        - llvm-openmp                                         # [osx] bounds through run_exports
+        - _openmp_mutex                                       # [linux]
+        - libcurl # bounds through run_exports
+
+    test:
+      commands:
+        - llama-cli --help
+        - llama-server --help
+        - test -f $PREFIX/bin/llama-cli      # [unix]
+        - test -f $PREFIX/bin/llama-server   # [unix]
+        - if not exist %PREFIX%/Library/bin/llama-cli.exe exit 1      # [win]
+        - if not exist %PREFIX%/Library/bin/llama-server.exe exit 1   # [win]
+        - test ! -f $PREFIX/include/llama.h    # [unix]
+        - test ! -f $PREFIX/lib/libllama.so    # [linux]
+        - test ! -f $PREFIX/lib/libllama.dylib # [osx]
+        - if exist %PREFIX%/Library/include/llama.h exit 1  # [win]
+        - if exist %PREFIX%/Library/lib/llama.lib exit 1    # [win]
+        - if exist %PREFIX%/Library/bin/llama.dll exit 1    # [win]
+
+    about:
+      home: https://github.com/ggml-org/llama.cpp
+      summary: llama.cpp server example and tools, using libllama
+      description: |
+        Server example and tools for llama.cpp, using libllama
+      license: MIT
+      license_family: MIT
+      license_file: LICENSE
+      dev_url: https://github.com/ggml-org/llama.cpp
+      doc_url: https://github.com/ggml-org/llama.cpp
+
+  - name: llama.cpp-tests
+    script: build-llama-cpp.sh   # [not win]
+    script: bld-llama-cpp.bat   # [win]
+    version: {{ version }}
+
+    build:
+      script_env:
+        - LLAMA_BUILD_NUMBER={{ upstream_release[1:] }}
+        - LLAMA_BUILD_COMMIT={{ upstream_commit}}  
+      # skip_cuda_prefect is set through abs.yaml for use in prefect only
+      skip: true # [skip_cuda_prefect and (gpu_variant or "").startswith('cuda')]
+      # do not mix cublas and mkl/openblas
+      skip: true # [((gpu_variant or "").startswith('cuda') and (blas_impl != "cublas")) or (not (gpu_variant or "").startswith('cuda') and (blas_impl == "cublas"))]
+      # Use a build number difference to ensure that the GPU
+      # variant is slightly preferred by conda's solver, so that it's preferentially
+      # installed where the platform supports it.
+      number: {{ build_number + 100 }}  # [(gpu_variant or "").startswith('cuda')]
+      number: {{ build_number }}        # [gpu_variant == "none"
+      string: cuda{{ cuda_compiler_version | replace('.', '') }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [(gpu_variant or "").startswith('cuda')]
+      string: cpu_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                 # [gpu_variant == "none"]
       string: mps_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                                 # [gpu_variant == "metal"]
       missing_dso_whitelist:                                                                         # [(gpu_variant or "").startswith('cuda')]
         - "**/libcuda.so*"                                                                           # [(gpu_variant or "").startswith('cuda')]
@@ -66,47 +222,42 @@ outputs:
         - openblas-devel {{ openblas }}                       # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "openblas"]
         - mkl-devel {{ mkl }}                                 # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
         - intel-openmp {{ mkl }}                              # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
-        - llvm-openmp 17.0.6                                  # [osx]
         - libcurl {{ libcurl }}
-
+        - {{ pin_subpackage('libllama', exact=True) }}
+        - {{ pin_subpackage('llama.cpp', exact=True) }}
       run:
+        - {{ pin_subpackage('libllama', exact=True) }}
+        - {{ pin_subpackage('llama.cpp', exact=True) }}
         - {{ pin_compatible('cuda-version', max_pin='x.x') }} # [(gpu_variant or "").startswith('cuda')]
         - {{ pin_compatible('intel-openmp') }}                # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
-        - llvm-openmp                                         # [osx] bounds through run_exports
         - _openmp_mutex                                       # [linux]
         - libcurl # bounds through run_exports
 
     test:
       commands:
-        - llama-cli --help
-        - llama-server --help
-        - test -f $PREFIX/include/llama.h    # [unix]
-        - test -f $PREFIX/bin/llama-cli       # [unix]
-        - test -f $PREFIX/bin/llama-server   # [unix]
-        - test -f $PREFIX/lib/libllama.so    # [linux]
-        - test -f $PREFIX/lib/libllama.dylib # [osx]
-        - if not exist %PREFIX%/Library/include/llama.h exit 1  # [win]
-        - if not exist %PREFIX%/Library/lib/llama.lib exit 1    # [win]
-        - if not exist %PREFIX%/Library/bin/llama.dll exit 1    # [win]
-        - if not exist %PREFIX%/Library/bin/llama-cli.exe exit 1      # [win]
-        - if not exist %PREFIX%/Library/bin/llama-server.exe exit 1   # [win]
+        - test -f $PREFIX/bin/test-tokenizer-0                          # [unix]
+        - if not exist %PREFIX%/Library/bin/test-tokenizer-0.exe exit 1 # [win]
+        - test ! -f $PREFIX/include/llama.h    # [unix]
+        - test ! -f $PREFIX/bin/llama-cli      # [unix]
+        - test ! -f $PREFIX/bin/llama-server   # [unix]
+        - test ! -f $PREFIX/lib/libllama.so    # [linux]
+        - test ! -f $PREFIX/lib/libllama.dylib # [osx]
+        - if exist %PREFIX%/Library/include/llama.h exit 1  # [win]
+        - if exist %PREFIX%/Library/lib/llama.lib exit 1    # [win]
+        - if exist %PREFIX%/Library/bin/llama.dll exit 1    # [win]
+        - if exist %PREFIX%/Library/bin/llama-cli.exe exit 1      # [win]
+        - if exist %PREFIX%/Library/bin/llama-server.exe exit 1   # [win]
 
     about:
       home: https://github.com/ggml-org/llama.cpp
-      summary: LLM inference in C/C++
+      summary: llama.cpp test executables
       description: |
-        Inference of Meta's LLaMA model (and others) in pure C/C++
+        Test executables for llama.cpp
       license: MIT
       license_family: MIT
       license_file: LICENSE
       dev_url: https://github.com/ggml-org/llama.cpp
       doc_url: https://github.com/ggml-org/llama.cpp
-
-    extra:
-      recipe-maintainers:
-        - sodre
-        - cbouss
-        - jnoller
 
   - name: llama.cpp-tools
     script: build-llama-cpp-tools.sh   # [not win]
@@ -171,12 +322,6 @@ outputs:
       dev_url: https://github.com/ggml-org/llama.cpp
       doc_url: https://github.com/ggml-org/llama.cpp
 
-    extra:
-      recipe-maintainers:
-        - sodre
-        - cbouss
-        - jnoller
-
   - name: gguf
     script: build-gguf.sh   # [not win]
     script: bld-gguf.bat    # [win]
@@ -230,11 +375,6 @@ outputs:
       license_file: LICENSE
       dev_url: https://github.com/ggml-org/llama.cpp/tree/master/gguf-py
       doc_url: https://github.com/ggml-org/llama.cpp/tree/master/gguf-py
-    extra:
-      recipe-maintainers:
-        - sodre
-        - cbouss
-        - jnoller
 
 about:
   home: https://github.com/ggml-org/llama.cpp
@@ -246,3 +386,9 @@ about:
   summary: LLM inference in C/C++ and GGML conversion tools
   description: |
     Inference of Meta's LLaMA model (and others) in pure C/C++ and GGML conversion tools
+
+extra:
+  recipe-maintainers:
+    - sodre
+    - cbouss
+    - jnoller
