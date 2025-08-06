@@ -18,6 +18,7 @@ source:
     - patches/metal_gpu_selection.patch     # [osx]
     - patches/hwcap_sve_check.patch         # [linux and aarch64]
     - patches/no-armv9-support-gcc11.patch  # [linux and aarch64]
+    - patches/increase-nmse-tolerance.patch # [win]
     - patches/fix-convert_lora_to_gguf.patch
 
 build:
