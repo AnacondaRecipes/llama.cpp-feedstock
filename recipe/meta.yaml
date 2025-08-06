@@ -271,15 +271,7 @@ outputs:
         # requirements/requirements-convert_lora_to_gguf.txt
         - mistral-common >=1.8.3
         - pytorch >=2.2.1
-        # temporary until pytorch gets constrained to the matching version of libtorch.
-        # current pytorch only has gpu variants for linux-64 and osx-arm64.
-        - pytorch >=2.2.1=cpu_*  # [gpu_variant == "none" and ((linux and x86_64) or (osx and arm64))]
-        - pytorch >=2.2.1=gpu_*  # [gpu_variant != "none" and ((linux and x86_64) or (osx and arm64))]
         - {{ pin_subpackage('gguf', exact=True) }}
-      run_constrained:
-        # temporary until pytorch gets constrained to the matching version of libtorch.
-        - libtorch=*=cpu_* # [gpu_variant == "none" and ((linux and x86_64) or (osx and arm64))]
-        - libtorch=*=gpu_* # [gpu_variant != "none" and ((linux and x86_64) or (osx and arm64))]
 
     test:
       imports:
