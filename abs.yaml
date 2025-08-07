@@ -9,8 +9,3 @@ build_parameters:
 pkg_build_image_tag: main-rockylinux-8
 build_env_vars:
   ANACONDA_ROCKET_GLIBC: "2.28"
-
-channels:
-  - https://staging.continuum.io/prefect/fs/pycountry-feedstock/pr2/62e52cb
-  - https://staging.continuum.io/prefect/fs/pydantic-extra-types-feedstock/pr2/45857d6
-  - https://staging.continuum.io/prefect/fs/mistral-common-feedstock/pr1/bab270a
