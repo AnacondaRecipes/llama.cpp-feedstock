@@ -259,12 +259,6 @@ outputs:
         - python
         - poetry-core >=1.0.0
         - pip
-        - numpy >=1.26.4
-        - sentencepiece >=0.1.98,<=0.2.0
-        - transformers >=4.45.1,<5.0.0
-        - protobuf >=4.21.0,<5.0.0
-        - mistral-common >=1.8.3
-        - pytorch >=2.2.1
       run:
         # This is an aggregate of requirements from multiple files in the llama.cpp-tools repo, see:
         # https://github.com/ggml-org/llama.cpp/tree/master/requirements
