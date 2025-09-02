@@ -1,5 +1,5 @@
 {% set name = "llama.cpp-meta" %}
-{% set upstream_release = "b6082" %}
+{% set upstream_release = "b6358" %}
 {% set upstream_commit = "5aa1105da24a8dd1661cea3db0582c9b2c2f54d3" %}
 {% set version = "0.0." + upstream_release[1:] %}
 {% set gguf_version = "0.17.1." + upstream_release[1:] %}
@@ -11,7 +11,7 @@ package:
 
 source:
   url: https://github.com/ggml-org/llama.cpp/archive/{{ upstream_release }}.tar.gz
-  sha256: f961d6a9525133991a0b86cce8e33671cac6b028d51f8d22ce2370b526f4c6c2
+  sha256: 9cd9349fd664adfd6a6c8edcfc32ab9a6c624de68f58c7e2d377a0b3ef54e7f4
 
   patches:
     - patches/mkl.patch                     # [blas_impl == "mkl"]
@@ -272,7 +272,7 @@ outputs:
         # requirements/requirements-convert_llama_ggml_to_gguf.txt
         # requirements/requirements-convert_lora_to_gguf.txt
         - mistral-common >=1.8.3
-        - pytorch >=2.2.1
+        - pytorch >=2.4.0
         - {{ pin_subpackage('gguf', exact=True) }}
 
     test:
