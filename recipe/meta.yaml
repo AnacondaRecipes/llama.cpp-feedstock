@@ -20,6 +20,7 @@ source:
     - patches/no-armv9-support-gcc11.patch  # [linux and aarch64]
     - patches/increase-nmse-tolerance.patch # [win]
     - patches/fix-convert_lora_to_gguf.patch
+    - patches/fix-models-path.patch
 
 build:
   skip: true # [skip_cuda_prefect and (gpu_variant or "").startswith('cuda')]
@@ -281,6 +282,14 @@ outputs:
         - llama-convert-hf-to-gguf --help
         - llama-convert-llama-ggml-to-gguf --help
         - llama-convert-lora-to-gguf --help
+        - test -d $SP_DIR/llama_cpp_tools/models  # [unix]
+        - test -f $SP_DIR/llama_cpp_tools/models/ggml-vocab-llama-bpe.gguf  # [unix]
+        - test -d $SP_DIR/llama_cpp_tools/models/templates  # [unix]
+        - test -f $SP_DIR/llama_cpp_tools/models/templates/README.md  # [unix]
+        - if not exist %SP_DIR%\llama_cpp_tools\models exit 1  # [win]
+        - if not exist %SP_DIR%\llama_cpp_tools\models\ggml-vocab-llama-bpe.gguf exit 1  # [win]
+        - if not exist %SP_DIR%\llama_cpp_tools\models\templates exit 1  # [win]
+        - if not exist %SP_DIR%\llama_cpp_tools\models\templates\README.md exit 1  # [win]
       requires:
         - pip
 
@@ -288,7 +297,7 @@ outputs:
       home: https://github.com/ggml-org/llama.cpp
       summary: Scripts and conversion tools that ship with llama.cpp
       description: |
-        Scripts and conversion tools that ship with llama.cpp
+        Scripts and conversion tools that ship with llama.cpp, including model vocabulary files and templates
       license: MIT
       license_family: MIT
       license_file: LICENSE

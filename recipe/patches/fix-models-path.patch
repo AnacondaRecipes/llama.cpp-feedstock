@@ -1,0 +1,22 @@
+From 3ea0eac09703ea067e29c7460afd72c063a6b19f Mon Sep 17 00:00:00 2001
+From: John Noller <jnoller@anaconda.com>
+Date: Sun, 20 Jul 2025 14:37:44 -0400
+Subject: [PATCH] fix convert_hf_to_gguf.py
+
+convert_hf_to_gguf.py uses relative paths to the models directory that break when run from a different
+parent directory. When the models are installed in a conda package, the script needs to use
+Path(__file__).parent instead of sys.path[0] to correctly locate the models directory.
+
+---
+diff --git a/convert_hf_to_gguf.py b/convert_hf_to_gguf.py
+index 1234567..abcdefg 100644
+--- a/convert_hf_to_gguf.py
++++ b/convert_hf_to_gguf.py
+@@ -1114,7 +1114,7 @@ class LlamaModel:
+         special_vocab.add_to_gguf(self.gguf_writer)
+ 
+     def _set_vocab_builtin(self, model_name: Literal["gpt-neox", "llama-spm"], vocab_size: int):
+-        tokenizer_path = Path(sys.path[0]) / "models" / f"ggml-vocab-{model_name}.gguf"
++        tokenizer_path = Path(__file__).parent / "models" / f"ggml-vocab-{model_name}.gguf"
+         logger.warning(f"Using tokenizer from '{os.path.relpath(tokenizer_path, os.getcwd())}'")
+         vocab_reader = gguf.GGUFReader(tokenizer_path, "r")
