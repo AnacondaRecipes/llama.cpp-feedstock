@@ -23,7 +23,8 @@ source:
     - patches/fix-models-path.patch
 
 build:
-  skip: true # [skip_cuda_prefect and (gpu_variant or "").startswith('cuda')]
+  # build with --variants "{enable_cuda: True}" to enable CUDA
+  skip: true # [not enable_cuda and (gpu_variant or "").startswith('cuda')]
   number: {{ build_number }}
 
 outputs:
@@ -36,8 +37,8 @@ outputs:
       script_env:
         - LLAMA_BUILD_NUMBER={{ upstream_release[1:] }}
         - LLAMA_BUILD_COMMIT={{ upstream_commit}}  
-      # skip_cuda_prefect is set through abs.yaml for use in prefect only
-      skip: true # [skip_cuda_prefect and (gpu_variant or "").startswith('cuda')]
+      # build with --variants "{enable_cuda: True}" to enable CUDA
+      skip: true # [not enable_cuda and (gpu_variant or "").startswith('cuda')]
       # do not mix cublas and mkl/openblas
       skip: true # [((gpu_variant or "").startswith('cuda') and (blas_impl != "cublas")) or (not (gpu_variant or "").startswith('cuda') and (blas_impl == "cublas"))]
       # Use a build number difference to ensure that the GPU
@@ -108,8 +109,8 @@ outputs:
       script_env:
         - LLAMA_BUILD_NUMBER={{ upstream_release[1:] }}
         - LLAMA_BUILD_COMMIT={{ upstream_commit}}  
-      # skip_cuda_prefect is set through abs.yaml for use in prefect only
-      skip: true # [skip_cuda_prefect and (gpu_variant or "").startswith('cuda')]
+      # build with --variants "{enable_cuda: True}" to enable CUDA
+      skip: true # [not enable_cuda and (gpu_variant or "").startswith('cuda')]
       # do not mix cublas and mkl/openblas
       skip: true # [((gpu_variant or "").startswith('cuda') and (blas_impl != "cublas")) or (not (gpu_variant or "").startswith('cuda') and (blas_impl == "cublas"))]
       # Use a build number difference to ensure that the GPU
@@ -182,8 +183,8 @@ outputs:
       script_env:
         - LLAMA_BUILD_NUMBER={{ upstream_release[1:] }}
         - LLAMA_BUILD_COMMIT={{ upstream_commit}}  
-      # skip_cuda_prefect is set through abs.yaml for use in prefect only
-      skip: true # [skip_cuda_prefect and (gpu_variant or "").startswith('cuda')]
+      # build with --variants "{enable_cuda: True}" to enable CUDA
+      skip: true # [not enable_cuda and (gpu_variant or "").startswith('cuda')]
       # do not mix cublas and mkl/openblas
       skip: true # [((gpu_variant or "").startswith('cuda') and (blas_impl != "cublas")) or (not (gpu_variant or "").startswith('cuda') and (blas_impl == "cublas"))]
       # Use a build number difference to ensure that the GPU
