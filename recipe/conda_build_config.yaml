@@ -5,11 +5,6 @@ c_stdlib_version:  # [win]
 cxx_compiler:      # [win]
   - vs2022         # [win]
 
-c_compiler_version:   # [osx]
-  - 17                # [osx]
-cxx_compiler_version: # [osx]
-  - 17                # [osx]
-
 blas_impl:
   - mkl                        # [(x86 or x86_64) and not osx]
   - openblas                   # [not win and not osx]
