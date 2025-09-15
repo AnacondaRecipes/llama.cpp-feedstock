@@ -25,7 +25,7 @@ source:
 build:
   # build with --variants "{enable_cuda: True}" to enable CUDA
   skip: true # [not enable_cuda and (gpu_variant or "").startswith('cuda')]
-  number: {{ build_number }}
+  number: {{ build_number }} # trigger
 
 outputs:
   - name: libllama
