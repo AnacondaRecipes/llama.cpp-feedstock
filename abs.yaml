@@ -1,6 +1,6 @@
-# disable CUDA build by default - not yet supported on PBP
-build_env_vars:
-  ANACONDA_ROCKET_ENABLE_CUDA: 0
+# enable CUDA build - not yet supported on PBP
+# build_env_vars:
+#  ANACONDA_ROCKET_ENABLE_CUDA: 1
 
 channels:
   - https://staging.continuum.io/pbp/fs/sentencepiece-feedstock/pr9/21ae2c4
