@@ -7,14 +7,14 @@
 
 # When output_set is llama_cpp_tools, PBP trips on undefined variables
 # because they are not part of the variant config.
-# So we set them to -1 to avoid the render error.
-# Setting to -1 is safe because if they ever get used in the build, they
+# So we set them to 999.0a0 to avoid the render error.
+# Setting to 999.0a0 is safe because if they ever get used in the build, they
 # will generate a solve error.
 {% if output_set == "llama_cpp_tools" %}
-{% set libcurl = "-1" %}
-{% set mkl = "-1" %}
-{% set openblas = "-1" %}
-{% set cuda_compiler_version = "-1" %}
+{% set libcurl = "999.0a0" %}
+{% set mkl = "999.0a0" %}
+{% set openblas = "999.0a0" %}
+{% set cuda_compiler_version = "999.0a0" %}
 {% endif %}
 
 package:
