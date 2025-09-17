@@ -3,4 +3,4 @@
 #  ANACONDA_ROCKET_ENABLE_CUDA: 1
 
 channels:
-  - https://staging.continuum.io/pbp/fs/sentencepiece-feedstock/pr9/21ae2c4
+  - https://staging.continuum.io/preprod-pbp/fs/sentencepiece-feedstock/pr9/c1621ca
