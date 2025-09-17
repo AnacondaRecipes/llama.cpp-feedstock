@@ -1,6 +1,6 @@
 {% set name = "llama.cpp-meta" %}
-{% set upstream_release = "b6440" %}
-{% set upstream_commit = "33daece86b65607451d0d4378d2d04ba6a20ad55" %}
+{% set upstream_release = "b6500" %}
+{% set upstream_commit = "a7a98e0fffed794396b3fbad4dcdbbc184963645" %}
 {% set version = "0.0." + upstream_release[1:] %}
 {% set gguf_version = "0.17.1." + upstream_release[1:] %}
 {% set build_number = 0 %}
@@ -23,7 +23,7 @@ package:
 
 source:
   url: https://github.com/ggml-org/llama.cpp/archive/{{ upstream_release }}.tar.gz
-  sha256: 7df8684c4d2e2b683855d2e199acaa559a2a81fd8ee9b0e47ed3e91c23dac3d0
+  sha256: f2a188b194f25178460eecda7a7619b34d0b53421588faa2e6f0287a96674f28
 
   patches:
     - patches/mkl.patch                     # [blas_impl == "mkl"]
