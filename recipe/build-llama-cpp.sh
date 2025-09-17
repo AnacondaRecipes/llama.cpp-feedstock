@@ -69,7 +69,7 @@ fi
 # TODO add LLAMA_LLGUIDANCE? 
 # TODO set LLAMA_USE_SYSTEM_GGML once ggml gets its own feedstock
 
-cmake -S . -B build \
+cmake -S . -B build_${gpu_variant} \
     -G Ninja \
     ${CMAKE_ARGS} \
     -DCMAKE_INSTALL_PREFIX=${PREFIX} \
@@ -79,15 +79,15 @@ cmake -S . -B build \
     ${GGML_ARGS} \
     ${LLAMA_ARGS}
 
-cmake --build build --config Release --verbose
-cmake --install build
+cmake --build build_${gpu_variant} --config Release --verbose
+cmake --install build_${gpu_variant}
  
 if [[ "$PKG_NAME" == "llama-cpp-tests" ]]; then
     # Tests like test_chat use relative paths to load the model template files that break when run from a different 
     # parent directory. Tests (per upstream CI workflows) should be run from the build directory.
     # See: https://github.com/ggerganov/llama.cpp/blob/master/.github/workflows/build.yml
 
-    pushd build
+    pushd build_${gpu_variant}
     # test-tokenizers-ggml-vocabs requires git-lfs to download the model files
     ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs)"
     popd
