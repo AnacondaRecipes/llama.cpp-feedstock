@@ -1,6 +1,12 @@
 #!/bin/bash
 set -ex
 
+# workaround to get PBP to see that OSX_SDK_DIR is used
+# and thus get it forwarded to the build
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    echo $OSX_SDK_DIR
+fi
+
 # GGML build options
 GGML_ARGS="-DGGML_NATIVE=OFF -DGGML_CPU_ALL_VARIANTS=ON -DGGML_BACKEND_DL=ON"
 
