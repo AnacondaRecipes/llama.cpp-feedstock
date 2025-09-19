@@ -68,7 +68,7 @@ if errorlevel 1 exit 1
 cmake --install build
 if errorlevel 1 exit 1
 
-if "%PKG_NAME%" == "llama-cpp-tests" (
+if "%PKG_NAME%" == "llama.cpp-tests" (
     pushd build
     REM test-tokenizers-ggml-vocabs requires git-lfs to download the model files
     ctest -L main -C Release --output-on-failure -j%CPU_COUNT% --timeout 900 -E "test-tokenizers-ggml-vocabs"

@@ -88,7 +88,7 @@ cmake -S . -B build_${gpu_variant} \
 cmake --build build_${gpu_variant} --config Release --verbose
 cmake --install build_${gpu_variant}
  
-if [[ "$PKG_NAME" == "llama-cpp-tests" ]]; then
+if [[ "$PKG_NAME" == "llama.cpp-tests" ]]; then
     # Tests like test_chat use relative paths to load the model template files that break when run from a different 
     # parent directory. Tests (per upstream CI workflows) should be run from the build directory.
     # See: https://github.com/ggerganov/llama.cpp/blob/master/.github/workflows/build.yml
