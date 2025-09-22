@@ -1,6 +1,6 @@
-From aaf1a25c65647aec4c6fd583582d324392bff1ef Mon Sep 17 00:00:00 2001
+From a7a44342a7becf02a3bf640a022f9edaa5a3f3ce Mon Sep 17 00:00:00 2001
 From: Charles Bousseau <cbousseau@anaconda.com>
-Date: Sun, 20 Jul 2025 14:03:26 -0400
+Date: Mon, 22 Sep 2025 10:36:54 -0400
 Subject: [PATCH] metal gpu selection
 
 In macOS, in order for the system to provide a default Metal device object, you must link to the Core Graphics framework. 
@@ -11,18 +11,18 @@ https://developer.apple.com/documentation/metal/mtldevice/1433409-lowpower#discu
 
 I did try linking to CoreGraphics, but MTLCreateSystemDefaultDevice was still returning nil.
 ---
- ggml/src/ggml-metal/ggml-metal.m | 19 +++++++++++++++++++
+ ggml/src/ggml-metal/ggml-metal-device.m | 19 +++++++++++++++++++
  1 file changed, 19 insertions(+)
 
-diff --git a/ggml/src/ggml-metal/ggml-metal.m b/ggml/src/ggml-metal/ggml-metal.m
-index dc391a0d4..2083e2a31 100644
---- a/ggml/src/ggml-metal/ggml-metal.m
-+++ b/ggml/src/ggml-metal/ggml-metal.m
-@@ -92,6 +92,25 @@
+diff --git a/ggml/src/ggml-metal/ggml-metal-device.m b/ggml/src/ggml-metal/ggml-metal-device.m
+index 67f71ace2..beae781b8 100644
+--- a/ggml/src/ggml-metal/ggml-metal-device.m
++++ b/ggml/src/ggml-metal/ggml-metal-device.m
+@@ -449,6 +449,25 @@ ggml_metal_device_t ggml_metal_device_init(void) {
  
-     if (ctx->mtl_device == nil) {
-         ctx->mtl_device = MTLCreateSystemDefaultDevice();
-+        if (ctx->mtl_device == nil) {
+     if (dev->mtl_device == nil) {
+         dev->mtl_device = MTLCreateSystemDefaultDevice();
++        if (dev->mtl_device == nil) {
 +          /*
 +            In macOS, in order for the system to provide a default Metal device object, you must link to the Core Graphics framework.
 +            You usually need to do this explicitly if you're writing apps that don't use graphics by default, such as command line tools.
@@ -31,19 +31,19 @@ index dc391a0d4..2083e2a31 100644
 +            > https://developer.apple.com/documentation/metal/mtldevice/1433409-lowpower#discussion
 +           */
 +            NSArray * devices = MTLCopyAllDevices();
-+            for (id<MTLDevice> dev in devices) {
-+                if (dev != nil) {
-+                    if (ctx->mtl_device == nil) {
-+                        ctx->mtl_device = dev;
++            for (id<MTLDevice> device in devices) {
++                if (device != nil) {
++                    if (dev->mtl_device == nil) {
++                        dev->mtl_device = device;
 +                    } else {
-+                        [dev release];
++                        [device release];
 +                    }
 +                }
 +            }
 +        }
  
-         ctx->has_simdgroup_reduction  = [ctx->mtl_device supportsFamily:MTLGPUFamilyApple7];
-         ctx->has_simdgroup_reduction |= [ctx->mtl_device supportsFamily:MTLGPUFamilyMetal3_GGML];
+         if (dev->mtl_device) {
+             dev->mtl_queue = [dev->mtl_device newCommandQueue];
 -- 
 2.39.5 (Apple Git-154)
 
