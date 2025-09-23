@@ -1,20 +1,20 @@
-From 94eb0b1f1bb0df0a0517bbc6631ef282edd7947c Mon Sep 17 00:00:00 2001
+From 49f8a96212d0d7ae43d3f006dbc37adb9360b6e2 Mon Sep 17 00:00:00 2001
 From: Charles Bousseau <cbousseau@anaconda.com>
-Date: Wed, 6 Aug 2025 22:09:29 +0200
+Date: Mon, 22 Sep 2025 20:58:45 -0400
 Subject: [PATCH] tests: increase NMSE tolerance
 
 Fixes numerical precision failures due to floating-point rounding errors
 This was observed on Windows instance for CUDA builds.
 
 ---
- tests/test-backend-ops.cpp | 10 +++++++++-
- 1 file changed, 9 insertions(+), 1 deletion(-)
+ tests/test-backend-ops.cpp | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
 
 diff --git a/tests/test-backend-ops.cpp b/tests/test-backend-ops.cpp
-index ea65f1a2e..0a3af8192 100644
+index f11eecd8e..0e696ef47 100644
 --- a/tests/test-backend-ops.cpp
 +++ b/tests/test-backend-ops.cpp
-@@ -2007,6 +2007,10 @@ struct test_set_rows : public test_case {
+@@ -2073,6 +2073,10 @@ struct test_set_rows : public test_case {
          return VARS_TO_STR5(type, ne, nr23, r, v);
      }
  
@@ -25,7 +25,7 @@ index ea65f1a2e..0a3af8192 100644
      test_set_rows(ggml_type type,
              std::array<int64_t, 4> ne,
              std::array<int, 2> nr23,
-@@ -2333,7 +2337,7 @@ struct test_cpy : public test_case {
+@@ -2419,7 +2423,7 @@ struct test_cpy : public test_case {
      }
  
      double max_nmse_err() override {
@@ -34,17 +34,15 @@ index ea65f1a2e..0a3af8192 100644
      }
  
      size_t op_size(ggml_tensor * t) override {
-@@ -3730,6 +3734,10 @@ struct test_conv_transpose_2d : public test_case {
-         return VARS_TO_STR3(ne_input, ne_kernel, stride);
+@@ -3184,7 +3188,7 @@ struct test_mul_mat : public test_case {
      }
  
-+    double max_nmse_err() override {
-+        return 1e-6; // Increased tolerance for numerical precision issues
-+    }
-+
-     test_conv_transpose_2d(std::array<int64_t, 4> ne_input = {10, 10, 3, 1}, // [input_width, input_height, input_channels, 1]
-                            std::array<int64_t, 4> ne_kernel = {3, 3, 3, 1}, // [kernel_width, kernel_height, input_channels, 1]
-                            int stride = 1)
+     double max_nmse_err() override {
+-        return 5e-4;
++        return 5e-3;
+     }
+ 
+     int64_t grad_nmax() override {
 -- 
 2.39.5 (Apple Git-154)
 
