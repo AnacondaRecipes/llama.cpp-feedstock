@@ -1,11 +1,12 @@
-# the conda build parameters to use
-build_parameters:
-  - "--suppress-variables"
-  - "--skip-existing"
-  - "--error-overlinking"
-  - "--variants \"{skip_cuda_prefect: True}\""
+# enable CUDA build - not yet supported on PBP
+# build_env_vars:
+#  ANACONDA_ROCKET_ENABLE_CUDA: 1
 
-# Required for glibc >= 2.28
-pkg_build_image_tag: main-rockylinux-8
-build_env_vars:
-  ANACONDA_ROCKET_GLIBC: "2.28"
+# How to build on dev instance:
+# Follow: https://github.com/anaconda/perseverance-skills/blob/main/sections/05_Tools/Accessing_dev_machine_instances.md#cuda-builds
+# On linux:
+# > export ANACONDA_ROCKET_ENABLE_CUDA=1
+# > conda build --error-overlinking --croot=cr llama.cpp-feedstock/ --variants "{output_set: llama, gpu_variant: cuda-12, cuda_compiler_version: 12.4}" 2>&1 | tee ./llama.cpp.log
+# On windows:
+# > $env:ANACONDA_ROCKET_ENABLE_CUDA=1
+# > conda build --error-overlinking --croot=cr .\llama.cpp-feedstock\  --variants "{output_set: llama, gpu_variant: cuda-12, cuda_compiler_version: 12.4}"  2>&1 | Tee-Object -FilePath ./llama.cpp.log
