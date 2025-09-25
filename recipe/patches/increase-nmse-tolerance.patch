@@ -4,7 +4,7 @@ Date: Mon, 22 Sep 2025 20:58:45 -0400
 Subject: [PATCH] tests: increase NMSE tolerance
 
 Fixes numerical precision failures due to floating-point rounding errors
-This was observed on Windows instance for CUDA builds.
+This was observed on Windows instance for CUDA builds, and on CI for osx metal.
 
 ---
  tests/test-backend-ops.cpp | 8 ++++++--
