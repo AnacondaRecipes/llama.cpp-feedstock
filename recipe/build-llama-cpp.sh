@@ -95,11 +95,6 @@ if [[ "$PKG_NAME" == "llama.cpp-tests" ]]; then
 
     pushd build_${gpu_variant}
     # test-tokenizers-ggml-vocabs requires git-lfs to download the model files
-    # test-backend-ops has 1 flaky test on aarch64 with BLAS (14617/14618 pass)
-    if [[ $(uname -m) == "aarch64" && ${blas_impl:-} = "openblas" ]]; then
-        ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs|test-backend-ops)"
-    else
-        ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs)"
-    fi
+    ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs)"
     popd
 fi

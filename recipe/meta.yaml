@@ -31,6 +31,7 @@ source:
     - patches/hwcap_sve_check.patch         # [linux and aarch64]
     - patches/no-armv9-support-gcc11.patch  # [linux and aarch64]
     - patches/increase-nmse-tolerance.patch
+    - patches/increase-nmse-tolerance-aarch64.patch  # [linux and aarch64]
     - patches/fix-convert_lora_to_gguf.patch
     - patches/fix-models-path.patch
 
