@@ -60,7 +60,8 @@ outputs:
       string: cpu_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                 # [gpu_variant == "none"]
       string: mps_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                                 # [gpu_variant == "metal"]
       missing_dso_whitelist:                                                                         # [(gpu_variant or "").startswith('cuda')]
-        - "**/libcuda.so*"                                                                           # [(gpu_variant or "").startswith('cuda')]
+        - "**/libcuda.so*"                                                                           # [(gpu_variant or "").startswith('cuda') and linux]
+        - "**/nvcuda.dll"                                                                            # [(gpu_variant or "").startswith('cuda') and win]
       run_exports:
         - {{ pin_subpackage('libllama', exact=True) }}
 
@@ -133,7 +134,8 @@ outputs:
       string: cpu_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                 # [gpu_variant == "none"]
       string: mps_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                                 # [gpu_variant == "metal"]
       missing_dso_whitelist:                                                                         # [(gpu_variant or "").startswith('cuda')]
-        - "**/libcuda.so*"                                                                           # [(gpu_variant or "").startswith('cuda')]
+        - "**/libcuda.so*"                                                                           # [(gpu_variant or "").startswith('cuda') and linux]
+        - "**/nvcuda.dll"                                                                            # [(gpu_variant or "").startswith('cuda') and win]
       run_exports:
         - {{ pin_subpackage('llama.cpp', exact=True) }}
       
@@ -208,7 +210,8 @@ outputs:
       string: cpu_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                 # [gpu_variant == "none"]
       string: mps_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                                 # [gpu_variant == "metal"]
       missing_dso_whitelist:                                                                         # [(gpu_variant or "").startswith('cuda')]
-        - "**/libcuda.so*"                                                                           # [(gpu_variant or "").startswith('cuda')]
+        - "**/libcuda.so*"                                                                           # [(gpu_variant or "").startswith('cuda') and linux]
+        - "**/nvcuda.dll"                                                                            # [(gpu_variant or "").startswith('cuda') and win]
       
     requirements:
       build:
