@@ -1,8 +1,3 @@
-From 49f8a96212d0d7ae43d3f006dbc37adb9360b6e2 Mon Sep 17 00:00:00 2001
-From: Claude Code <noreply@anthropic.com>
-Date: Mon, 14 Oct 2025 11:30:00 -0500
-Subject: [PATCH] tests: increase NMSE tolerance further for aarch64
-
 ARM64 with OpenBLAS shows significantly higher numerical error (0.0748)
 for specific matrix multiply configurations. This appears to be related to
 OpenBLAS's ARM64 BLAS implementation having different floating-point
