@@ -95,12 +95,6 @@ if [[ "$PKG_NAME" == "llama.cpp-tests" ]]; then
 
     pushd build_${gpu_variant}
     # test-tokenizers-ggml-vocabs requires git-lfs to download the model files
-    # test-backend-ops and test-thread-safety fail on macOS Metal builds due to bf16 Metal shader runtime compilation issues
-    # (kernel_get_rows_bf16 fails to compile at runtime despite SDK supporting bf16)
-    if [[ "$OSTYPE" == "darwin"* ]] && [[ ${gpu_variant:-} = "metal" ]]; then
-        ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs|test-backend-ops|test-thread-safety)"
-    else
-        ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs)"
-    fi
+    ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs)"
     popd
 fi
