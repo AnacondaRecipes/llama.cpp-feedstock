@@ -3,7 +3,7 @@ From: Charles Bousseau <cbousseau@anaconda.com>
 Date: Sun, 20 Jul 2025 14:03:26 -0400
 Subject: [PATCH] metal gpu selection
 
-In macOS, in order for the system to provide a default Metal device object, you must link to the Core Graphics framework.
+In macOS, in order for the system to provide a default Metal device object, you must link to the Core Graphics framework. 
 You usually need to do this explicitly if you're writing apps that don't use graphics by default, such as command line tools.
 https://developer.apple.com/documentation/metal/1433401-mtlcreatesystemdefaultdevice?language=objc
 Systems with Apple silicon only have one GPU, which removes the need to choose a GPU.
