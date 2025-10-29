@@ -98,7 +98,7 @@ if [[ "$PKG_NAME" == "llama.cpp-tests" ]]; then
     pushd build_${gpu_variant}
     # test-tokenizers-ggml-vocabs requires git-lfs to download the model files
 
-    # Note: BF16 is disabled at build time (GGML_METAL_USE_BF16=OFF) to ensure
+    # Note: BF16 is disabled via patch (disable-metal-bf16.patch) to ensure
     # stability across all macOS versions. This prevents Metal shader compilation
     # crashes that occurred with BF16 enabled on macOS SDK < 15.
     ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs)"
