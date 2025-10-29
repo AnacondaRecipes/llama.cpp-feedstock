@@ -29,10 +29,8 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
         # to run metal and metallib commands to compile Metal kernels
         GGML_ARGS="${GGML_ARGS} -DGGML_METAL=ON"
         GGML_ARGS="${GGML_ARGS} -DGGML_METAL_EMBED_LIBRARY=ON"
-        # Disable BF16 to prevent Metal shader compilation crashes on macOS SDK < 15
-        # (matches old llama.cpp behavior, ensures stability across all macOS versions)
-        # Long-term: Re-enable when building with macOS 15+ SDK
-        GGML_ARGS="${GGML_ARGS} -DGGML_METAL_USE_BF16=OFF"
+        # Note: BF16 is disabled via patch (disable-metal-bf16.patch) to prevent
+        # Metal shader compilation crashes on macOS SDK < 15
         # TODO look into GGML_METAL_MACOSX_VERSION_MIN and GGML_METAL_STD
     fi
 fi

@@ -1,0 +1,39 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Conda Build <noreply@anaconda.com>
+Date: Wed, 23 Oct 2024 00:00:00 +0000
+Subject: [PATCH] Disable Metal BF16 support for macOS SDK < 15 compatibility
+
+Forcibly disable BF16 (bfloat16) support in Metal shaders to prevent
+Metal shader compilation crashes on macOS SDK versions prior to 15.0.
+
+The Metal compiler in SDK < 15 has a bug that causes crashes when
+compiling BF16 kernel code (e.g., kernel_get_rows_bf16). By explicitly
+undefining GGML_METAL_HAS_BF16, we prevent these kernels from being
+included in the Metal library.
+
+This ensures stability across all macOS versions (12-14) at the cost
+of BF16 performance optimizations. Long-term plan: Remove this patch
+when building with macOS 15+ SDK.
+
+Fixes: test-backend-ops (SEGFAULT), test-thread-safety (abort) on macOS < 15
+---
+ ggml/src/ggml-metal/ggml-metal.metal | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/ggml/src/ggml-metal/ggml-metal.metal b/ggml/src/ggml-metal/ggml-metal.metal
+index 1111111..2222222 100644
+--- a/ggml/src/ggml-metal/ggml-metal.metal
++++ b/ggml/src/ggml-metal/ggml-metal.metal
+@@ -26,6 +26,10 @@
+
+ #define GGML_METAL_VERSION 1
+
++// Forcibly disable BF16 for macOS SDK < 15 compatibility
++#ifdef GGML_METAL_HAS_BF16
++#undef GGML_METAL_HAS_BF16
++#endif
+ #if __METAL_VERSION__ < 310 && defined(GGML_METAL_HAS_BF16)
+ #undef GGML_METAL_HAS_BF16
+ #endif
+--
+2.39.2
