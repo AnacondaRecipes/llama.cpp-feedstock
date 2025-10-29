@@ -25,10 +25,14 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
         # so to support earlier macOS versions we provide the non-metal variant
         GGML_ARGS="${GGML_ARGS} -DGGML_METAL=OFF"
     elif [[ ${gpu_variant:-} = "metal" ]]; then
-        # GGML_METAL as a shared library requires xcode 
+        # GGML_METAL as a shared library requires xcode
         # to run metal and metallib commands to compile Metal kernels
         GGML_ARGS="${GGML_ARGS} -DGGML_METAL=ON"
         GGML_ARGS="${GGML_ARGS} -DGGML_METAL_EMBED_LIBRARY=ON"
+        # Disable BF16 to prevent Metal shader compilation crashes on macOS SDK < 15
+        # (matches old llama.cpp behavior, ensures stability across all macOS versions)
+        # Long-term: Re-enable when building with macOS 15+ SDK
+        GGML_ARGS="${GGML_ARGS} -DGGML_METAL_USE_BF16=OFF"
         # TODO look into GGML_METAL_MACOSX_VERSION_MIN and GGML_METAL_STD
     fi
 fi
@@ -96,28 +100,9 @@ if [[ "$PKG_NAME" == "llama.cpp-tests" ]]; then
     pushd build_${gpu_variant}
     # test-tokenizers-ggml-vocabs requires git-lfs to download the model files
 
-    # Metal-specific test failures on older macOS (Metal runtime bug, not llama.cpp or packaging):
-    # - test-backend-ops: SEGFAULT when kernel_get_rows_bf16 Metal shader fails to compile at runtime
-    # - test-thread-safety: Subprocess abort (same root cause - BF16 shader compilation failure)
-    # Root cause: Metal runtime on macOS 12.x-14.x has BF16 shader compilation bug (fixed in macOS 15+)
-    # Verified: Tests PASS on macOS 15.6 (M4 Pro), FAIL on macOS 14.5 SDK build (M2 Pro, CI)
-    # Tested with llama.cpp b6653 and b6810 - issue persists on older macOS versions
-    # Solution: Skip these tests only on macOS < 15, run them on macOS 15+ where they work
-    if [[ "$OSTYPE" == "darwin"* ]] && [[ ${gpu_variant:-} = "metal" ]]; then
-        # Get macOS version to conditionally skip tests only where they fail
-        macos_version=$(sw_vers -productVersion)
-        macos_major=$(echo $macos_version | cut -d. -f1)
-
-        # Skip Metal BF16 tests only on macOS < 15 (where Metal runtime has the bug)
-        if [[ $macos_major -lt 15 ]]; then
-            echo "macOS $macos_version detected - skipping Metal BF16 tests (known to fail on macOS < 15)"
-            ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs|test-backend-ops|test-thread-safety)"
-        else
-            echo "macOS $macos_version detected - running all Metal tests (BF16 shader bug fixed in macOS 15+)"
-            ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs)"
-        fi
-    else
-        ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs)"
-    fi
+    # Note: BF16 is disabled at build time (GGML_METAL_USE_BF16=OFF) to ensure
+    # stability across all macOS versions. This prevents Metal shader compilation
+    # crashes that occurred with BF16 enabled on macOS SDK < 15.
+    ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs)"
     popd
 fi
