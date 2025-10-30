@@ -9,12 +9,19 @@ output_set:
 libcurl:
   - 8
 
-c_compiler:        # [win]
-  - vs2022         # [win]
-c_stdlib_version:  # [win]
-  - 2022.14        # [win]
-cxx_compiler:      # [win]
-  - vs2022         # [win]
+c_stdlib:
+  - sysroot                        # [linux]
+  - macosx_deployment_target       # [osx]
+
+c_stdlib_version:
+  - 2.28                           # [linux]
+  - 12.1                           # [osx]
+  - 2022.14                        # [win]
+
+c_compiler:                        # [win]
+  - vs2022                         # [win]
+cxx_compiler:                      # [win]
+  - vs2022                         # [win]
 
 blas_impl:
   - mkl                        # [win or (linux and x86_64)]
