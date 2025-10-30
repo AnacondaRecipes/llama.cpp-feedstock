@@ -102,13 +102,9 @@ if [[ "$PKG_NAME" == "llama.cpp-tests" ]]; then
     # stability across all macOS versions. This prevents Metal shader compilation
     # crashes that occurred with BF16 enabled on macOS SDK < 15.
 
-    # Skip flaky tests on Metal GPU builds
-    if [[ ${gpu_variant:-} = "metal" ]]; then
-        # test-thread-safety: crashes on Metal (Subprocess aborted)
-        # test-backend-ops: FLASH_ATTN_EXT has numerical precision issues on Metal
-        ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs|test-thread-safety|test-backend-ops)"
-    else
-        ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs)"
-    fi
+    # Skip test-tokenizers-ggml-vocabs on all platforms: Known test data issue (#10290)
+    # Note: Flash Attention is disabled on Metal via disable-metal-flash-attention.patch,
+    #       so test-backend-ops FLASH_ATTN_EXT tests should now pass
+    ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs)"
     popd
 fi
