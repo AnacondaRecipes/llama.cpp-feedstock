@@ -4,25 +4,27 @@ Date: Sun, 20 Jul 2025 14:03:26 -0400
 Subject: [PATCH] metal gpu selection
 
 In macOS, in order for the system to provide a default Metal device object, you must link to the Core Graphics framework. 
-You usually need to do this explicitly if you’re writing apps that don’t use graphics by default, such as command line tools.
+You usually need to do this explicitly if you're writing apps that don't use graphics by default, such as command line tools.
 https://developer.apple.com/documentation/metal/1433401-mtlcreatesystemdefaultdevice?language=objc
 Systems with Apple silicon only have one GPU, which removes the need to choose a GPU.
 https://developer.apple.com/documentation/metal/mtldevice/1433409-lowpower#discussion
 
 I did try linking to CoreGraphics, but MTLCreateSystemDefaultDevice was still returning nil.
+
+Updated for b6653: File renamed from ggml/src/ggml-metal/ggml-metal.m to ggml-metal-device.m
 ---
- ggml/src/ggml-metal/ggml-metal.m | 19 +++++++++++++++++++
+ ggml/src/ggml-metal/ggml-metal-device.m | 19 +++++++++++++++++++
  1 file changed, 19 insertions(+)
 
-diff --git a/ggml/src/ggml-metal/ggml-metal.m b/ggml/src/ggml-metal/ggml-metal.m
+diff --git a/ggml/src/ggml-metal/ggml-metal-device.m b/ggml/src/ggml-metal/ggml-metal-device.m
 index dc391a0d4..2083e2a31 100644
---- a/ggml/src/ggml-metal/ggml-metal.m
-+++ b/ggml/src/ggml-metal/ggml-metal.m
-@@ -92,6 +92,25 @@
- 
-     if (ctx->mtl_device == nil) {
-         ctx->mtl_device = MTLCreateSystemDefaultDevice();
-+        if (ctx->mtl_device == nil) {
+--- a/ggml/src/ggml-metal/ggml-metal-device.m
++++ b/ggml/src/ggml-metal/ggml-metal-device.m
+@@ -449,6 +449,25 @@ ggml_metal_device_t ggml_metal_device_init(void) {
+
+     if (dev->mtl_device == nil) {
+         dev->mtl_device = MTLCreateSystemDefaultDevice();
++        if (dev->mtl_device == nil) {
 +          /*
 +            In macOS, in order for the system to provide a default Metal device object, you must link to the Core Graphics framework.
 +            You usually need to do this explicitly if you're writing apps that don't use graphics by default, such as command line tools.
@@ -31,19 +33,18 @@ index dc391a0d4..2083e2a31 100644
 +            > https://developer.apple.com/documentation/metal/mtldevice/1433409-lowpower#discussion
 +           */
 +            NSArray * devices = MTLCopyAllDevices();
-+            for (id<MTLDevice> dev in devices) {
-+                if (dev != nil) {
-+                    if (ctx->mtl_device == nil) {
-+                        ctx->mtl_device = dev;
++            for (id<MTLDevice> dev_tmp in devices) {
++                if (dev_tmp != nil) {
++                    if (dev->mtl_device == nil) {
++                        dev->mtl_device = dev_tmp;
 +                    } else {
-+                        [dev release];
++                        [dev_tmp release];
 +                    }
 +                }
 +            }
 +        }
- 
-         ctx->has_simdgroup_reduction  = [ctx->mtl_device supportsFamily:MTLGPUFamilyApple7];
-         ctx->has_simdgroup_reduction |= [ctx->mtl_device supportsFamily:MTLGPUFamilyMetal3_GGML];
--- 
-2.39.5 (Apple Git-154)
 
+         if (dev->mtl_device) {
+             dev->mtl_queue = [dev->mtl_device newCommandQueue];
+--
+2.39.5 (Apple Git-154)

@@ -1,0 +1,94 @@
+From f549b0007dbdd683215820f7229ce180a12b191d Mon Sep 17 00:00:00 2001
+From: Xianglong Kong <xkong@anaconda.com>
+Date: Thu, 30 Oct 2025 11:15:00 -0500
+Subject: [PATCH] Disable Metal Flash Attention due to numerical precision
+ issues
+
+Metal Flash Attention implementation in llama.cpp b6872 produces incorrect
+results with NMSE errors ranging from 0.068 to 0.160, significantly exceeding
+the test tolerance of 0.005. This affects test-backend-ops with various
+configurations using f32/f16/q8_0/q4_0 K/V types.
+
+Investigation shows Flash Attention was present in both b6653 and b6872, with
+significant improvements between versions including:
+- Metal backend refactoring and optimizations (#16446)
+- Support for non-padded Flash Attention KV (#16148)
+- Flash Attention support for F32 K/V and head size 32 (#16531)
+- Avoiding Metal's gpuAddress property (#16576)
+
+However, these changes introduced or exposed numerical precision issues on
+macOS SDK < 15. Disabling Flash Attention on Metal until precision is fixed
+upstream.
+
+This patch makes ggml_metal_supports_op return false for GGML_OP_FLASH_ATTN_EXT,
+causing Flash Attention operations to fall back to CPU implementation which has
+correct precision.
+
+Related issues:
+- test-backend-ops: 190/~5489 Flash Attention tests failing
+- Errors like: NMSE = 0.124010895 > 0.005000000
+
+TODO: Re-enable when Metal Flash Attention precision is fixed in upstream llama.cpp
+---
+ ggml/src/ggml-metal/ggml-metal-device.m | 36 +++++++++++++++++-------
+ 1 file changed, 26 insertions(+), 10 deletions(-)
+
+--- a/ggml/src/ggml-metal/ggml-metal-device.m
++++ b/ggml/src/ggml-metal/ggml-metal-device.m
+@@ -703,27 +703,35 @@
+         case GGML_OP_ARANGE:
+             return true;
+         case GGML_OP_FLASH_ATTN_EXT:
+-            // for new head sizes, add checks here
+-            if (op->src[0]->ne[0] != 32 &&
+-                op->src[0]->ne[0] != 40 &&
+-                op->src[0]->ne[0] != 64 &&
+-                op->src[0]->ne[0] != 80 &&
+-                op->src[0]->ne[0] != 96 &&
+-                op->src[0]->ne[0] != 112 &&
+-                op->src[0]->ne[0] != 128 &&
+-                op->src[0]->ne[0] != 192 &&
+-                op->src[0]->ne[0] != 256) {
+-                return false;
+-            }
+-            if (op->src[0]->ne[0] == 576) {
+-                // DeepSeek sizes
+-                // TODO: disabled for now, until optmized
+-                return false;
+-            }
+-            if (op->src[1]->type != op->src[2]->type) {
+-                return false;
+-            }
+-            return has_simdgroup_mm; // TODO: over-restricted for vec-kernels
++            // Disable Flash Attention on Metal due to numerical precision issues
++            // Metal Flash Attention implementation produces incorrect results with
++            // NMSE errors 0.068-0.160 (vs tolerance 0.005) in test-backend-ops.
++            // This affects various configurations with f32/f16/q8_0/q4_0 K/V types.
++            // TODO: Re-enable when Metal Flash Attention precision is fixed upstream
++            return false;
++
++            // Original code (disabled):
++            // // for new head sizes, add checks here
++            // if (op->src[0]->ne[0] != 32 &&
++            //     op->src[0]->ne[0] != 40 &&
++            //     op->src[0]->ne[0] != 64 &&
++            //     op->src[0]->ne[0] != 80 &&
++            //     op->src[0]->ne[0] != 96 &&
++            //     op->src[0]->ne[0] != 112 &&
++            //     op->src[0]->ne[0] != 128 &&
++            //     op->src[0]->ne[0] != 192 &&
++            //     op->src[0]->ne[0] != 256) {
++            //     return false;
++            // }
++            // if (op->src[0]->ne[0] == 576) {
++            //     // DeepSeek sizes
++            //     // TODO: disabled for now, until optmized
++            //     return false;
++            // }
++            // if (op->src[1]->type != op->src[2]->type) {
++            //     return false;
++            // }
++            // return has_simdgroup_mm; // TODO: over-restricted for vec-kernels
+         case GGML_OP_SSM_CONV:
+         case GGML_OP_SSM_SCAN:
+             return has_simdgroup_reduction;

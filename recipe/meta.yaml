@@ -1,6 +1,6 @@
 {% set name = "llama.cpp-meta" %}
-{% set upstream_release = "b6402" %}
-{% set upstream_commit = "79bc429262268ad2ac8a364cfe6c2d6b9c5f008a" %}
+{% set upstream_release = "b6872" %}
+{% set upstream_commit = "f549b0007dbdd683215820f7229ce180a12b191d" %}
 {% set version = "0.0." + upstream_release[1:] %}
 {% set gguf_version = "0.17.1." + upstream_release[1:] %}
 {% set build_number = 0 %}
@@ -11,7 +11,6 @@
 # Setting to 999.0a0 is safe because if they ever get used in the build, they
 # will generate a solve error.
 {% if output_set == "llama_cpp_tools" %}
-{% set libcurl = "999.0a0" %}
 {% set mkl = "999.0a0" %}
 {% set openblas = "999.0a0" %}
 {% set cuda_compiler_version = "999.0a0" %}
@@ -23,14 +22,17 @@ package:
 
 source:
   url: https://github.com/ggml-org/llama.cpp/archive/{{ upstream_release }}.tar.gz
-  sha256: 015f8f68b1feabd10984acaa1de5dcb466207306b5ab975a98e35ad2169ca0c3
+  sha256: 5dcab3a9c071ee296788083c3b8380e9d52b00720b34f4aa5ab9644be23f79cb
 
   patches:
     - patches/mkl.patch                     # [blas_impl == "mkl"]
     - patches/metal_gpu_selection.patch     # [osx]
+    - patches/disable-metal-bf16.patch      # [osx]
+    - patches/disable-metal-flash-attention.patch  # [osx]
     - patches/hwcap_sve_check.patch         # [linux and aarch64]
     - patches/no-armv9-support-gcc11.patch  # [linux and aarch64]
     - patches/increase-nmse-tolerance.patch
+    - patches/increase-nmse-tolerance-aarch64.patch  # [linux and aarch64]
     - patches/fix-convert_lora_to_gguf.patch
     - patches/fix-models-path.patch
 
@@ -59,7 +61,8 @@ outputs:
       string: cpu_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                 # [gpu_variant == "none"]
       string: mps_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                                 # [gpu_variant == "metal"]
       missing_dso_whitelist:                                                                         # [(gpu_variant or "").startswith('cuda')]
-        - "**/libcuda.so*"                                                                           # [(gpu_variant or "").startswith('cuda')]
+        - "**/libcuda.so*"  # [(gpu_variant or "").startswith('cuda')]
+        - "**/nvcuda.dll"   # [(gpu_variant or "").startswith('cuda')]
       run_exports:
         - {{ pin_subpackage('libllama', exact=True) }}
 
@@ -132,7 +135,8 @@ outputs:
       string: cpu_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                 # [gpu_variant == "none"]
       string: mps_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                                 # [gpu_variant == "metal"]
       missing_dso_whitelist:                                                                         # [(gpu_variant or "").startswith('cuda')]
-        - "**/libcuda.so*"                                                                           # [(gpu_variant or "").startswith('cuda')]
+        - "**/libcuda.so*"  # [(gpu_variant or "").startswith('cuda')]
+        - "**/nvcuda.dll"   # [(gpu_variant or "").startswith('cuda')]
       run_exports:
         - {{ pin_subpackage('llama.cpp', exact=True) }}
       
@@ -207,8 +211,9 @@ outputs:
       string: cpu_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                 # [gpu_variant == "none"]
       string: mps_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                                 # [gpu_variant == "metal"]
       missing_dso_whitelist:                                                                         # [(gpu_variant or "").startswith('cuda')]
-        - "**/libcuda.so*"                                                                           # [(gpu_variant or "").startswith('cuda')]
-      
+        - "**/libcuda.so*"  # [(gpu_variant or "").startswith('cuda')]
+        - "**/nvcuda.dll"   # [(gpu_variant or "").startswith('cuda')]
+
     requirements:
       build:
         - {{ stdlib('c')}}
