@@ -7,9 +7,9 @@ Fix MKL BLAS detection and configuration logic.
 The condition needs to properly handle both Intel MKL vendor setting
 and generic vendor with MKL include paths.
 
-Updated for b6653: Adjusted for quoted ${BLAS_INCLUDE_DIRS} variable.
+Updated for b6188: Uses unquoted variable syntax (older CMake style).
 
-Co-Authored-By: Patrick Sodré <psodre@gmail.com>
+Co-Authored-By: Patrick Sodre <psodre@gmail.com>
 ---
  ggml/src/ggml-blas/CMakeLists.txt | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
@@ -22,8 +22,8 @@ index 0bf3c05d..a2efa938 100644
 
      target_compile_options(ggml-blas PRIVATE ${BLAS_LINKER_FLAGS})
 
--    if ("${BLAS_INCLUDE_DIRS}" MATCHES "mkl" AND (${GGML_BLAS_VENDOR} MATCHES "Generic" OR ${GGML_BLAS_VENDOR} MATCHES "Intel"))
-+    if (("${BLAS_INCLUDE_DIRS}" MATCHES "mkl" AND ${GGML_BLAS_VENDOR} MATCHES "Generic") OR ${GGML_BLAS_VENDOR} MATCHES "Intel")
+-    if (${BLAS_INCLUDE_DIRS} MATCHES "mkl" AND (${GGML_BLAS_VENDOR} MATCHES "Generic" OR ${GGML_BLAS_VENDOR} MATCHES "Intel"))
++    if ((${BLAS_INCLUDE_DIRS} MATCHES "mkl" AND ${GGML_BLAS_VENDOR} MATCHES "Generic") OR ${GGML_BLAS_VENDOR} MATCHES "Intel")
          add_compile_definitions(GGML_BLAS_USE_MKL)
      endif()
 

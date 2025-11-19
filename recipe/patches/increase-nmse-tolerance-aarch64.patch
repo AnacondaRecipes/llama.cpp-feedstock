@@ -15,16 +15,16 @@ for architecture-specific precision differences.
 Applies on top of increase-nmse-tolerance.patch (5e-4 -> 5e-3).
 This patch further increases: 5e-3 -> 1e-1 for aarch64 only.
 
-Updated for b6872: Line numbers adjusted for latest upstream code.
+Updated for b6188: Regenerated for older codebase with 5 test classes.
 ---
- tests/test-backend-ops.cpp | 14 +++++++-------
- 1 file changed, 7 insertions(+), 7 deletions(-)
+ tests/test-backend-ops.cpp | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
 
 diff --git a/tests/test-backend-ops.cpp b/tests/test-backend-ops.cpp
 index 0e696ef47..a2efa938 100644
 --- a/tests/test-backend-ops.cpp
 +++ b/tests/test-backend-ops.cpp
-@@ -3318,7 +3318,7 @@
+@@ -3104,7 +3104,7 @@
      }
 
      double max_nmse_err() override {
@@ -33,7 +33,7 @@ index 0e696ef47..a2efa938 100644
      }
 
      int64_t grad_nmax() override {
-@@ -3434,7 +3434,7 @@
+@@ -3207,7 +3207,7 @@
      }
 
      double max_nmse_err() override {
@@ -42,7 +42,7 @@ index 0e696ef47..a2efa938 100644
      }
 
      uint64_t op_flops(ggml_tensor * t) override {
-@@ -3523,7 +3523,7 @@
+@@ -3282,7 +3282,7 @@
      }
 
      double max_nmse_err() override {
@@ -51,16 +51,7 @@ index 0e696ef47..a2efa938 100644
      }
 
      test_out_prod(ggml_type type_a = GGML_TYPE_F32, ggml_type type_b = GGML_TYPE_F32,
-@@ -4248,7 +4248,7 @@
-     }
-
-     double max_nmse_err() override {
--        return 5e-3; // The default 1e-7 is too small for Vulkan.
-+        return 1e-1; // The default 1e-7 is too small for Vulkan and ARM64 BLAS.
-     }
-
-     test_conv_transpose_2d(std::array<int64_t, 4> ne_input = {10, 10, 3, 1}, // [input_width, input_height, input_channels, 1]
-@@ -4400,7 +4400,7 @@
+@@ -3954,7 +3954,7 @@
      }
 
      double max_nmse_err() override {
@@ -69,16 +60,7 @@ index 0e696ef47..a2efa938 100644
      }
 
      uint64_t op_flops(ggml_tensor * t) override {
-@@ -4532,7 +4532,7 @@
-     }
-
-     double max_nmse_err() override {
--        return 5e-3;
-+        return 1e-1;
-     }
-
-     uint64_t op_flops(ggml_tensor * t) override {
-@@ -5386,7 +5386,7 @@
+@@ -4579,7 +4579,7 @@
      }
 
      double max_nmse_err() override {

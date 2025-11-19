@@ -1,4 +1,4 @@
-From 49f8a96212d0d7ae43d3f006dbc37adb9360b6e2 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Charles Bousseau <cbousseau@anaconda.com>
 Date: Mon, 22 Sep 2025 20:58:45 -0400
 Subject: [PATCH] tests: increase NMSE tolerance for matrix operations
@@ -6,18 +6,19 @@ Subject: [PATCH] tests: increase NMSE tolerance for matrix operations
 Fixes numerical precision failures due to floating-point rounding errors.
 This was observed on Windows instance for CUDA builds, and on CI for osx metal.
 
-Updated for b6653: Only test_mul_mat and related operations need adjustment now,
-as test_cpy and test_set_rows have been fixed upstream with appropriate tolerances.
+Updated for b6188: Regenerated for older codebase with different test structure.
+Changes 5 test classes: test_mul_mat, test_mul_mat_id, test_out_prod,
+test_conv_2d, and test_flash_attn_ext.
 
 ---
- tests/test-backend-ops.cpp | 14 +++++++-------
- 1 file changed, 7 insertions(+), 7 deletions(-)
+ tests/test-backend-ops.cpp | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
 
 diff --git a/tests/test-backend-ops.cpp b/tests/test-backend-ops.cpp
-index f11eecd8e..0e696ef47 100644
+index 1234567..abcdefg 100644
 --- a/tests/test-backend-ops.cpp
 +++ b/tests/test-backend-ops.cpp
-@@ -3254,7 +3254,7 @@
+@@ -3104,7 +3104,7 @@
      }
 
      double max_nmse_err() override {
@@ -26,7 +27,7 @@ index f11eecd8e..0e696ef47 100644
      }
 
      int64_t grad_nmax() override {
-@@ -3370,7 +3370,7 @@
+@@ -3207,7 +3207,7 @@
      }
 
      double max_nmse_err() override {
@@ -35,7 +36,7 @@ index f11eecd8e..0e696ef47 100644
      }
 
      uint64_t op_flops(ggml_tensor * t) override {
-@@ -3459,7 +3459,7 @@
+@@ -3282,7 +3282,7 @@
      }
 
      double max_nmse_err() override {
@@ -44,16 +45,7 @@ index f11eecd8e..0e696ef47 100644
      }
 
      test_out_prod(ggml_type type_a = GGML_TYPE_F32, ggml_type type_b = GGML_TYPE_F32,
-@@ -4053,7 +4053,7 @@
-     }
-
-     double max_nmse_err() override {
--        return 5e-4; // The default 1e-7 is too small for Vulkan.
-+        return 5e-3; // The default 1e-7 is too small for Vulkan.
-     }
-
-     test_conv_transpose_2d(std::array<int64_t, 4> ne_input = {10, 10, 3, 1}, // [input_width, input_height, input_channels, 1]
-@@ -4205,7 +4205,7 @@
+@@ -3954,7 +3954,7 @@
      }
 
      double max_nmse_err() override {
@@ -62,16 +54,7 @@ index f11eecd8e..0e696ef47 100644
      }
 
      uint64_t op_flops(ggml_tensor * t) override {
-@@ -4337,7 +4337,7 @@
-     }
-
-     double max_nmse_err() override {
--        return 5e-4;
-+        return 5e-3;
-     }
-
-     uint64_t op_flops(ggml_tensor * t) override {
-@@ -5032,7 +5032,7 @@
+@@ -4579,7 +4579,7 @@
      }
 
      double max_nmse_err() override {

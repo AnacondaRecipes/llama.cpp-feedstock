@@ -1,6 +1,6 @@
 {% set name = "llama.cpp-meta" %}
-{% set upstream_release = "b6872" %}
-{% set upstream_commit = "f549b0007dbdd683215820f7229ce180a12b191d" %}
+{% set upstream_release = "b6188" %}
+{% set upstream_commit = "21c17b5befc5f6be5992bc87fc1ba99d388561df" %}
 {% set version = "0.0." + upstream_release[1:] %}
 {% set gguf_version = "0.17.1." + upstream_release[1:] %}
 {% set build_number = 0 %}
@@ -22,13 +22,13 @@ package:
 
 source:
   url: https://github.com/ggml-org/llama.cpp/archive/{{ upstream_release }}.tar.gz
-  sha256: 5dcab3a9c071ee296788083c3b8380e9d52b00720b34f4aa5ab9644be23f79cb
+  sha256: aba3d07942daa048d46cc7fddebc33d839e89e256306428910dcd582597c0b97
 
   patches:
     - patches/mkl.patch                     # [blas_impl == "mkl"]
     - patches/metal_gpu_selection.patch     # [osx]
-    - patches/disable-metal-bf16.patch      # [osx]
-    - patches/disable-metal-flash-attention.patch  # [osx]
+    # Note: disable-metal-bf16.patch not needed for b6188 (BF16 is OFF by default)
+    # Note: disable-metal-flash-attention.patch not needed for b6188
     - patches/hwcap_sve_check.patch         # [linux and aarch64]
     - patches/no-armv9-support-gcc11.patch  # [linux and aarch64]
     - patches/increase-nmse-tolerance.patch
