@@ -1,3 +1,6 @@
+libcurl:
+  - 8
+
 c_compiler:        # [win]
   - vs2022         # [win]
 c_stdlib_version:  # [win]
