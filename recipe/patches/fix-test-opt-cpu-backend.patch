@@ -15,17 +15,15 @@ diff --git a/tests/test-opt.cpp b/tests/test-opt.cpp
 index 1234567..abcdefg 100644
 --- a/tests/test-opt.cpp
 +++ b/tests/test-opt.cpp
-@@ -903,7 +903,7 @@ int main(int argc, char ** argv) {
+@@ -902,7 +902,7 @@ int main(void) {
+
          ggml_backend_t backend = ggml_backend_dev_init(devs[i], NULL);
          GGML_ASSERT(backend != NULL);
- 
 -#ifndef _MSC_VER
 +#if !defined(_MSC_VER) && !defined(GGML_BACKEND_DL)
          if (ggml_backend_is_cpu(backend)) {
              ggml_backend_cpu_set_n_threads(backend, std::thread::hardware_concurrency() / 2);
          }
- #endif
-
 --
 2.39.5 (Apple Git-154)
 

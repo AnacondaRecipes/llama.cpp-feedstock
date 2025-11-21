@@ -15,7 +15,7 @@ for architecture-specific precision differences.
 Applies on top of increase-nmse-tolerance.patch (5e-4 -> 5e-3).
 This patch further increases: 5e-3 -> 1e-1 for aarch64 only.
 
-Updated for b6188: Regenerated for older codebase with 5 test classes.
+Updated for b6188: Regenerated with correct line numbers after base patch.
 ---
  tests/test-backend-ops.cpp | 10 +++++-----
  1 file changed, 5 insertions(+), 5 deletions(-)
@@ -26,48 +26,49 @@ index 0e696ef47..a2efa938 100644
 +++ b/tests/test-backend-ops.cpp
 @@ -3104,7 +3104,7 @@
      }
-
+ 
      double max_nmse_err() override {
 -        return 5e-3;
 +        return 1e-1;
      }
-
+ 
      int64_t grad_nmax() override {
 @@ -3207,7 +3207,7 @@
      }
-
+ 
      double max_nmse_err() override {
 -        return 5e-3;
 +        return 1e-1;
      }
-
+ 
      uint64_t op_flops(ggml_tensor * t) override {
 @@ -3282,7 +3282,7 @@
      }
-
+ 
      double max_nmse_err() override {
 -        return 5e-3;
 +        return 1e-1;
      }
-
+ 
      test_out_prod(ggml_type type_a = GGML_TYPE_F32, ggml_type type_b = GGML_TYPE_F32,
 @@ -3954,7 +3954,7 @@
      }
-
+ 
      double max_nmse_err() override {
 -        return 5e-3;
 +        return 1e-1;
      }
-
+ 
      uint64_t op_flops(ggml_tensor * t) override {
 @@ -4579,7 +4579,7 @@
      }
-
-     double max_nmse_err() override {
+ 
+    double max_nmse_err() override {
 -        return 5e-3;
 +        return 1e-1;
      }
-
+ 
      uint64_t op_flops(ggml_tensor * t) override {
 --
 2.39.5 (Apple Git-154)
+
