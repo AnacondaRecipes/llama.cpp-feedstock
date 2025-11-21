@@ -1,37 +1,47 @@
+# This feedstocks builds two sets of packages:
+# - libllama, llama.cpp, llama.cpp-tests
+# - gguf, llama.cpp-tools
+# This helps us avoid mixing the two sets of packages in the same build on PBP.
+output_set:
+  - llama
+  - llama_cpp_tools
+
 libcurl:
   - 8
 
-c_compiler:        # [win]
-  - vs2022         # [win]
-c_stdlib_version:  # [win]
-  - 2022.14        # [win]
-cxx_compiler:      # [win]
-  - vs2022         # [win]
+c_stdlib:
+  - sysroot                        # [linux]
+  - macosx_deployment_target       # [osx]
 
-c_compiler_version:   # [osx]
-  - 17                # [osx]
-cxx_compiler_version: # [osx]
-  - 17                # [osx]
+c_stdlib_version:
+  - 2.28                           # [linux]
+  - 12.1                           # [osx]
+  - 2022.14                        # [win]
+
+c_compiler:                        # [win]
+  - vs2022                         # [win]
+cxx_compiler:                      # [win]
+  - vs2022                         # [win]
 
 blas_impl:
-  - mkl                        # [(x86 or x86_64) and not osx]
-  - openblas                   # [not win and not osx]
+  - mkl                        # [win or (linux and x86_64)]
+  - openblas                   # [linux]
   - accelerate                 # [osx]
-  - cublas                     # [win or (linux and x86_64)]
+  - cublas                     # [ANACONDA_ROCKET_ENABLE_CUDA and (win or (linux and x86_64))]
 
 gpu_variant:
   - none
-  - metal                      # [osx and arm64]
-  - cuda-12                    # [win or (linux and x86_64)]
+  - metal                      # [osx]
+  - cuda-12                    # [ANACONDA_ROCKET_ENABLE_CUDA and (win or (linux and x86_64))]
 
-cuda_compiler_version:         # [win or (linux and x86_64)]
-  - none                       # [win or (linux and x86_64)]
-  - 12.4                       # [win or (linux and x86_64)]
+cuda_compiler_version:         # [ANACONDA_ROCKET_ENABLE_CUDA and (win or (linux and x86_64))]
+  - none                       # [ANACONDA_ROCKET_ENABLE_CUDA and (win or (linux and x86_64))]
+  - 12.4                       # [ANACONDA_ROCKET_ENABLE_CUDA and (win or (linux and x86_64))]
 
-cuda_compiler:                 # [win or (linux and x86_64)]
-- cuda-nvcc                    # [win or (linux and x86_64)]
+cuda_compiler:                 # [ANACONDA_ROCKET_ENABLE_CUDA and (win or (linux and x86_64))]
+- cuda-nvcc                    # [ANACONDA_ROCKET_ENABLE_CUDA and (win or (linux and x86_64))]
 
-zip_keys:                      # [win or (linux and x86_64)]
-  -                            # [win or (linux and x86_64)]
-    - gpu_variant              # [win or (linux and x86_64)]
-    - cuda_compiler_version    # [win or (linux and x86_64)]
+zip_keys:                      # [ANACONDA_ROCKET_ENABLE_CUDA and (win or (linux and x86_64))]
+  -                            # [ANACONDA_ROCKET_ENABLE_CUDA and (win or (linux and x86_64))]
+    - gpu_variant              # [ANACONDA_ROCKET_ENABLE_CUDA and (win or (linux and x86_64))]
+    - cuda_compiler_version    # [ANACONDA_ROCKET_ENABLE_CUDA and (win or (linux and x86_64))]
