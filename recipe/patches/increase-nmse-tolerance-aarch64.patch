@@ -8,14 +8,10 @@ for specific matrix multiply configurations. This appears to be related to
 OpenBLAS's ARM64 BLAS implementation having different floating-point
 precision characteristics.
 
-The error is 15x higher than the base 5e-3 tolerance, requiring 1e-1 (0.1)
-to pass. This is still acceptable as it catches real errors while allowing
-for architecture-specific precision differences.
-
 Applies on top of increase-nmse-tolerance.patch (5e-4 -> 5e-3).
 This patch further increases: 5e-3 -> 1e-1 for aarch64 only.
 
-Updated for b6188: Regenerated with correct line numbers after base patch.
+Updated for b6188.
 ---
  tests/test-backend-ops.cpp | 10 +++++-----
  1 file changed, 5 insertions(+), 5 deletions(-)
@@ -63,7 +59,7 @@ index 0e696ef47..a2efa938 100644
 @@ -4579,7 +4579,7 @@
      }
  
-    double max_nmse_err() override {
+     double max_nmse_err() override {
 -        return 5e-3;
 +        return 1e-1;
      }
