@@ -12,11 +12,12 @@ libcurl:
 c_stdlib:
   - sysroot                        # [linux]
   - macosx_deployment_target       # [osx]
+  - vs                             # [win]
 
 c_stdlib_version:
   - 2.28                           # [linux]
   - 12.1                           # [osx]
-  - "2022"                         # [win]
+  - 2022.14                        # [win]
 
 c_compiler:                        # [win]
   - vs2022                         # [win]
