@@ -23,12 +23,6 @@ c_compiler:                        # [win]
 cxx_compiler:                      # [win]
   - vs2022                         # [win]
 
-# GCC version for Linux CUDA builds (CUDA 12.4 requires gcc < 13)
-c_compiler_version:                # [linux and ANACONDA_ROCKET_ENABLE_CUDA]
-  - 12                             # [linux and ANACONDA_ROCKET_ENABLE_CUDA]
-cxx_compiler_version:              # [linux and ANACONDA_ROCKET_ENABLE_CUDA]
-  - 12                             # [linux and ANACONDA_ROCKET_ENABLE_CUDA]
-
 blas_impl:
   - mkl                        # [win or (linux and x86_64)]
   - openblas                   # [linux]
