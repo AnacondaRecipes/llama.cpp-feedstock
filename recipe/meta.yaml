@@ -37,7 +37,8 @@ outputs:
     build:
       script_env:
         - LLAMA_BUILD_NUMBER={{ upstream_release[1:] }}
-        - LLAMA_BUILD_COMMIT={{ upstream_commit}}  
+        - LLAMA_BUILD_COMMIT={{ upstream_commit}}
+      skip: true # [output_set != "llama"]
       # skip_cuda_prefect is set through abs.yaml for use in prefect only
       skip: true # [skip_cuda_prefect and (gpu_variant or "").startswith('cuda')]
       # do not mix cublas and mkl/openblas
@@ -123,6 +124,7 @@ outputs:
         - llama-convert-llama-ggml-to-gguf = llama_cpp_tools.convert_llama_ggml_to_gguf:main
         - llama-convert-lora-to-gguf = llama_cpp_tools.convert_lora_to_gguf:main
       skip: True # [py<39]
+      skip: true # [output_set != "llama_cpp_tools"]
       number: {{ build_number }}
 
     requirements:
@@ -193,6 +195,7 @@ outputs:
         - gguf-new-metadata = gguf.scripts.gguf_new_metadata:main
         - gguf-editor-gui = gguf.scripts.gguf_editor_gui:main
       skip: True # [py<39]
+      skip: true # [output_set != "llama_cpp_tools"]
       number: {{ build_number }}
 
     requirements:
