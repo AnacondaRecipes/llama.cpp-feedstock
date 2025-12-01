@@ -5,6 +5,19 @@
 {% set gguf_version = "0.17.1." + upstream_release[1:] %}
 {% set build_number = 0 %}
 
+# When output_set is llama_cpp_tools, PBP trips on undefined variables
+# because they are not part of the variant config.
+# So we set them to 999.0a0 to avoid the render error.
+# Setting to 999.0a0 is safe because if they ever get used in the build, they
+# will generate a solve error.
+{% if output_set == "llama_cpp_tools" %}
+{% set mkl = "999.0a0" %}
+{% set openblas = "999.0a0" %}
+{% set cuda_compiler_version = "999.0a0" %}
+{% set blas_impl = "none" %}
+{% set gpu_variant = "none" %}
+{% endif %}
+
 package:
   name: {{ name|lower }}
   version: {{ version }}
