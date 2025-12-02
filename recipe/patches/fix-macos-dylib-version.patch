@@ -1,0 +1,27 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: conda-forge <conda@conda-forge.org>
+Date: Mon, 2 Dec 2024 10:00:00 +0000
+Subject: [PATCH] Fix macOS dylib version format
+
+Remove 0.0. prefix from LLAMA_INSTALL_VERSION to avoid macOS linker error
+with large build numbers (e.g. 7229).
+
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 1234567..abcdefg 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -28,7 +28,7 @@ endif()
+ if (NOT DEFINED LLAMA_BUILD_COMMIT)
+     set(LLAMA_BUILD_COMMIT        ${BUILD_COMMIT})
+ endif()
+-set(LLAMA_INSTALL_VERSION 0.0.${LLAMA_BUILD_NUMBER})
++set(LLAMA_INSTALL_VERSION ${LLAMA_BUILD_NUMBER})
+
+ # override ggml options
+ set(GGML_ALL_WARNINGS   ${LLAMA_ALL_WARNINGS})
+--
+2.45.2

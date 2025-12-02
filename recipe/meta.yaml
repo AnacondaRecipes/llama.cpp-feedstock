@@ -25,13 +25,14 @@ source:
   sha256: a7168a245b5c19d1acc32137b02783fe6b411c13dd1a6bf064abe5c2d1ceba21
 
   patches:
+    - patches/fix-macos-dylib-version.patch
     - patches/mkl.patch                     # [blas_impl == "mkl"]
     - patches/metal_gpu_selection.patch     # [osx]
     - patches/hwcap_sve_check.patch         # [linux and aarch64]
     - patches/no-armv9-support-gcc11.patch  # [linux and aarch64]
     - patches/fix-convert_lora_to_gguf.patch
     - patches/fix-models-path.patch
-    # TODO: Re-evaluate Metal patches for b7223 - may not be needed if upstream fixed
+    # TODO: Re-evaluate Metal patches for b7229 - may not be needed if upstream fixed
     # - patches/disable-metal-bf16.patch      # [osx]
     # - patches/disable-metal-flash-attention.patch  # [osx]
 
