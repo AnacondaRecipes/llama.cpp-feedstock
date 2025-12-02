@@ -1,6 +1,6 @@
 {% set name = "llama.cpp-meta" %}
-{% set upstream_release = "b6872" %}
-{% set upstream_commit = "f549b0007dbdd683215820f7229ce180a12b191d" %}
+{% set upstream_release = "b7223" %}
+{% set upstream_commit = "98bd9ab1e4fdef1497da628574bb90d0890539e7" %}
 {% set version = "0.0." + upstream_release[1:] %}
 {% set gguf_version = "0.17.1." + upstream_release[1:] %}
 {% set build_number = 0 %}
@@ -22,19 +22,18 @@ package:
 
 source:
   url: https://github.com/ggml-org/llama.cpp/archive/{{ upstream_release }}.tar.gz
-  sha256: 5dcab3a9c071ee296788083c3b8380e9d52b00720b34f4aa5ab9644be23f79cb
+  sha256: a604cd1f5453ec49620b7fa69f896dbc6e930ec644063c032d6932dce4a6f006
 
   patches:
     - patches/mkl.patch                     # [blas_impl == "mkl"]
     - patches/metal_gpu_selection.patch     # [osx]
-    - patches/disable-metal-bf16.patch      # [osx]
-    - patches/disable-metal-flash-attention.patch  # [osx]
     - patches/hwcap_sve_check.patch         # [linux and aarch64]
     - patches/no-armv9-support-gcc11.patch  # [linux and aarch64]
-    - patches/increase-nmse-tolerance.patch
-    - patches/increase-nmse-tolerance-aarch64.patch  # [linux and aarch64]
     - patches/fix-convert_lora_to_gguf.patch
     - patches/fix-models-path.patch
+    # TODO: Re-evaluate Metal patches for b7223 - may not be needed if upstream fixed
+    # - patches/disable-metal-bf16.patch      # [osx]
+    # - patches/disable-metal-flash-attention.patch  # [osx]
 
 build:
   number: {{ build_number }}
