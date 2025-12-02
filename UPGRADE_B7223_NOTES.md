@@ -127,5 +127,36 @@ Based on comprehensive patch analysis comparing with conda-forge b6191 (which ha
 
 **Patch Reduction**: 10 patches → 6 patches (40% reduction)
 
+## Option A Implementation (2025-12-01)
+
+### Testing Strategy: Let Upstream Prove Itself
+
+**Decision**: Test b7223 WITHOUT Metal Flash Attention patches to see if the 351 commits between b6872 and b7223 fixed the precision issues.
+
+**Implementation**:
+1. ✅ Metal patches commented out in meta.yaml (lines 35-36)
+2. ✅ test-backend-ops NOT skipped on Metal builds
+3. ✅ Build script updated with clear comments about Option A approach
+4. ✅ Only skip test-tokenizers-ggml-vocabs and test-thread-safety on Metal
+
+**Test Configuration**:
+```bash
+# Metal variant test command:
+ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 \
+  -E "(test-tokenizers-ggml-vocabs|test-thread-safety)"
+```
+
+**Expected Outcomes**:
+- ✅ **PASS**: Upstream fixed Flash Attention → keep current setup (no patches needed)
+- ❌ **FAIL with Flash Attention errors**: Upstream NOT fixed → Options:
+  - Regenerate `disable-metal-flash-attention.patch` for b7223
+  - Skip test-backend-ops on Metal builds
+- ❌ **FAIL with BF16 errors**: Upstream NOT fixed → Regenerate `disable-metal-bf16.patch` for b7223
+
+**Next Actions**:
+1. Push branch for CI testing OR test locally on macOS
+2. Review test results to determine if Metal patches are still needed
+3. Document findings and decide final patch strategy
+
 ## Status
-**IN PROGRESS** - Patches cleaned up, ready for test build or further optimization
+**READY FOR TESTING** - Option A implemented, Metal patches commented out, awaiting test results
