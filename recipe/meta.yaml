@@ -174,8 +174,8 @@ outputs:
 
     test:
       commands:
-        - llama-cli --help
-        - llama-server --help
+        - llama-cli --version
+        - llama-server --version
         - test -f $PREFIX/bin/llama-cli      # [unix]
         - test -f $PREFIX/bin/llama-server   # [unix]
         - if not exist %PREFIX%/Library/bin/llama-cli.exe exit 1      # [win]
