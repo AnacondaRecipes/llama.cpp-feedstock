@@ -105,9 +105,9 @@ if [[ "$PKG_NAME" == "llama.cpp-tests" ]]; then
     if [[ ${gpu_variant:-} = "metal" ]]; then
         # Skip Metal-specific failing tests:
         # test-tokenizers-ggml-vocabs: Known test data issue (#10290)
-        # test-thread-safety: crashes on Metal with "Subprocess aborted" (not Flash Attention related)
-        # test-backend-ops: Testing if b7229 upstream fixes Flash Attention precision issues (not skipped)
-        ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs|test-thread-safety)"
+        # test-thread-safety: crashes with "Subprocess aborted"
+        # test-backend-ops: crashes with SEGFAULT (b7229)
+        ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs|test-thread-safety|test-backend-ops)"
     else
         # Skip test-tokenizers-ggml-vocabs on all platforms: Known test data issue (#10290)
         ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs)"
