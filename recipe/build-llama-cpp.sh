@@ -106,7 +106,7 @@ if [[ "$PKG_NAME" == "llama.cpp-tests" ]]; then
         # Skip Metal-specific failing tests:
         # test-tokenizers-ggml-vocabs: Known test data issue (#10290)
         # test-thread-safety: crashes on Metal with "Subprocess aborted" (not Flash Attention related)
-        # test-backend-ops: Flash Attention disabled via patch, should now pass (removed from skip list)
+        # test-backend-ops: Testing if b7223 upstream fixes Flash Attention precision issues (not skipped)
         ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs|test-thread-safety)"
     else
         # Skip test-tokenizers-ggml-vocabs on all platforms: Known test data issue (#10290)
