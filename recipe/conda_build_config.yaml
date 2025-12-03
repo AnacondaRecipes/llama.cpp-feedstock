@@ -16,7 +16,6 @@ c_stdlib:
 c_stdlib_version:
   - 2.28                           # [linux]
   - 12.1                           # [osx]
-  - 2019.11                        # [win]
 
 c_compiler:                        # [win]
   - vs2022                         # [win]
