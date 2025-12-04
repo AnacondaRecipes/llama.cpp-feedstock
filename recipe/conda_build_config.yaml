@@ -16,9 +16,9 @@ libcurl:
 # platforms. See pytorch-feedstock and onnxruntime-feedstock for reference.
 
 c_compiler:                        # [win]
-  - vs2022                         # [win]
+  - vs2019                         # [win]
 cxx_compiler:                      # [win]
-  - vs2022                         # [win]
+  - vs2019                         # [win]
 
 blas_impl:
   - mkl                        # [win or (linux and x86_64)]
