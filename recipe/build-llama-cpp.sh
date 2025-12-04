@@ -29,9 +29,6 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
         # to run metal and metallib commands to compile Metal kernels
         GGML_ARGS="${GGML_ARGS} -DGGML_METAL=ON"
         GGML_ARGS="${GGML_ARGS} -DGGML_METAL_EMBED_LIBRARY=ON"
-        # Note: BF16 is disabled via patch (disable-metal-bf16.patch) to prevent
-        # Metal shader compilation crashes on macOS SDK < 15
-        # TODO look into GGML_METAL_MACOSX_VERSION_MIN and GGML_METAL_STD
     fi
 fi
 
@@ -97,10 +94,6 @@ if [[ "$PKG_NAME" == "llama.cpp-tests" ]]; then
 
     pushd build_${gpu_variant}
     # test-tokenizers-ggml-vocabs requires git-lfs to download the model files
-
-    # Note: BF16 is disabled via patch (disable-metal-bf16.patch) to ensure
-    # stability across all macOS versions. This prevents Metal shader compilation
-    # crashes that occurred with BF16 enabled on macOS SDK < 15.
 
     if [[ ${gpu_variant:-} = "metal" ]]; then
         # Skip Metal-specific failing tests:
