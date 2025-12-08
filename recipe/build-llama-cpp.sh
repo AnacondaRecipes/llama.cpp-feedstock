@@ -73,13 +73,10 @@ cmake --install build
 
 pushd build
 # test-tokenizers-ggml-vocabs requires git-lfs to download the model files
-if [[ "${gpu_variant}" == "metal" ]] || [[ "${gpu_variant}" == "cuda-12" ]]; then
-    # For Metal and CUDA: run all tests except test-backend-ops first
-    ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs|test-backend-ops)"
-    # Then run test-backend-ops separately to capture logs (don't fail build if it fails)
-    echo "=== Running test-backend-ops separately to capture logs ==="
-    ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -R "test-backend-ops" || true
-else
-    ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs)"
-fi
+# Run all tests except test-backend-ops first (test-backend-ops has known issues on all platforms in b6188)
+ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs|test-backend-ops)"
+# Then run test-backend-ops separately to capture logs (don't fail build if it fails)
+# Per Charles's request: capture failure logs without failing the build
+echo "=== Running test-backend-ops separately to capture logs ==="
+ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -R "test-backend-ops" || true
 popd
