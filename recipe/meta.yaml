@@ -299,9 +299,10 @@ outputs:
       imports:
         - llama_cpp_tools
       commands:
-        - llama-convert-hf-to-gguf --help
-        - llama-convert-llama-ggml-to-gguf --help
-        - llama-convert-lora-to-gguf --help
+        # Skip --help on osx: PyTorch has ABI issue (Symbol not found: __ZN2at3mps14getMPSProfilerEv)
+        - llama-convert-hf-to-gguf --help  # [not osx]
+        - llama-convert-llama-ggml-to-gguf --help  # [not osx]
+        - llama-convert-lora-to-gguf --help  # [not osx]
         - test -d $SP_DIR/llama_cpp_tools/models  # [unix]
         - test -f $SP_DIR/llama_cpp_tools/models/ggml-vocab-llama-bpe.gguf  # [unix]
         - test -d $SP_DIR/llama_cpp_tools/models/templates  # [unix]
