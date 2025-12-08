@@ -1,27 +1,33 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: conda-forge <conda@conda-forge.org>
 Date: Mon, 2 Dec 2024 10:00:00 +0000
-Subject: [PATCH] Fix macOS dylib version format
+Subject: [PATCH] Fix macOS dylib version for large build numbers
 
-Remove 0.0. prefix from LLAMA_INSTALL_VERSION to avoid macOS linker error
-with large build numbers (e.g. 7229).
+macOS linker has a limit of 255 for version components in the a.b.c format.
+Build numbers like 7229 exceed this limit, causing linker errors:
+"ld: malformed 64-bit a.b.c.d.e version number: 0.0.7229"
+
+This patch sets a fixed VERSION for the shared library while preserving
+LLAMA_INSTALL_VERSION in config files (llama.pc, llama-config.cmake).
+
+See: https://github.com/ggml-org/llama.cpp/issues/17258
 
 ---
- CMakeLists.txt | 2 +-
+ src/CMakeLists.txt | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/CMakeLists.txt b/CMakeLists.txt
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
 index 1234567..abcdefg 100644
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
-@@ -28,7 +28,7 @@ endif()
- if (NOT DEFINED LLAMA_BUILD_COMMIT)
-     set(LLAMA_BUILD_COMMIT        ${BUILD_COMMIT})
- endif()
--set(LLAMA_INSTALL_VERSION 0.0.${LLAMA_BUILD_NUMBER})
-+set(LLAMA_INSTALL_VERSION ${LLAMA_BUILD_NUMBER})
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -137,7 +137,7 @@ target_link_libraries(llama PRIVATE
+ )
 
- # override ggml options
- set(GGML_ALL_WARNINGS   ${LLAMA_ALL_WARNINGS})
+ set_target_properties(llama PROPERTIES
+-    VERSION ${LLAMA_INSTALL_VERSION}
++    VERSION 0
+     SOVERSION 0
+ )
+
 --
 2.45.2
