@@ -60,7 +60,7 @@ outputs:
       # variant is slightly preferred by conda's solver, so that it's preferentially
       # installed where the platform supports it.
       number: {{ build_number + 100 }}  # [(gpu_variant or "").startswith('cuda')]
-      number: {{ build_number }}        # [gpu_variant == "none"
+      number: {{ build_number }}        # [gpu_variant == "none"]
       string: cuda{{ cuda_compiler_version | replace('.', '') }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [(gpu_variant or "").startswith('cuda')]
       string: cpu_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                              # [gpu_variant == "none"]
       string: mps_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                                 # [gpu_variant == "metal"]
