@@ -1,7 +1,7 @@
 {% set name = "llama.cpp-meta" %}
 {% set upstream_release = "b7229" %}
 {% set upstream_commit = "682e6658bb8de53f56bfbf16efee98697db1b21f" %}
-{% set version = upstream_release[1:] %}
+{% set version = "0.0." + upstream_release[1:] %}
 {% set gguf_version = "0.17.1." + upstream_release[1:] %}
 {% set build_number = 0 %}
 
