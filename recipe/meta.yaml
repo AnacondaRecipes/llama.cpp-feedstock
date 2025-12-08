@@ -299,8 +299,9 @@ outputs:
       imports:
         - llama_cpp_tools
       commands:
-        # Skip --help tests: they import transformers/torch which has ABI issues on some platforms
-        # The imports test above already verifies the package is functional
+        - llama-convert-hf-to-gguf --help
+        - llama-convert-llama-ggml-to-gguf --help
+        - llama-convert-lora-to-gguf --help
         - test -d $SP_DIR/llama_cpp_tools/models  # [unix]
         - test -f $SP_DIR/llama_cpp_tools/models/ggml-vocab-llama-bpe.gguf  # [unix]
         - test -d $SP_DIR/llama_cpp_tools/models/templates  # [unix]
