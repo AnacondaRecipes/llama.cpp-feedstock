@@ -1,0 +1,40 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Conda Build <noreply@anaconda.com>
+Date: Mon, 2 Dec 2025 10:00:00 +0000
+Subject: [PATCH] Disable Metal Flash Attention due to numerical precision issues
+
+AI assistant generated patch.
+
+Metal Flash Attention produces incorrect numerical results on macOS SDK < 15,
+with NMSE errors 14-32x higher than acceptable tolerance (0.068-0.160 vs 0.005).
+
+This patch makes ggml_metal_device_supports_op return false for GGML_OP_FLASH_ATTN_EXT,
+causing Flash Attention operations to fall back to CPU (correct precision).
+
+Can be removed when Metal Flash Attention precision is fixed upstream or
+when building with macOS 15+ SDK.
+
+---
+ ggml/src/ggml-metal/ggml-metal-device.m | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/ggml/src/ggml-metal/ggml-metal-device.m b/ggml/src/ggml-metal/ggml-metal-device.m
+index 1234567..abcdefg 100644
+--- a/ggml/src/ggml-metal/ggml-metal-device.m
++++ b/ggml/src/ggml-metal/ggml-metal-device.m
+@@ -909,6 +909,10 @@ bool ggml_metal_device_supports_op(ggml_metal_device_t dev, const struct ggml_te
+         case GGML_OP_TOP_K:
+         case GGML_OP_ARANGE:
+             return true;
+         case GGML_OP_FLASH_ATTN_EXT:
++            // Disabled for conda-forge: Flash Attention has numerical precision issues on macOS SDK < 15
++            // NMSE errors 0.068-0.160 vs tolerance 0.005 (14-32x too high)
++            // Fall back to CPU implementation for correct results
++            return false;
+             // for new head sizes, add checks here
+             if (op->src[0]->ne[0] != 32 &&
+                 op->src[0]->ne[0] != 40 &&
+
+--
+2.45.2
+
