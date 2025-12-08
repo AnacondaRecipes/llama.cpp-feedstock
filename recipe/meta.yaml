@@ -76,6 +76,7 @@ outputs:
         - cmake
         - ninja-base
         - pkgconfig
+        - zstd                                                # [osx] cmake's ctest needs libzstd at runtime
       host:
         - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
         - cuda-cudart-dev  {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
