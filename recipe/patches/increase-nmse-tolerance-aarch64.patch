@@ -1,7 +1,9 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: conda-forge <conda@conda-forge.org>
+From: Conda Build <noreply@anaconda.com>
 Date: Mon, 2 Dec 2025 11:00:00 -0600
 Subject: [PATCH] Increase NMSE tolerance for ARM64 with OpenBLAS
+
+AI assistant generated patch.
 
 ARM64 with OpenBLAS shows significantly higher numerical error (0.078)
 for specific matrix multiply configurations. This appears to be related to

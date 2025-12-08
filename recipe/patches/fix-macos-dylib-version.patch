@@ -1,7 +1,9 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: conda-forge <conda@conda-forge.org>
+From: Conda Build <noreply@anaconda.com>
 Date: Mon, 2 Dec 2024 10:00:00 +0000
 Subject: [PATCH] Fix macOS dylib version for large build numbers
+
+AI assistant generated patch.
 
 macOS linker has a limit of 255 for version components in the a.b.c format.
 Build numbers like 7229 exceed this limit, causing linker errors:
