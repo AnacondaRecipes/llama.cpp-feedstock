@@ -1,0 +1,50 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Conda Build <noreply@anaconda.com>
+Date: Mon, 2 Dec 2024 10:00:00 +0000
+Subject: [PATCH] Fix macOS dylib version for large build numbers
+
+AI assistant generated patch.
+
+macOS linker has a limit of 255 for version components in the a.b.c format.
+Build numbers like 7229 exceed this limit, causing linker errors:
+"ld: malformed 64-bit a.b.c.d.e version number: 0.0.7229"
+
+This patch sets a fixed VERSION for shared libraries (libllama, libmtmd)
+while preserving LLAMA_INSTALL_VERSION in config files (llama.pc, llama-config.cmake).
+
+See: https://github.com/ggml-org/llama.cpp/issues/17258
+
+---
+ src/CMakeLists.txt        | 2 +-
+ tools/mtmd/CMakeLists.txt | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 1234567..abcdefg 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -137,7 +137,7 @@ target_link_libraries(llama PRIVATE
+ )
+
+ set_target_properties(llama PROPERTIES
+-    VERSION ${LLAMA_INSTALL_VERSION}
++    VERSION 0
+     SOVERSION 0
+ )
+
+diff --git a/tools/mtmd/CMakeLists.txt b/tools/mtmd/CMakeLists.txt
+index 1234567..abcdefg 100644
+--- a/tools/mtmd/CMakeLists.txt
++++ b/tools/mtmd/CMakeLists.txt
+@@ -14,7 +14,7 @@ add_library(mtmd
+             )
+
+ set_target_properties(mtmd PROPERTIES
+-    VERSION ${LLAMA_INSTALL_VERSION}
++    VERSION 0
+     SOVERSION 0
+ )
+
+--
+2.45.2
+

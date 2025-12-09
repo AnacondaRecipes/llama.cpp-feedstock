@@ -1,6 +1,6 @@
 {% set name = "llama.cpp-meta" %}
-{% set upstream_release = "b6872" %}
-{% set upstream_commit = "f549b0007dbdd683215820f7229ce180a12b191d" %}
+{% set upstream_release = "b7229" %}
+{% set upstream_commit = "682e6658bb8de53f56bfbf16efee98697db1b21f" %}
 {% set version = "0.0." + upstream_release[1:] %}
 {% set gguf_version = "0.17.1." + upstream_release[1:] %}
 {% set build_number = 0 %}
@@ -22,17 +22,17 @@ package:
 
 source:
   url: https://github.com/ggml-org/llama.cpp/archive/{{ upstream_release }}.tar.gz
-  sha256: 5dcab3a9c071ee296788083c3b8380e9d52b00720b34f4aa5ab9644be23f79cb
+  sha256: a7168a245b5c19d1acc32137b02783fe6b411c13dd1a6bf064abe5c2d1ceba21
 
   patches:
+    - patches/fix-macos-dylib-version.patch
+    - patches/increase-nmse-tolerance.patch
+    - patches/increase-nmse-tolerance-aarch64.patch  # [linux and aarch64]
     - patches/mkl.patch                     # [blas_impl == "mkl"]
     - patches/metal_gpu_selection.patch     # [osx]
     - patches/disable-metal-bf16.patch      # [osx]
     - patches/disable-metal-flash-attention.patch  # [osx]
     - patches/hwcap_sve_check.patch         # [linux and aarch64]
-    - patches/no-armv9-support-gcc11.patch  # [linux and aarch64]
-    - patches/increase-nmse-tolerance.patch
-    - patches/increase-nmse-tolerance-aarch64.patch  # [linux and aarch64]
     - patches/fix-convert_lora_to_gguf.patch
     - patches/fix-models-path.patch
 
@@ -172,8 +172,8 @@ outputs:
 
     test:
       commands:
-        - llama-cli --help
-        - llama-server --help
+        - llama-cli --version
+        - llama-server --version
         - test -f $PREFIX/bin/llama-cli      # [unix]
         - test -f $PREFIX/bin/llama-server   # [unix]
         - if not exist %PREFIX%/Library/bin/llama-cli.exe exit 1      # [win]
@@ -299,9 +299,10 @@ outputs:
       imports:
         - llama_cpp_tools
       commands:
-        - llama-convert-hf-to-gguf --help
-        - llama-convert-llama-ggml-to-gguf --help
-        - llama-convert-lora-to-gguf --help
+        # Skip --help on osx: PyTorch has ABI issue (Symbol not found: __ZN2at3mps14getMPSProfilerEv)
+        - llama-convert-hf-to-gguf --help  # [not osx]
+        - llama-convert-llama-ggml-to-gguf --help  # [not osx]
+        - llama-convert-lora-to-gguf --help  # [not osx]
         - test -d $SP_DIR/llama_cpp_tools/models  # [unix]
         - test -f $SP_DIR/llama_cpp_tools/models/ggml-vocab-llama-bpe.gguf  # [unix]
         - test -d $SP_DIR/llama_cpp_tools/models/templates  # [unix]

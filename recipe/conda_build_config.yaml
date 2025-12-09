@@ -9,19 +9,16 @@ output_set:
 libcurl:
   - 8
 
-c_stdlib:
-  - sysroot                        # [linux]
-  - macosx_deployment_target       # [osx]
-
-c_stdlib_version:
-  - 2.28                           # [linux]
-  - 12.1                           # [osx]
-  - 2022.14                        # [win]
+# NOTE: c_stdlib and c_stdlib_version are intentionally NOT defined here.
+# When defined with only Linux/macOS selectors (no Windows value), conda-build
+# on Windows tries to find a non-existent c_win-64 package. By not defining
+# these, conda-build uses its internal defaults which work correctly on all
+# platforms. See pytorch-feedstock and onnxruntime-feedstock for reference.
 
 c_compiler:                        # [win]
-  - vs2022                         # [win]
+  - vs2019                         # [win]
 cxx_compiler:                      # [win]
-  - vs2022                         # [win]
+  - vs2019                         # [win]
 
 blas_impl:
   - mkl                        # [win or (linux and x86_64)]
