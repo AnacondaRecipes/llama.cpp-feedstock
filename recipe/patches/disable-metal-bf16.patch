@@ -31,7 +31,7 @@ index 1234567..abcdefg 100644
 -                if (ggml_metal_device_get_props(dev)->has_bfloat) {
 -                    [prep setObject:@"1" forKey:@"GGML_METAL_HAS_BF16"];
 -                }
-+                // Disabled for conda-forge: BF16 causes Metal shader compiler crashes on macOS SDK < 15
++                // Disabled for Anaconda: BF16 causes Metal shader compiler crashes on macOS SDK < 15
 +                // if (ggml_metal_device_get_props(dev)->has_bfloat) {
 +                //     [prep setObject:@"1" forKey:@"GGML_METAL_HAS_BF16"];
 +                // }
