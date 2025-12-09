@@ -27,7 +27,7 @@ index 1234567..abcdefg 100644
          case GGML_OP_ARANGE:
              return true;
          case GGML_OP_FLASH_ATTN_EXT:
-+            // Disabled for conda-forge: Flash Attention has numerical precision issues on macOS SDK < 15
++            // Disabled for Anaconda: Flash Attention has numerical precision issues on macOS SDK < 15
 +            // NMSE errors 0.068-0.160 vs tolerance 0.005 (14-32x too high)
 +            // Fall back to CPU implementation for correct results
 +            return false;
