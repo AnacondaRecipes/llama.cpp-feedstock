@@ -99,10 +99,19 @@ if [[ "$PKG_NAME" == "llama.cpp-tests" ]]; then
         # Skip Metal-specific failing tests:
         # test-tokenizers-ggml-vocabs: Known test data issue (#10290)
         # test-thread-safety: crashes with "Subprocess aborted" (investigating)
-        # test-backend-ops: Fixed by disable-metal-bf16.patch and disable-metal-flash-attention.patch
         ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs|test-thread-safety)"
+    elif [[ ${gpu_variant:0:5} = "cuda-" ]]; then
+        # Check GPU compute capability - skip test-backend-ops on older GPUs (<=7.5)
+        # T4 (SM 7.5) has limited shared memory causing Flash Attention crashes
+        COMPUTE_CAP=$(nvidia-smi --query-gpu=compute_cap --format=csv,noheader 2>/dev/null | head -1 | tr -d '.')
+        if [[ -n "$COMPUTE_CAP" ]] && [[ "$COMPUTE_CAP" -le 75 ]]; then
+            echo "GPU compute capability <= 7.5 detected, skipping test-backend-ops (shared memory limits)"
+            ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs|test-backend-ops)"
+        else
+            ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs)"
+        fi
     else
-        # Skip test-tokenizers-ggml-vocabs on all platforms: Known test data issue (#10290)
+        # Skip test-tokenizers-ggml-vocabs on all platforms: Requires git-lfs to download model files
         ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs)"
     fi
     popd
