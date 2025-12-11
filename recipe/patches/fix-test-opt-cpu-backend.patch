@@ -1,0 +1,29 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Conda Build <noreply@anaconda.com>
+Date: Tue, 19 Nov 2024 00:00:00 +0000
+Subject: [PATCH] Fix test-opt linking with GGML_BACKEND_DL
+
+When using dynamic backend loading (GGML_BACKEND_DL), the CPU backend functions
+ggml_backend_is_cpu() and ggml_backend_cpu_set_n_threads() are not available
+in the main libraries as they are in the dynamically loaded CPU backend plugin.
+
+---
+ tests/test-opt.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tests/test-opt.cpp b/tests/test-opt.cpp
+index 1234567..abcdefg 100644
+--- a/tests/test-opt.cpp
++++ b/tests/test-opt.cpp
+@@ -902,7 +902,7 @@ int main(void) {
+
+         ggml_backend_t backend = ggml_backend_dev_init(devs[i], NULL);
+         GGML_ASSERT(backend != NULL);
+-#ifndef _MSC_VER
++#if !defined(_MSC_VER) && !defined(GGML_BACKEND_DL)
+         if (ggml_backend_is_cpu(backend)) {
+             ggml_backend_cpu_set_n_threads(backend, std::thread::hardware_concurrency() / 2);
+         }
+--
+2.39.5 (Apple Git-154)
+

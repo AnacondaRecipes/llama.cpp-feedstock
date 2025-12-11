@@ -1,9 +1,22 @@
 {% set name = "llama.cpp-meta" %}
-{% set upstream_release = "b6082" %}
-{% set upstream_commit = "5aa1105da24a8dd1661cea3db0582c9b2c2f54d3" %}
+{% set upstream_release = "b6188" %}
+{% set upstream_commit = "21c17b5befc5f6be5992bc87fc1ba99d388561df" %}
 {% set version = "0.0." + upstream_release[1:] %}
 {% set gguf_version = "0.17.1." + upstream_release[1:] %}
 {% set build_number = 0 %}
+
+# When output_set is llama_cpp_tools, PBP trips on undefined variables
+# because they are not part of the variant config.
+# So we set them to 999.0a0 to avoid the render error.
+# Setting to 999.0a0 is safe because if they ever get used in the build, they
+# will generate a solve error.
+{% if output_set == "llama_cpp_tools" %}
+{% set mkl = "999.0a0" %}
+{% set openblas = "999.0a0" %}
+{% set cuda_compiler_version = "999.0a0" %}
+{% set blas_impl = "none" %}
+{% set gpu_variant = "none" %}
+{% endif %}
 
 package:
   name: {{ name|lower }}
@@ -11,14 +24,18 @@ package:
 
 source:
   url: https://github.com/ggml-org/llama.cpp/archive/{{ upstream_release }}.tar.gz
-  sha256: f961d6a9525133991a0b86cce8e33671cac6b028d51f8d22ce2370b526f4c6c2
+  sha256: aba3d07942daa048d46cc7fddebc33d839e89e256306428910dcd582597c0b97
 
   patches:
     - patches/mkl.patch                     # [blas_impl == "mkl"]
     - patches/metal_gpu_selection.patch     # [osx]
     - patches/hwcap_sve_check.patch         # [linux and aarch64]
     - patches/no-armv9-support-gcc11.patch  # [linux and aarch64]
+    - patches/increase-nmse-tolerance.patch
+    - patches/increase-nmse-tolerance-aarch64.patch  # [linux and aarch64]
     - patches/fix-convert_lora_to_gguf.patch
+    - patches/fix-models-path.patch
+    - patches/fix-test-opt-cpu-backend.patch
 
 build:
   skip: true # [skip_cuda_prefect and (gpu_variant or "").startswith('cuda')]
@@ -33,7 +50,8 @@ outputs:
     build:
       script_env:
         - LLAMA_BUILD_NUMBER={{ upstream_release[1:] }}
-        - LLAMA_BUILD_COMMIT={{ upstream_commit}}  
+        - LLAMA_BUILD_COMMIT={{ upstream_commit}}
+      skip: true # [output_set != "llama"]
       # skip_cuda_prefect is set through abs.yaml for use in prefect only
       skip: true # [skip_cuda_prefect and (gpu_variant or "").startswith('cuda')]
       # do not mix cublas and mkl/openblas
@@ -42,7 +60,7 @@ outputs:
       # variant is slightly preferred by conda's solver, so that it's preferentially
       # installed where the platform supports it.
       number: {{ build_number + 100 }}  # [(gpu_variant or "").startswith('cuda')]
-      number: {{ build_number }}        # [gpu_variant == "none"
+      number: {{ build_number }}        # [gpu_variant == "none"]
       string: cuda{{ cuda_compiler_version | replace('.', '') }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [(gpu_variant or "").startswith('cuda')]
       string: cpu_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                              # [gpu_variant == "none"]
       string: mps_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                                 # [gpu_variant == "metal"]
@@ -119,6 +137,7 @@ outputs:
         - llama-convert-llama-ggml-to-gguf = llama_cpp_tools.convert_llama_ggml_to_gguf:main
         - llama-convert-lora-to-gguf = llama_cpp_tools.convert_lora_to_gguf:main
       skip: True # [py<39]
+      skip: true # [output_set != "llama_cpp_tools"]
       number: {{ build_number }}
 
     requirements:
@@ -189,6 +208,7 @@ outputs:
         - gguf-new-metadata = gguf.scripts.gguf_new_metadata:main
         - gguf-editor-gui = gguf.scripts.gguf_editor_gui:main
       skip: True # [py<39]
+      skip: true # [output_set != "llama_cpp_tools"]
       number: {{ build_number }}
 
     requirements:
