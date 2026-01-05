@@ -1,6 +1,6 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Conda Build <noreply@anaconda.com>
-Date: Mon, 2 Dec 2025 11:00:00 -0600
+Date: Sun, 5 Jan 2026 10:00:00 -0600
 Subject: [PATCH] Increase NMSE tolerance for ARM64 with OpenBLAS
 
 AI assistant generated patch.
@@ -17,7 +17,7 @@ for architecture-specific precision differences.
 Applies on top of increase-nmse-tolerance.patch (5e-4 -> 5e-3).
 This patch further increases: 5e-3 -> 1e-1 for aarch64 only.
 
-Updated for b7345: Adjusted for new test structure (9 instances).
+Updated for b7633: Adjusted for new test structure (9 instances).
 
 ---
  tests/test-backend-ops.cpp | 18 +++++++++---------
@@ -27,7 +27,7 @@ diff --git a/tests/test-backend-ops.cpp b/tests/test-backend-ops.cpp
 index f5e6a7b8c..d7c8e9f0a 100644
 --- a/tests/test-backend-ops.cpp
 +++ b/tests/test-backend-ops.cpp
-@@ -3568,7 +3568,7 @@
+@@ -3683,7 +3683,7 @@
      }
 
      double max_nmse_err() override {
@@ -36,7 +36,7 @@ index f5e6a7b8c..d7c8e9f0a 100644
      }
 
      int64_t grad_nmax() override {
-@@ -3696,7 +3696,7 @@
+@@ -3811,7 +3811,7 @@
      }
 
      double max_nmse_err() override {
@@ -45,7 +45,7 @@ index f5e6a7b8c..d7c8e9f0a 100644
      }
 
      uint64_t op_flops(ggml_tensor * t) override {
-@@ -3756,7 +3756,7 @@
+@@ -3871,7 +3871,7 @@
      }
 
      double max_nmse_err() override {
@@ -54,7 +54,7 @@ index f5e6a7b8c..d7c8e9f0a 100644
      }
 
      uint64_t op_flops(ggml_tensor * t) override {
-@@ -3835,7 +3835,7 @@
+@@ -3950,7 +3950,7 @@
      }
 
      double max_nmse_err() override {
@@ -63,7 +63,7 @@ index f5e6a7b8c..d7c8e9f0a 100644
      }
 
      test_out_prod(ggml_type type_a = GGML_TYPE_F32, ggml_type type_b = GGML_TYPE_F32,
-@@ -4560,7 +4560,7 @@
+@@ -4675,7 +4675,7 @@
      }
 
      double max_nmse_err() override {
@@ -72,7 +72,7 @@ index f5e6a7b8c..d7c8e9f0a 100644
      }
 
      test_conv_transpose_2d(std::array<int64_t, 4> ne_input = {10, 10, 3, 1}, // [input_width, input_height, input_channels, 1]
-@@ -4712,7 +4712,7 @@
+@@ -4827,7 +4827,7 @@
      }
 
      double max_nmse_err() override {
@@ -81,7 +81,7 @@ index f5e6a7b8c..d7c8e9f0a 100644
      }
 
      uint64_t op_flops(ggml_tensor * t) override {
-@@ -4844,7 +4844,7 @@
+@@ -4959,7 +4959,7 @@
      }
 
      double max_nmse_err() override {
@@ -90,7 +90,7 @@ index f5e6a7b8c..d7c8e9f0a 100644
      }
 
      uint64_t op_flops(ggml_tensor * t) override {
-@@ -5302,7 +5302,7 @@
+@@ -5464,7 +5464,7 @@
      }
 
      double max_nmse_err() override {
@@ -99,7 +99,7 @@ index f5e6a7b8c..d7c8e9f0a 100644
      }
  };
 
-@@ -5826,7 +5826,7 @@
+@@ -6000,7 +6000,7 @@
      }
 
      double max_nmse_err() override {

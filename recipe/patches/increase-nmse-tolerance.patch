@@ -9,6 +9,8 @@ This was observed on Windows instance for CUDA builds.
 Increases tolerance from 5e-4 to 5e-3 for 8 test operations
 that perform matrix computations sensitive to floating-point rounding.
 
+Updated for b7633.
+
 ---
  tests/test-backend-ops.cpp | 16 ++++++++--------
  1 file changed, 8 insertions(+), 8 deletions(-)
@@ -17,7 +19,7 @@ diff --git a/tests/test-backend-ops.cpp b/tests/test-backend-ops.cpp
 index a1b2c3d4e..f5e6a7b8c 100644
 --- a/tests/test-backend-ops.cpp
 +++ b/tests/test-backend-ops.cpp
-@@ -3568,7 +3568,7 @@
+@@ -3683,7 +3683,7 @@
      }
 
      double max_nmse_err() override {
@@ -26,7 +28,7 @@ index a1b2c3d4e..f5e6a7b8c 100644
      }
 
      int64_t grad_nmax() override {
-@@ -3696,7 +3696,7 @@
+@@ -3811,7 +3811,7 @@
      }
 
      double max_nmse_err() override {
@@ -35,7 +37,7 @@ index a1b2c3d4e..f5e6a7b8c 100644
      }
 
      uint64_t op_flops(ggml_tensor * t) override {
-@@ -3756,7 +3756,7 @@
+@@ -3871,7 +3871,7 @@
      }
 
      double max_nmse_err() override {
@@ -44,7 +46,7 @@ index a1b2c3d4e..f5e6a7b8c 100644
      }
 
      uint64_t op_flops(ggml_tensor * t) override {
-@@ -3835,7 +3835,7 @@
+@@ -3950,7 +3950,7 @@
      }
 
      double max_nmse_err() override {
@@ -53,7 +55,7 @@ index a1b2c3d4e..f5e6a7b8c 100644
      }
 
      test_out_prod(ggml_type type_a = GGML_TYPE_F32, ggml_type type_b = GGML_TYPE_F32,
-@@ -4560,7 +4560,7 @@
+@@ -4675,7 +4675,7 @@
      }
 
      double max_nmse_err() override {
@@ -62,7 +64,7 @@ index a1b2c3d4e..f5e6a7b8c 100644
      }
 
      test_conv_transpose_2d(std::array<int64_t, 4> ne_input = {10, 10, 3, 1}, // [input_width, input_height, input_channels, 1]
-@@ -4712,7 +4712,7 @@
+@@ -4827,7 +4827,7 @@
      }
 
      double max_nmse_err() override {
@@ -71,7 +73,7 @@ index a1b2c3d4e..f5e6a7b8c 100644
      }
 
      uint64_t op_flops(ggml_tensor * t) override {
-@@ -4844,7 +4844,7 @@
+@@ -4959,7 +4959,7 @@
      }
 
      double max_nmse_err() override {
@@ -80,7 +82,7 @@ index a1b2c3d4e..f5e6a7b8c 100644
      }
 
      uint64_t op_flops(ggml_tensor * t) override {
-@@ -5826,7 +5826,7 @@
+@@ -6000,7 +6000,7 @@
      }
 
      double max_nmse_err() override {

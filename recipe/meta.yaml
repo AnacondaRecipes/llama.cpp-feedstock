@@ -1,10 +1,9 @@
 {% set name = "llama.cpp-meta" %}
-{% set upstream_release = "b7345" %}
-{% set upstream_commit = "17f7f4baad8b3a716ee139da7bb56ae984e8c0fa" %}
+{% set upstream_release = "b7633" %}
+{% set upstream_commit = "2da64a2f8a47894d70bc87a160dcb57a3df63b6e" %}
 {% set version = "0.0." + upstream_release[1:] %}
 {% set gguf_version = "0.17.1." + upstream_release[1:] %}
 {% set build_number = 0 %}
-# re-trigger CI
 
 # When output_set is llama_cpp_tools, PBP trips on undefined variables
 # because they are not part of the variant config.
@@ -23,7 +22,7 @@ package:
 
 source:
   url: https://github.com/ggml-org/llama.cpp/archive/{{ upstream_release }}.tar.gz
-  sha256: 89131912a3a9aff79fd322f9709e9691d0b19929d55ceee6571dc51f17d76a63
+  sha256: 11e5ca19aea709c5ad83b03330eab8555c378d1c8479dcbf96faf96acdcb8969
 
   patches:
     - patches/fix-macos-dylib-version.patch
