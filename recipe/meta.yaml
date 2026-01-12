@@ -28,7 +28,6 @@ source:
     - patches/fix-macos-dylib-version.patch
     - patches/increase-nmse-tolerance.patch
     - patches/increase-nmse-tolerance-aarch64.patch  # [linux and aarch64]
-    - patches/mkl.patch                     # [blas_impl == "mkl"]
     - patches/metal_gpu_selection.patch     # [osx]
     - patches/disable-metal-bf16.patch      # [osx]
     - patches/disable-metal-flash-attention.patch  # [osx]
