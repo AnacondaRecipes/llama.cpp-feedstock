@@ -1,6 +1,6 @@
 {% set name = "llama.cpp-meta" %}
-{% set upstream_release = "b7633" %}
-{% set upstream_commit = "2da64a2f8a47894d70bc87a160dcb57a3df63b6e" %}
+{% set upstream_release = "b7710" %}
+{% set upstream_commit = "2bbe4c2cf8298114e3908e285125b9d0d1c5bb42" %}
 {% set version = "0.0." + upstream_release[1:] %}
 {% set gguf_version = "0.17.1." + upstream_release[1:] %}
 {% set build_number = 0 %}
@@ -22,7 +22,7 @@ package:
 
 source:
   url: https://github.com/ggml-org/llama.cpp/archive/{{ upstream_release }}.tar.gz
-  sha256: 11e5ca19aea709c5ad83b03330eab8555c378d1c8479dcbf96faf96acdcb8969
+  sha256: 4c5d3d38221a27ce4a75e406d8e5229fab8b0004f579365167f8b900e0f35181
 
   patches:
     - patches/fix-macos-dylib-version.patch
