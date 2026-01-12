@@ -54,10 +54,8 @@ outputs:
       # Use a build number difference to ensure that the GPU
       # variant is slightly preferred by conda's solver, so that it's preferentially
       # installed where the platform supports it.
-      # Different CUDA versions get different build numbers so the latest variant is preferred
-      number: {{ build_number + 110 }}  # [(gpu_variant or "").startswith('cuda') and cuda_compiler_version == "13.0"]
-      number: {{ build_number + 100 }}  # [(gpu_variant or "").startswith('cuda') and cuda_compiler_version == "12.8"]
-      number: {{ build_number + 100 }}  # [gpu_variant == "metal"]
+      
+      number: {{ build_number + 100 }}  # [gpu_variant != "none"]
       number: {{ build_number }}        # [gpu_variant == "none"]
       string: cuda{{ cuda_compiler_version | replace('.', '') }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [(gpu_variant or "").startswith('cuda')]
       string: cpu_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                 # [gpu_variant == "none"]
@@ -131,10 +129,8 @@ outputs:
       # Use a build number difference to ensure that the GPU
       # variant is slightly preferred by conda's solver, so that it's preferentially
       # installed where the platform supports it.
-      # Different CUDA versions get different build numbers so the latest variant is preferred
-      number: {{ build_number + 110 }}  # [(gpu_variant or "").startswith('cuda') and cuda_compiler_version == "13.0"]
-      number: {{ build_number + 100 }}  # [(gpu_variant or "").startswith('cuda') and cuda_compiler_version == "12.8"]
-      number: {{ build_number + 100 }}  # [gpu_variant == "metal"]
+      
+      number: {{ build_number + 100 }}  # [gpu_variant != "none"]
       number: {{ build_number }}        # [gpu_variant == "none"]
       string: cuda{{ cuda_compiler_version | replace('.', '') }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [(gpu_variant or "").startswith('cuda')]
       string: cpu_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                 # [gpu_variant == "none"]
@@ -210,10 +206,8 @@ outputs:
       # Use a build number difference to ensure that the GPU
       # variant is slightly preferred by conda's solver, so that it's preferentially
       # installed where the platform supports it.
-      # Different CUDA versions get different build numbers so the latest variant is preferred
-      number: {{ build_number + 110 }}  # [(gpu_variant or "").startswith('cuda') and cuda_compiler_version == "13.0"]
-      number: {{ build_number + 100 }}  # [(gpu_variant or "").startswith('cuda') and cuda_compiler_version == "12.8"]
-      number: {{ build_number + 100 }}  # [gpu_variant == "metal"]
+      
+      number: {{ build_number + 100 }}  # [gpu_variant != "none"]
       number: {{ build_number }}        # [gpu_variant == "none"]
       string: cuda{{ cuda_compiler_version | replace('.', '') }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [(gpu_variant or "").startswith('cuda')]
       string: cpu_{{ blas_impl }}_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                 # [gpu_variant == "none"]
