@@ -351,6 +351,7 @@ outputs:
         - numpy >=1.17
         - tqdm >=4.27
         - pyyaml >=5.1
+        - requests >=2.25
         - sentencepiece >=0.1.98,<=0.2.0
       run_constrained:
         - pyside6 >=6.9,<7.0
