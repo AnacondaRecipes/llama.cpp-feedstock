@@ -11,7 +11,9 @@ fi
 GGML_ARGS="-DGGML_NATIVE=OFF -DGGML_CPU_ALL_VARIANTS=ON -DGGML_BACKEND_DL=ON"
 
 if [[ ${gpu_variant:0:5} = "cuda-" ]]; then
-    CMAKE_ARGS="${CMAKE_ARGS} -DCMAKE_CUDA_ARCHITECTURES=all-major"
+    # Exclude Blackwell (sm_120) - MXFP4 instructions require CUDA 13.0+
+    # Support: Maxwell(50), Pascal(60), Volta(70), Turing(75), Ampere(80,86), Ada(89), Hopper(90)
+    CMAKE_ARGS="${CMAKE_ARGS} -DCMAKE_CUDA_ARCHITECTURES=50;60;70;75;80;86;89;90"
     GGML_ARGS="${GGML_ARGS} -DGGML_CUDA=ON"
     # cuda-compat provided libcuda.so.1
     LDFLAGS="$LDFLAGS -Wl,-rpath-link,${PREFIX}/cuda-compat/"
