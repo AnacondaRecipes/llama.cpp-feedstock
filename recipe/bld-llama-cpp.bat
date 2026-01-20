@@ -5,9 +5,9 @@ REM GGML build options
 set GGML_ARGS=-DGGML_NATIVE=OFF -DGGML_CPU_ALL_VARIANTS=ON -DGGML_BACKEND_DL=ON
 
 if "%gpu_variant:~0,5%"=="cuda-" (
-    REM Exclude Blackwell (sm_120) - MXFP4 instructions require CUDA 13.0+
-    REM Support: Maxwell(50), Pascal(60), Volta(70), Turing(75), Ampere(80,86), Ada(89), Hopper(90)
-    set CMAKE_ARGS=!CMAKE_ARGS! -DCMAKE_CUDA_ARCHITECTURES=50;60;70;75;80;86;89;90
+    REM Let llama.cpp's CMakeLists.txt handle architecture selection
+    REM It automatically uses 120a-real for CUDA 12.8+ (fixes MXFP4 compilation)
+    REM See: https://github.com/ggml-org/llama.cpp/pull/18672
     set GGML_ARGS=!GGML_ARGS! -DGGML_CUDA=ON
 ) else (
     set GGML_ARGS=!GGML_ARGS! -DGGML_CUDA=OFF

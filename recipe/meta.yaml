@@ -77,7 +77,7 @@ outputs:
       host:
         - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
         - cuda-cudart-dev  {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
-        - libcublas-dev    {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
+        - libcublas-dev                                       # [(gpu_variant or "").startswith('cuda')]
         - cuda-compat      {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda') and linux]
         - openblas-devel {{ openblas }}                       # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "openblas"]
         - mkl-devel {{ mkl }}                                 # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
@@ -152,7 +152,7 @@ outputs:
       host:
         - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
         - cuda-cudart-dev  {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
-        - libcublas-dev    {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
+        - libcublas-dev                                       # [(gpu_variant or "").startswith('cuda')]
         - cuda-compat      {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda') and linux]
         - openblas-devel {{ openblas }}                       # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "openblas"]
         - mkl-devel {{ mkl }}                                 # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
@@ -227,7 +227,7 @@ outputs:
       host:
         - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
         - cuda-cudart-dev  {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
-        - libcublas-dev    {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
+        - libcublas-dev                                       # [(gpu_variant or "").startswith('cuda')]
         - cuda-compat      {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda') and linux]
         - openblas-devel {{ openblas }}                       # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "openblas"]
         - mkl-devel {{ mkl }}                                 # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
