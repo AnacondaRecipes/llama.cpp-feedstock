@@ -1,93 +1,93 @@
-From 94eb0b1f1bb0df0a0517bbc6631ef282edd7947c Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Charles Bousseau <cbousseau@anaconda.com>
 Date: Wed, 6 Aug 2025 22:09:29 +0200
 Subject: [PATCH] tests: increase NMSE tolerance
 
-Fixes numerical precision failures due to floating-point rounding errors
+Fixes numerical precision failures due to floating-point rounding errors.
 This was observed on Windows instance for CUDA builds.
 
-Updated for b7229: Increases tolerance from 5e-4 to 5e-3 for 8 test operations
+Increases tolerance from 5e-4 to 5e-3 for 8 test operations
 that perform matrix computations sensitive to floating-point rounding.
 
+Updated for b7710.
+
 ---
- tests/test-backend-ops.cpp | 16 ++++++++--------
+ tests/test-backend-ops.cpp | 8 +++++---
  1 file changed, 8 insertions(+), 8 deletions(-)
 
 diff --git a/tests/test-backend-ops.cpp b/tests/test-backend-ops.cpp
 index a1b2c3d4e..f5e6a7b8c 100644
 --- a/tests/test-backend-ops.cpp
 +++ b/tests/test-backend-ops.cpp
-@@ -3551,7 +3551,7 @@
+@@ -3714,7 +3714,7 @@
      }
-
+ 
      double max_nmse_err() override {
 -        return 5e-4;
 +        return 5e-3;
      }
-
-     int64_t grad_nmax() override {
-@@ -3679,7 +3679,7 @@
+ 
+     double max_nmse_err(ggml_backend_t backend) override {
+@@ -3850,7 +3850,7 @@
      }
-
+ 
      double max_nmse_err() override {
 -        return 5e-4;
 +        return 5e-3;
      }
-
+ 
+     double max_nmse_err(ggml_backend_t backend) override {
+@@ -3918,7 +3918,7 @@
+     }
+ 
+     double max_nmse_err() override {
+-        return 5e-4;
++        return 5e-3;
+     }
+ 
      uint64_t op_flops(ggml_tensor * t) override {
-@@ -3739,7 +3739,7 @@
+@@ -3997,7 +3997,7 @@
      }
-
+ 
      double max_nmse_err() override {
 -        return 5e-4;
 +        return 5e-3;
      }
-
-     uint64_t op_flops(ggml_tensor * t) override {
-@@ -3818,7 +3818,7 @@
+ 
+     test_out_prod(ggml_type type_a = GGML_TYPE_F32, ggml_type type_b = GGML_TYPE_F32,
+@@ -4722,7 +4722,7 @@
      }
-
-     double max_nmse_err() override {
--        return 5e-4;
-+        return 5e-3;
-     }
-
-     test_mul_mat_id(ggml_type type_a = GGML_TYPE_F32, ggml_type type_b = GGML_TYPE_F32,
-@@ -4543,7 +4543,7 @@
-     }
-
+ 
      double max_nmse_err() override {
 -        return 5e-4; // The default 1e-7 is too small for Vulkan.
 +        return 5e-3; // The default 1e-7 is too small for Vulkan.
      }
-
+ 
      test_conv_transpose_2d(std::array<int64_t, 4> ne_input = {10, 10, 3, 1}, // [input_width, input_height, input_channels, 1]
-@@ -4695,7 +4695,7 @@
+@@ -4874,7 +4874,7 @@
      }
-
+ 
      double max_nmse_err() override {
 -        return 5e-4;
 +        return 5e-3;
      }
-
+ 
      uint64_t op_flops(ggml_tensor * t) override {
-@@ -4827,7 +4827,7 @@
+@@ -5006,7 +5006,7 @@
      }
-
+ 
      double max_nmse_err() override {
 -        return 5e-4;
 +        return 5e-3;
      }
-
+ 
      uint64_t op_flops(ggml_tensor * t) override {
-@@ -5745,7 +5745,7 @@
+@@ -6047,7 +6047,7 @@
      }
-
+ 
      double max_nmse_err() override {
 -        return 5e-4;
 +        return 5e-3;
      }
-
+ 
      uint64_t op_flops(ggml_tensor * t) override {
---
-2.45.2

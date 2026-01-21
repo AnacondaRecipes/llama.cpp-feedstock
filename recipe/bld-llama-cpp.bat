@@ -5,7 +5,9 @@ REM GGML build options
 set GGML_ARGS=-DGGML_NATIVE=OFF -DGGML_CPU_ALL_VARIANTS=ON -DGGML_BACKEND_DL=ON
 
 if "%gpu_variant:~0,5%"=="cuda-" (
-    set CMAKE_ARGS=!CMAKE_ARGS! -DCMAKE_CUDA_ARCHITECTURES=all-major
+    REM Let llama.cpp's CMakeLists.txt handle architecture selection
+    REM It automatically uses 120a-real for CUDA 12.8+ (fixes MXFP4 compilation)
+    REM See: https://github.com/ggml-org/llama.cpp/pull/18672
     set GGML_ARGS=!GGML_ARGS! -DGGML_CUDA=ON
 ) else (
     set GGML_ARGS=!GGML_ARGS! -DGGML_CUDA=OFF
