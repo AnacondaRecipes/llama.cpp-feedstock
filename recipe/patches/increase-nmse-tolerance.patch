@@ -9,10 +9,10 @@ This was observed on Windows instance for CUDA builds.
 Increases tolerance from 5e-4 to 5e-3 for 8 test operations
 that perform matrix computations sensitive to floating-point rounding.
 
-Updated for b7710.
+Updated for b7819.
 
 ---
- tests/test-backend-ops.cpp | 8 +++++---
+ tests/test-backend-ops.cpp | 16 ++++++++++------
  1 file changed, 8 insertions(+), 8 deletions(-)
 
 diff --git a/tests/test-backend-ops.cpp b/tests/test-backend-ops.cpp
@@ -21,73 +21,73 @@ index a1b2c3d4e..f5e6a7b8c 100644
 +++ b/tests/test-backend-ops.cpp
 @@ -3714,7 +3714,7 @@
      }
- 
+
      double max_nmse_err() override {
 -        return 5e-4;
 +        return 5e-3;
      }
- 
+
      double max_nmse_err(ggml_backend_t backend) override {
 @@ -3850,7 +3850,7 @@
      }
- 
+
      double max_nmse_err() override {
 -        return 5e-4;
 +        return 5e-3;
      }
- 
+
      double max_nmse_err(ggml_backend_t backend) override {
 @@ -3918,7 +3918,7 @@
      }
- 
+
      double max_nmse_err() override {
 -        return 5e-4;
 +        return 5e-3;
      }
- 
+
      uint64_t op_flops(ggml_tensor * t) override {
 @@ -3997,7 +3997,7 @@
      }
- 
+
      double max_nmse_err() override {
 -        return 5e-4;
 +        return 5e-3;
      }
- 
+
      test_out_prod(ggml_type type_a = GGML_TYPE_F32, ggml_type type_b = GGML_TYPE_F32,
-@@ -4722,7 +4722,7 @@
+@@ -4753,7 +4753,7 @@
      }
- 
+
      double max_nmse_err() override {
 -        return 5e-4; // The default 1e-7 is too small for Vulkan.
 +        return 5e-3; // The default 1e-7 is too small for Vulkan.
      }
- 
+
      test_conv_transpose_2d(std::array<int64_t, 4> ne_input = {10, 10, 3, 1}, // [input_width, input_height, input_channels, 1]
-@@ -4874,7 +4874,7 @@
+@@ -4905,7 +4905,7 @@
      }
- 
+
      double max_nmse_err() override {
 -        return 5e-4;
 +        return 5e-3;
      }
- 
+
      uint64_t op_flops(ggml_tensor * t) override {
-@@ -5006,7 +5006,7 @@
+@@ -5037,7 +5037,7 @@
      }
- 
+
      double max_nmse_err() override {
 -        return 5e-4;
 +        return 5e-3;
      }
- 
+
      uint64_t op_flops(ggml_tensor * t) override {
-@@ -6047,7 +6047,7 @@
+@@ -6078,7 +6078,7 @@
      }
- 
+
      double max_nmse_err() override {
 -        return 5e-4;
 +        return 5e-3;
      }
- 
+
      uint64_t op_flops(ggml_tensor * t) override {

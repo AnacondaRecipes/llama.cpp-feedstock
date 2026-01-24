@@ -1,6 +1,6 @@
 {% set name = "llama.cpp-meta" %}
-{% set upstream_release = "b7710" %}
-{% set upstream_commit = "2bbe4c2cf8298114e3908e285125b9d0d1c5bb42" %}
+{% set upstream_release = "b7819" %}
+{% set upstream_commit = "557515be1e93ed8939dd8a7c7d08765fdbe8be31" %}
 {% set version = "0.0." + upstream_release[1:] %}
 {% set gguf_version = "0.17.1." + upstream_release[1:] %}
 {% set build_number = 0 %}
@@ -22,7 +22,7 @@ package:
 
 source:
   url: https://github.com/ggml-org/llama.cpp/archive/{{ upstream_release }}.tar.gz
-  sha256: 4c5d3d38221a27ce4a75e406d8e5229fab8b0004f579365167f8b900e0f35181
+  sha256: d3eaf7ba0528e07a1e6120a3a42af07d841bbe405eff7bc5273cb172fa95617c
 
   patches:
     - patches/fix-macos-dylib-version.patch
@@ -92,6 +92,7 @@ outputs:
         - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
         - __cuda                                              # [(gpu_variant or "").startswith('cuda')]
         - libcurl # bounds through run_exports
+        - openssl # libcurl links to openssl
 
     test:
       commands:
@@ -169,6 +170,7 @@ outputs:
         - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
         - __cuda                                              # [(gpu_variant or "").startswith('cuda')]
         - libcurl # bounds through run_exports
+        - openssl # libcurl links to openssl
 
     test:
       commands:
@@ -244,6 +246,7 @@ outputs:
         - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
         - __cuda                                              # [(gpu_variant or "").startswith('cuda')]
         - libcurl # bounds through run_exports
+        - openssl # libcurl links to openssl
 
     test:
       commands:
