@@ -1,6 +1,6 @@
 {% set name = "llama.cpp-meta" %}
-{% set upstream_release = "b7819" %}
-{% set upstream_commit = "557515be1e93ed8939dd8a7c7d08765fdbe8be31" %}
+{% set upstream_release = "b7984" %}
+{% set upstream_commit = "f0bfe54f552f4783588f333b90d73920a57c5096" %}
 {% set version = "0.0." + upstream_release[1:] %}
 {% set gguf_version = "0.17.1." + upstream_release[1:] %}
 {% set build_number = 0 %}
@@ -22,7 +22,7 @@ package:
 
 source:
   url: https://github.com/ggml-org/llama.cpp/archive/{{ upstream_release }}.tar.gz
-  sha256: d3eaf7ba0528e07a1e6120a3a42af07d841bbe405eff7bc5273cb172fa95617c
+  sha256: 4a3adf43e850b947b89987f0422adfc613853bdfe72a1bb189b4409659ba9a15
 
   patches:
     - patches/fix-macos-dylib-version.patch
@@ -289,8 +289,8 @@ outputs:
         - python
         # requirements/requirements-convert_legacy_llama.txt
         - numpy >=1.26.4 # loosen bounds to accept numpy 2, which appears to be compatible
-        - sentencepiece >=0.1.98,<=0.2.0
-        - transformers >=4.51.3,<5.0.0
+        - sentencepiece >=0.1.98,<0.3.0
+        - transformers >=4.57.1,<5.0.0
         - protobuf >=4.21.0,<6.0.0 # loosen bounds to accept protobuf 5
         # requirements/requirements-convert_hf_to_gguf.txt
         # requirements/requirements-convert_llama_ggml_to_gguf.txt
@@ -355,7 +355,7 @@ outputs:
         - tqdm >=4.27
         - pyyaml >=5.1
         - requests >=2.25
-        - sentencepiece >=0.1.98,<=0.2.0
+        - sentencepiece >=0.1.98,<0.3.0
       run_constrained:
         - pyside6 >=6.9,<7.0
     
