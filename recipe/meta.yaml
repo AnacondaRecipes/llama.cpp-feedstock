@@ -22,7 +22,7 @@ package:
 
 source:
   url: https://github.com/ggml-org/llama.cpp/archive/{{ upstream_release }}.tar.gz
-  sha256: 4a3adf43e850b947b89987f0422adfc613853bdfe72a1bb189b4409659ba9a15
+  sha256: de654007aca8134f3cf89b8069230186ef92d8c029485581cb85eedc112c8a53
 
   patches:
     - patches/fix-macos-dylib-version.patch
