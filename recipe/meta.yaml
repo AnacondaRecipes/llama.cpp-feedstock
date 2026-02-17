@@ -83,7 +83,7 @@ outputs:
         - mkl-devel {{ mkl }}                                 # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
         - intel-openmp {{ mkl }}                              # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
         - llvm-openmp 17.0.6                                  # [osx]
-        - libcurl {{ libcurl }}
+        - openssl
       run:
         - {{ pin_compatible('cuda-version', max_pin='x.x') }} # [(gpu_variant or "").startswith('cuda')]
         - {{ pin_compatible('intel-openmp') }}                # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
@@ -91,8 +91,6 @@ outputs:
         - _openmp_mutex                                       # [linux]
         - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
         - __cuda                                              # [(gpu_variant or "").startswith('cuda')]
-        - libcurl # bounds through run_exports
-        - openssl # libcurl links to openssl
 
     test:
       commands:
@@ -159,7 +157,7 @@ outputs:
         - mkl-devel {{ mkl }}                                 # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
         - intel-openmp {{ mkl }}                              # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
         - llvm-openmp 17.0.6                                  # [osx]
-        - libcurl {{ libcurl }}
+        - openssl
         - {{ pin_subpackage('libllama', exact=True) }}
       run:
         - {{ pin_subpackage('libllama', exact=True) }}
@@ -169,8 +167,6 @@ outputs:
         - _openmp_mutex                                       # [linux]
         - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
         - __cuda                                              # [(gpu_variant or "").startswith('cuda')]
-        - libcurl # bounds through run_exports
-        - openssl # libcurl links to openssl
 
     test:
       commands:
@@ -234,7 +230,7 @@ outputs:
         - openblas-devel {{ openblas }}                       # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "openblas"]
         - mkl-devel {{ mkl }}                                 # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
         - intel-openmp {{ mkl }}                              # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
-        - libcurl {{ libcurl }}
+        - openssl
         - {{ pin_subpackage('libllama', exact=True) }}
         - {{ pin_subpackage('llama.cpp', exact=True) }}
       run:
@@ -245,8 +241,6 @@ outputs:
         - _openmp_mutex                                       # [linux]
         - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
         - __cuda                                              # [(gpu_variant or "").startswith('cuda')]
-        - libcurl # bounds through run_exports
-        - openssl # libcurl links to openssl
 
     test:
       commands:

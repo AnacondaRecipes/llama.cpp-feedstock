@@ -6,9 +6,6 @@ output_set:
   - llama
   - llama_cpp_tools
 
-libcurl:
-  - 8
-
 # NOTE: c_stdlib and c_stdlib_version are intentionally NOT defined here.
 # When defined with only Linux/macOS selectors (no Windows value), conda-build
 # on Windows tries to find a non-existent c_win-64 package. By not defining

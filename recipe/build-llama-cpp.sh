@@ -53,7 +53,7 @@ fi
 
 # LLAMA build options
 LLAMA_ARGS="-DLLAMA_BUILD_NUMBER=${LLAMA_BUILD_NUMBER} -DLLAMA_BUILD_COMMIT=${LLAMA_BUILD_COMMIT}"
-LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_CURL=ON"
+LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_OPENSSL=ON"
 if [[ "$PKG_NAME" == "libllama" ]]; then
     LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_BUILD_SERVER=OFF"
     LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_BUILD_TOOLS=OFF"
@@ -97,28 +97,24 @@ if [[ "$PKG_NAME" == "llama.cpp-tests" ]]; then
     pushd build_${gpu_variant}
     # test-tokenizers-ggml-vocabs requires git-lfs to download the model files
 
-    # Use explicit path to ctest to avoid picking up broken binary from package cache
-    # (cmake 4.1.2 on macOS has @rpath issue with libzstd)
-    CTEST_CMD="${BUILD_PREFIX}/bin/ctest"
-
     if [[ ${gpu_variant:-} = "metal" ]]; then
         # Skip Metal-specific failing tests:
         # test-tokenizers-ggml-vocabs: Known test data issue (#10290)
         # test-thread-safety: crashes with "Subprocess aborted" (investigating)
-        ${CTEST_CMD} -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs|test-thread-safety)"
+        ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs|test-thread-safety)"
     elif [[ ${gpu_variant:0:5} = "cuda-" ]]; then
         # Check GPU compute capability - skip test-backend-ops on older GPUs (<=7.5)
         # T4 (SM 7.5) has limited shared memory causing Flash Attention crashes
         COMPUTE_CAP=$(nvidia-smi --query-gpu=compute_cap --format=csv,noheader 2>/dev/null | head -1 | tr -d '.')
         if [[ -n "$COMPUTE_CAP" ]] && [[ "$COMPUTE_CAP" -le 75 ]]; then
             echo "GPU compute capability <= 7.5 detected, skipping test-backend-ops (shared memory limits)"
-            ${CTEST_CMD} -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs|test-backend-ops)"
+            ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs|test-backend-ops)"
         else
-            ${CTEST_CMD} -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs)"
+            ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs)"
         fi
     else
         # Skip test-tokenizers-ggml-vocabs on all platforms: Requires git-lfs to download model files
-        ${CTEST_CMD} -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs)"
+        ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs)"
     fi
     popd
 fi
