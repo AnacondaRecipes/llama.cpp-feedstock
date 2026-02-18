@@ -27,6 +27,8 @@ gpu_variant:
   - none
   - metal                      # [osx]
   - cuda-12                    # [win or linux]
+  - cuda-13                    # [win or linux]
+  - cuda-13                    # [win or linux]
 
 # metal builds now require the MTLBuffer gpuAddress property, introduced in macOS 13.0
 # metal builds now require the MTLDataType.bfloat4 data type, introduced in macOS 14.0
@@ -37,9 +39,8 @@ OSX_SDK_VER:                   # [osx]
 cuda_compiler_version:         # [win or linux]
   - none                       # [win or linux]
   - 12.8                       # [win or linux]
-
-cuda_compiler:                 # [win or linux]
-- cuda-nvcc                    # [win or linux]
+  - 13.0                       # [win or linux]
+  - 13.1                       # [win or linux]
 
 zip_keys:                      # [win or linux]
   -                            # [win or linux]
