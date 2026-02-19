@@ -6,9 +6,6 @@ output_set:
   - llama
   - llama_cpp_tools
 
-libcurl:
-  - 8
-
 # NOTE: c_stdlib and c_stdlib_version are intentionally NOT defined here.
 # When defined with only Linux/macOS selectors (no Windows value), conda-build
 # on Windows tries to find a non-existent c_win-64 package. By not defining
@@ -24,12 +21,14 @@ blas_impl:
   - mkl                        # [win or (linux and x86_64)]
   - openblas                   # [linux]
   - accelerate                 # [osx]
-  - cublas                     # [win or (linux and x86_64)]
+  - cublas                     # [win or linux]
 
 gpu_variant:
   - none
   - metal                      # [osx]
-  - cuda-12                    # [win or (linux and x86_64)]
+  - cuda-12                    # [win or linux]
+  - cuda-13                    # [win or linux]
+  - cuda-13                    # [win or linux]
 
 # metal builds now require the MTLBuffer gpuAddress property, introduced in macOS 13.0
 # metal builds now require the MTLDataType.bfloat4 data type, introduced in macOS 14.0
@@ -37,14 +36,13 @@ gpu_variant:
 OSX_SDK_VER:                   # [osx]
   - 14.5                       # [osx]
 
-cuda_compiler_version:         # [win or (linux and x86_64)]
-  - none                       # [win or (linux and x86_64)]
-  - 12.8                       # [win or (linux and x86_64)]
+cuda_compiler_version:         # [win or linux]
+  - none                       # [win or linux]
+  - 12.8                       # [win or linux]
+  - 13.0                       # [win or linux]
+  - 13.1                       # [win or linux]
 
-cuda_compiler:                 # [win or (linux and x86_64)]
-- cuda-nvcc                    # [win or (linux and x86_64)]
-
-zip_keys:                      # [win or (linux and x86_64)]
-  -                            # [win or (linux and x86_64)]
-    - gpu_variant              # [win or (linux and x86_64)]
-    - cuda_compiler_version    # [win or (linux and x86_64)]
+zip_keys:                      # [win or linux]
+  -                            # [win or linux]
+    - gpu_variant              # [win or linux]
+    - cuda_compiler_version    # [win or linux]

@@ -1,6 +1,6 @@
 {% set name = "llama.cpp-meta" %}
-{% set upstream_release = "b7710" %}
-{% set upstream_commit = "2bbe4c2cf8298114e3908e285125b9d0d1c5bb42" %}
+{% set upstream_release = "b7984" %}
+{% set upstream_commit = "f0bfe54f552f4783588f333b90d73920a57c5096" %}
 {% set version = "0.0." + upstream_release[1:] %}
 {% set gguf_version = "0.17.1." + upstream_release[1:] %}
 {% set build_number = 0 %}
@@ -22,7 +22,7 @@ package:
 
 source:
   url: https://github.com/ggml-org/llama.cpp/archive/{{ upstream_release }}.tar.gz
-  sha256: 4c5d3d38221a27ce4a75e406d8e5229fab8b0004f579365167f8b900e0f35181
+  sha256: de654007aca8134f3cf89b8069230186ef92d8c029485581cb85eedc112c8a53
 
   patches:
     - patches/fix-macos-dylib-version.patch
@@ -83,7 +83,7 @@ outputs:
         - mkl-devel {{ mkl }}                                 # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
         - intel-openmp {{ mkl }}                              # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
         - llvm-openmp 17.0.6                                  # [osx]
-        - libcurl {{ libcurl }}
+        - openssl
       run:
         - {{ pin_compatible('cuda-version', max_pin='x.x') }} # [(gpu_variant or "").startswith('cuda')]
         - {{ pin_compatible('intel-openmp') }}                # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
@@ -91,7 +91,6 @@ outputs:
         - _openmp_mutex                                       # [linux]
         - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
         - __cuda                                              # [(gpu_variant or "").startswith('cuda')]
-        - libcurl # bounds through run_exports
 
     test:
       commands:
@@ -158,7 +157,7 @@ outputs:
         - mkl-devel {{ mkl }}                                 # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
         - intel-openmp {{ mkl }}                              # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
         - llvm-openmp 17.0.6                                  # [osx]
-        - libcurl {{ libcurl }}
+        - openssl
         - {{ pin_subpackage('libllama', exact=True) }}
       run:
         - {{ pin_subpackage('libllama', exact=True) }}
@@ -168,7 +167,6 @@ outputs:
         - _openmp_mutex                                       # [linux]
         - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
         - __cuda                                              # [(gpu_variant or "").startswith('cuda')]
-        - libcurl # bounds through run_exports
 
     test:
       commands:
@@ -232,7 +230,7 @@ outputs:
         - openblas-devel {{ openblas }}                       # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "openblas"]
         - mkl-devel {{ mkl }}                                 # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
         - intel-openmp {{ mkl }}                              # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
-        - libcurl {{ libcurl }}
+        - openssl
         - {{ pin_subpackage('libllama', exact=True) }}
         - {{ pin_subpackage('llama.cpp', exact=True) }}
       run:
@@ -243,7 +241,6 @@ outputs:
         - _openmp_mutex                                       # [linux]
         - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
         - __cuda                                              # [(gpu_variant or "").startswith('cuda')]
-        - libcurl # bounds through run_exports
 
     test:
       commands:
@@ -286,8 +283,8 @@ outputs:
         - python
         # requirements/requirements-convert_legacy_llama.txt
         - numpy >=1.26.4 # loosen bounds to accept numpy 2, which appears to be compatible
-        - sentencepiece >=0.1.98,<=0.2.0
-        - transformers >=4.51.3,<5.0.0
+        - sentencepiece >=0.1.98,<0.3.0
+        - transformers >=4.57.1,<5.0.0
         - protobuf >=4.21.0,<6.0.0 # loosen bounds to accept protobuf 5
         # requirements/requirements-convert_hf_to_gguf.txt
         # requirements/requirements-convert_llama_ggml_to_gguf.txt
@@ -352,7 +349,7 @@ outputs:
         - tqdm >=4.27
         - pyyaml >=5.1
         - requests >=2.25
-        - sentencepiece >=0.1.98,<=0.2.0
+        - sentencepiece >=0.1.98,<0.3.0
       run_constrained:
         - pyside6 >=6.9,<7.0
     

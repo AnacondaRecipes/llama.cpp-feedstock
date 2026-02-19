@@ -1,4 +1,5 @@
-# Increase timeout for CPU builds with GGML_CPU_ALL_VARIANTS=ON
+# Increase timeout for builds with GGML_CPU_ALL_VARIANTS=ON
 # which compiles 15 different CPU backend variants (x64 to sapphirerapids)
+# and multiple CUDA variants (12.8, 13.0, 13.1)
 # Default is 7200 seconds (2 hours), which is insufficient
-task_timeout: 14400  # 4 hours
+task_timeout: 21600  # 6 hours
