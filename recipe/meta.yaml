@@ -3,7 +3,7 @@
 {% set upstream_commit = "f0bfe54f552f4783588f333b90d73920a57c5096" %}
 {% set version = "0.0." + upstream_release[1:] %}
 {% set gguf_version = "0.17.1." + upstream_release[1:] %}
-{% set build_number = 0 %}
+{% set build_number = 1 %}
 
 # When output_set is llama_cpp_tools, PBP trips on undefined variables
 # because they are not part of the variant config.
@@ -285,7 +285,7 @@ outputs:
         - numpy >=1.26.4 # loosen bounds to accept numpy 2, which appears to be compatible
         - sentencepiece >=0.1.98,<0.3.0
         - transformers >=4.57.1,<5.0.0
-        - protobuf >=4.21.0,<6.0.0 # loosen bounds to accept protobuf 5
+        - protobuf >=4.21.0,<7.0.0 # loosen bounds to accept protobuf 5 and 6
         # requirements/requirements-convert_hf_to_gguf.txt
         # requirements/requirements-convert_llama_ggml_to_gguf.txt
         # requirements/requirements-convert_lora_to_gguf.txt
