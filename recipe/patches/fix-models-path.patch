@@ -12,9 +12,9 @@ diff --git a/convert_hf_to_gguf.py b/convert_hf_to_gguf.py
 index 1234567..abcdefg 100644
 --- a/convert_hf_to_gguf.py
 +++ b/convert_hf_to_gguf.py
-@@ -1114,7 +1114,7 @@ class LlamaModel:
+@@ -1568,7 +1568,7 @@ class LlamaModel:
          special_vocab.add_to_gguf(self.gguf_writer)
- 
+
      def _set_vocab_builtin(self, model_name: Literal["gpt-neox", "llama-spm"], vocab_size: int):
 -        tokenizer_path = Path(sys.path[0]) / "models" / f"ggml-vocab-{model_name}.gguf"
 +        tokenizer_path = Path(__file__).parent / "models" / f"ggml-vocab-{model_name}.gguf"
