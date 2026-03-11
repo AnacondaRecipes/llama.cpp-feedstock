@@ -2,4 +2,4 @@
 # which compiles 15 different CPU backend variants (x64 to sapphirerapids)
 # and multiple CUDA variants (12.8, 13.0, 13.1)
 # Default is 7200 seconds (2 hours), which is insufficient
-task_timeout: 25200  # 7 hours
+task_timeout: 25201  # 7 hours
