@@ -98,10 +98,9 @@ if [[ "$PKG_NAME" == "llama.cpp-tests" ]]; then
     # test-tokenizers-ggml-vocabs requires git-lfs to download the model files
 
     if [[ ${gpu_variant:-} = "metal" ]]; then
-        # Skip Metal-specific failing tests:
-        # test-tokenizers-ggml-vocabs: Known test data issue (#10290)
-        # test-thread-safety: crashes with "Subprocess aborted" (investigating)
-        ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs|test-thread-safety|test-llama-archs)"
+        # test-tokenizers-ggml-vocabs: Requires git-lfs to download model files
+        # test-llama-archs: incompatible with GGML_BACKEND_DL=ON
+        ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs|test-llama-archs)"
     elif [[ ${gpu_variant:0:5} = "cuda-" ]]; then
         # Check GPU compute capability - skip test-backend-ops on older GPUs (<=7.5)
         # T4 (SM 7.5) has limited shared memory causing Flash Attention crashes
