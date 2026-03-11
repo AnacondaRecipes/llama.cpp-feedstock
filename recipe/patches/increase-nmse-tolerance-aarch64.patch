@@ -15,7 +15,7 @@ for architecture-specific precision differences.
 Applies on top of increase-nmse-tolerance.patch (5e-4 -> 5e-3).
 This patch further increases: 5e-3 -> 1e-1 for aarch64 only.
 
-Updated for b8189: Adjusted for new line numbers (9 instances).
+Updated for b8272: Adjusted for new line numbers (9 instances).
 
 ---
  tests/test-backend-ops.cpp | 18 +++++++++--------
