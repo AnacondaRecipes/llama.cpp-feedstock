@@ -15,7 +15,7 @@ for architecture-specific precision differences.
 Applies on top of increase-nmse-tolerance.patch (5e-4 -> 5e-3).
 This patch further increases: 5e-3 -> 1e-1 for aarch64 only.
 
-Updated for b7984: Adjusted for new line numbers (9 instances).
+Updated for b8272: Adjusted for new line numbers (9 instances).
 
 ---
  tests/test-backend-ops.cpp | 18 +++++++++--------
@@ -25,7 +25,7 @@ diff --git a/tests/test-backend-ops.cpp b/tests/test-backend-ops.cpp
 index f5e6a7b8c..d7c8e9f0a 100644
 --- a/tests/test-backend-ops.cpp
 +++ b/tests/test-backend-ops.cpp
-@@ -3717,7 +3717,7 @@
+@@ -3748,7 +3748,7 @@
      }
 
      double max_nmse_err() override {
@@ -34,7 +34,7 @@ index f5e6a7b8c..d7c8e9f0a 100644
      }
 
      double max_nmse_err(ggml_backend_t backend) override {
-@@ -3853,7 +3853,7 @@
+@@ -3884,7 +3884,7 @@
      }
 
      double max_nmse_err() override {
@@ -43,7 +43,7 @@ index f5e6a7b8c..d7c8e9f0a 100644
      }
 
      double max_nmse_err(ggml_backend_t backend) override {
-@@ -3921,7 +3921,7 @@
+@@ -3952,7 +3952,7 @@
      }
 
      double max_nmse_err() override {
@@ -52,7 +52,7 @@ index f5e6a7b8c..d7c8e9f0a 100644
      }
 
      uint64_t op_flops(ggml_tensor * t) override {
-@@ -4000,7 +4000,7 @@
+@@ -4031,7 +4031,7 @@
      }
 
      double max_nmse_err() override {
@@ -61,7 +61,7 @@ index f5e6a7b8c..d7c8e9f0a 100644
      }
 
      test_out_prod(ggml_type type_a = GGML_TYPE_F32, ggml_type type_b = GGML_TYPE_F32,
-@@ -4756,7 +4756,7 @@
+@@ -4787,7 +4787,7 @@
      }
 
      double max_nmse_err() override {
@@ -70,7 +70,7 @@ index f5e6a7b8c..d7c8e9f0a 100644
      }
 
      test_conv_transpose_2d(std::array<int64_t, 4> ne_input = {10, 10, 3, 1}, // [input_width, input_height, input_channels, 1]
-@@ -4908,7 +4908,7 @@
+@@ -4939,7 +4939,7 @@
      }
 
      double max_nmse_err() override {
@@ -79,7 +79,7 @@ index f5e6a7b8c..d7c8e9f0a 100644
      }
 
      uint64_t op_flops(ggml_tensor * t) override {
-@@ -5040,7 +5040,7 @@
+@@ -5071,7 +5071,7 @@
      }
 
      double max_nmse_err() override {
@@ -88,7 +88,7 @@ index f5e6a7b8c..d7c8e9f0a 100644
      }
 
      uint64_t op_flops(ggml_tensor * t) override {
-@@ -5545,7 +5545,7 @@
+@@ -5576,7 +5576,7 @@
      }
 
      double max_nmse_err() override {
@@ -97,7 +97,7 @@ index f5e6a7b8c..d7c8e9f0a 100644
      }
  };
 
-@@ -6084,7 +6084,7 @@
+@@ -6142,7 +6142,7 @@
      }
 
      double max_nmse_err() override {

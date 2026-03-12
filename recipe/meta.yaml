@@ -1,9 +1,9 @@
 {% set name = "llama.cpp-meta" %}
-{% set upstream_release = "b7984" %}
-{% set upstream_commit = "f0bfe54f552f4783588f333b90d73920a57c5096" %}
+{% set upstream_release = "b8272" %}
+{% set upstream_commit = "1274fbee9e185d41447bf6edb739e7240c0319a2" %}
 {% set version = "0.0." + upstream_release[1:] %}
-{% set gguf_version = "0.17.1." + upstream_release[1:] %}
-{% set build_number = 1 %}
+{% set gguf_version = "0.18.0." + upstream_release[1:] %}
+{% set build_number = 0 %}
 
 # When output_set is llama_cpp_tools, PBP trips on undefined variables
 # because they are not part of the variant config.
@@ -22,10 +22,9 @@ package:
 
 source:
   url: https://github.com/ggml-org/llama.cpp/archive/{{ upstream_release }}.tar.gz
-  sha256: de654007aca8134f3cf89b8069230186ef92d8c029485581cb85eedc112c8a53
+  sha256: b0af53f0b4007e4d0cf07b9f0cf80fa502547fef27761da2eb80c7a0a8480fc4
 
   patches:
-    - patches/fix-macos-dylib-version.patch
     - patches/increase-nmse-tolerance.patch
     - patches/increase-nmse-tolerance-aarch64.patch  # [linux and aarch64]
     - patches/metal_gpu_selection.patch     # [osx]

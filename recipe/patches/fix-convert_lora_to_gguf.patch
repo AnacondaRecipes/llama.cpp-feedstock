@@ -27,10 +27,10 @@ index 00a6733cb..6af6f3763 100755
 -from convert_hf_to_gguf import LazyTorchTensor, ModelBase
 +from llama_cpp_tools.convert_hf_to_gguf import LazyTorchTensor, ModelBase
  
- logger = logging.getLogger("lora-to-gguf")
+ from gguf.constants import GGUFValueType
  
-@@ -281,7 +281,7 @@ def load_hparams_from_hf(hf_model_id: str) -> dict[str, Any]:
-     return config.to_dict()
+@@ -288,7 +288,7 @@ def load_hparams_from_hf(hf_model_id: str) -> dict[str, Any]:
+     return config.to_dict(), cache_dir
  
  
 -if __name__ == '__main__':
