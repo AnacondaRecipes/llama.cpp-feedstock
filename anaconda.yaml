@@ -1,0 +1,10 @@
+anaconda_config_version: 1
+upstream_sources:
+  - github:
+      identifier: ggml-org/llama.cpp
+    packages:
+      - gguf
+      - libllama
+      - llama.cpp
+      - llama.cpp-tests
+      - llama.cpp-tools
