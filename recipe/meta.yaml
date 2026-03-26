@@ -1,6 +1,6 @@
 {% set name = "llama.cpp-meta" %}
-{% set upstream_release = "b8272" %}
-{% set upstream_commit = "1274fbee9e185d41447bf6edb739e7240c0319a2" %}
+{% set upstream_release = "b8533" %}
+{% set upstream_commit = "0fac87b157305eb82a70902327abffbbce25bd3e" %}
 {% set version = "0.0." + upstream_release[1:] %}
 {% set gguf_version = "0.18.0." + upstream_release[1:] %}
 {% set build_number = 0 %}
@@ -22,7 +22,7 @@ package:
 
 source:
   url: https://github.com/ggml-org/llama.cpp/archive/{{ upstream_release }}.tar.gz
-  sha256: b0af53f0b4007e4d0cf07b9f0cf80fa502547fef27761da2eb80c7a0a8480fc4
+  sha256: b119fff4ab3e87b093a77a1ec1af4541d4b3d0c2800d1f61925ad1a3c127ab3a
 
   patches:
     - patches/increase-nmse-tolerance.patch
@@ -32,6 +32,7 @@ source:
     - patches/disable-metal-flash-attention.patch  # [osx]
     - patches/fix-convert_lora_to_gguf.patch
     - patches/fix-models-path.patch
+    - patches/fix-test-llama-archs-backend-dl.patch
 
 build:
   number: {{ build_number }}

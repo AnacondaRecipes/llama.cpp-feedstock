@@ -73,8 +73,7 @@ if errorlevel 1 exit 1
 if "%PKG_NAME%" == "llama.cpp-tests" (
     pushd build
     REM test-tokenizers-ggml-vocabs requires git-lfs to download the model files
-    REM test-llama-archs: incompatible with GGML_BACKEND_DL=ON (requires statically linked backends)
-    ctest -L main -C Release --output-on-failure -j%CPU_COUNT% --timeout 900 -E "(test-tokenizers-ggml-vocabs|test-llama-archs)"
+    ctest -L main -C Release --output-on-failure -j%CPU_COUNT% --timeout 900 -E "test-tokenizers-ggml-vocabs"
     if errorlevel 1 exit 1
     popd
 )
