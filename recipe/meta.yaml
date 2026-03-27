@@ -266,6 +266,7 @@ outputs:
         - llama-convert-llama-ggml-to-gguf = llama_cpp_tools.convert_llama_ggml_to_gguf:main
         - llama-convert-lora-to-gguf = llama_cpp_tools.convert_lora_to_gguf:main
       skip: True # [py<39]
+      skip: true # [py>313]
       skip: true # [output_set != "llama_cpp_tools"]
       number: {{ build_number }}
 
@@ -332,6 +333,7 @@ outputs:
         - gguf-new-metadata = gguf.scripts.gguf_new_metadata:main
         - gguf-editor-gui = gguf.scripts.gguf_editor_gui:main      
       skip: True # [py<39]
+      skip: true # [py>313]
       skip: true # [output_set != "llama_cpp_tools"]
       number: {{ build_number }}
 
