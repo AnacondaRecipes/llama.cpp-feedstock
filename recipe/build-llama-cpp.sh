@@ -99,23 +99,21 @@ if [[ "$PKG_NAME" == "llama.cpp-tests" ]]; then
 
     if [[ ${gpu_variant:-} = "metal" ]]; then
         # test-tokenizers-ggml-vocabs: Requires git-lfs to download model files
-        # test-llama-archs: incompatible with GGML_BACKEND_DL=ON
         # test-thread-safety: GGML_ASSERT(buf_dst) fails in ggml_metal_cpy_tensor_async during concurrent decode
-        ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs|test-llama-archs|test-thread-safety)"
+        ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs|test-thread-safety)"
     elif [[ ${gpu_variant:0:5} = "cuda-" ]]; then
         # Check GPU compute capability - skip test-backend-ops on older GPUs (<=7.5)
         # T4 (SM 7.5) has limited shared memory causing Flash Attention crashes
         COMPUTE_CAP=$(nvidia-smi --query-gpu=compute_cap --format=csv,noheader 2>/dev/null | head -1 | tr -d '.')
         if [[ -n "$COMPUTE_CAP" ]] && [[ "$COMPUTE_CAP" -le 75 ]]; then
             echo "GPU compute capability <= 7.5 detected, skipping test-backend-ops (shared memory limits)"
-            ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs|test-backend-ops|test-llama-archs)"
+            ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs|test-backend-ops)"
         else
-            ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs|test-llama-archs)"
+            ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs)"
         fi
     else
         # Skip test-tokenizers-ggml-vocabs on all platforms: Requires git-lfs to download model files
-        # Skip test-llama-archs: incompatible with GGML_BACKEND_DL=ON (requires statically linked backends)
-        ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs|test-llama-archs)"
+        ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 -E "(test-tokenizers-ggml-vocabs)"
     fi
     popd
 fi

@@ -1,6 +1,6 @@
 {% set name = "llama.cpp-meta" %}
-{% set upstream_release = "b8272" %}
-{% set upstream_commit = "1274fbee9e185d41447bf6edb739e7240c0319a2" %}
+{% set upstream_release = "b8574" %}
+{% set upstream_commit = "98ae0a0d3600f08fbd8d938bc8de0436755e50c3" %}
 {% set version = "0.0." + upstream_release[1:] %}
 {% set gguf_version = "0.18.0." + upstream_release[1:] %}
 {% set build_number = 0 %}
@@ -22,7 +22,7 @@ package:
 
 source:
   url: https://github.com/ggml-org/llama.cpp/archive/{{ upstream_release }}.tar.gz
-  sha256: b0af53f0b4007e4d0cf07b9f0cf80fa502547fef27761da2eb80c7a0a8480fc4
+  sha256: f1a4e4a57bc7e31e3549e979fe7c6553dfd249958b8dfe6f63f698cac7682c75
 
   patches:
     - patches/increase-nmse-tolerance.patch
@@ -32,6 +32,7 @@ source:
     - patches/disable-metal-flash-attention.patch  # [osx]
     - patches/fix-convert_lora_to_gguf.patch
     - patches/fix-models-path.patch
+    - patches/fix-test-llama-archs-backend-dl.patch
 
 build:
   number: {{ build_number }}
@@ -268,6 +269,7 @@ outputs:
         - llama-convert-llama-ggml-to-gguf = llama_cpp_tools.convert_llama_ggml_to_gguf:main
         - llama-convert-lora-to-gguf = llama_cpp_tools.convert_lora_to_gguf:main
       skip: True # [py<39]
+      skip: true # [py>313]
       skip: true # [output_set != "llama_cpp_tools"]
       number: {{ build_number }}
 
@@ -334,6 +336,7 @@ outputs:
         - gguf-new-metadata = gguf.scripts.gguf_new_metadata:main
         - gguf-editor-gui = gguf.scripts.gguf_editor_gui:main      
       skip: True # [py<39]
+      skip: true # [py>313]
       skip: true # [output_set != "llama_cpp_tools"]
       number: {{ build_number }}
 
