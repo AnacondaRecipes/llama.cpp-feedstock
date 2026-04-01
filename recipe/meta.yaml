@@ -90,6 +90,7 @@ outputs:
         - llvm-openmp                                         # [osx] bounds through run_exports
         - _openmp_mutex                                       # [linux]
         - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
+        - __cuda                                              # [(gpu_variant or "").startswith('cuda')]
 
     test:
       commands:
@@ -165,6 +166,7 @@ outputs:
         - llvm-openmp                                         # [osx] bounds through run_exports
         - _openmp_mutex                                       # [linux]
         - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
+        - __cuda                                              # [(gpu_variant or "").startswith('cuda')]
 
     test:
       commands:
@@ -238,6 +240,7 @@ outputs:
         - {{ pin_compatible('intel-openmp') }}                # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
         - _openmp_mutex                                       # [linux]
         - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
+        - __cuda                                              # [(gpu_variant or "").startswith('cuda')]
 
     test:
       commands:
