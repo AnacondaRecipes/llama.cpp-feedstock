@@ -3,6 +3,3 @@
 # and multiple CUDA variants (12.9, 13.0, 13.1)
 # Default is 7200 seconds (2 hours), which is insufficient
 task_timeout: 25200  # 7 hours
-
-# Upload to staging so llama-cpp-python can build before main release
-staging_channel_upload_target: llama-cpp-b8574-staging
