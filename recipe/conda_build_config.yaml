@@ -1,3 +1,7 @@
+# TEMPORARY — single-Python fast iteration. Remove before merge.
+python:
+  - "3.12"
+
 # This feedstocks builds two sets of packages:
 # - libllama, llama.cpp, llama.cpp-tests
 # - gguf, llama.cpp-tools
