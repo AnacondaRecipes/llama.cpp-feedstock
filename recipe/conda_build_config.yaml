@@ -19,7 +19,7 @@ cxx_compiler:                      # [win]
 
 blas_impl:
   - mkl                        # [win or (linux and x86_64)]
-  - openblas                   # [linux]
+  - openblas                   # [win or linux]
   - accelerate                 # [osx]
   - cublas                     # [win or linux]
 
