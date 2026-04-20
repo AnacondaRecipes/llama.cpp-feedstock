@@ -3,9 +3,9 @@ upstream_sources:
   - github:
       identifier: ggml-org/llama.cpp
       use_max_tag: true
-      exclude_regex: (?i)^(?=.*(?:(?<=\d)rc\d*|(?<=\d)dev\d+|(?:^|[-._])(?:alpha|beta|gamma|pre|preview)(?:\d+)?|[-._]rc\d+|(?:^|[-._])dev\d+|(?:\d+\.)+\d+[ab]\d*)).+$
-      from_pattern: ^v?(\d+(?:\.\d+)*.*)$
-      to_pattern: \1
+      include_regex: ^b\d+$
+      from_pattern: ^b(\d+)$
+      to_pattern: 0.0.\1
     packages:
       - gguf
       - libllama
