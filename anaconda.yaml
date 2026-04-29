@@ -6,9 +6,3 @@ upstream_sources:
       include_regex: ^b\d+$
       from_pattern: ^b(\d+)$
       to_pattern: 0.0.\1
-    packages:
-      - gguf
-      - libllama
-      - llama.cpp
-      - llama.cpp-tests
-      - llama.cpp-tools
