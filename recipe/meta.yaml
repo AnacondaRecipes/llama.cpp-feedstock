@@ -33,6 +33,7 @@ source:
     - patches/fix-convert_lora_to_gguf.patch
     - patches/fix-models-path.patch
     - patches/fix-test-llama-archs-backend-dl.patch
+    - patches/skip-test-chat-without-server.patch
 
 build:
   number: {{ build_number }}

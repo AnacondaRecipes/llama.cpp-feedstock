@@ -1,0 +1,43 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Xianglong Kong <xkong@anaconda.com>
+Date: Thu, 1 May 2026 12:00:00 -0500
+Subject: [PATCH] tests: skip test-chat when LLAMA_BUILD_SERVER is OFF
+
+Upstream b8994 made test-chat depend on the server-context library
+(introduced via tools/server/). The dependency is unconditional in
+tests/CMakeLists.txt, but server-context only exists when
+LLAMA_BUILD_SERVER=ON.
+
+In this feedstock, the llama.cpp-tests output is built with
+LLAMA_BUILD_SERVER=OFF (the server lives in the llama.cpp output
+instead), so test-chat fails to link on linux-aarch64
+(`cannot find -lserver-context`) and fails to compile on osx-arm64
+(server headers transitively pull in libllama's $PREFIX/include/ggml.h
+from the host env, colliding with the local source's ggml.h and
+producing redefinition errors).
+
+Wrap the test-chat target in `if (LLAMA_BUILD_SERVER)` so it is only
+built when the server library is available. Other tests in the same
+block are unaffected.
+
+---
+ tests/CMakeLists.txt | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
+
+--- a/tests/CMakeLists.txt
++++ b/tests/CMakeLists.txt
+@@ -154,9 +154,11 @@ if (NOT WIN32 OR NOT BUILD_SHARED_LIBS)
+     llama_build_and_test(test-grammar-parser.cpp)
+     llama_build_and_test(test-grammar-integration.cpp)
+     llama_build_and_test(test-llama-grammar.cpp)
+-    llama_build_and_test(test-chat.cpp WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+-    target_include_directories(test-chat PRIVATE ${PROJECT_SOURCE_DIR}/tools/server)
+-    target_link_libraries(test-chat PRIVATE server-context)
++    if (LLAMA_BUILD_SERVER)
++        llama_build_and_test(test-chat.cpp WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
++        target_include_directories(test-chat PRIVATE ${PROJECT_SOURCE_DIR}/tools/server)
++        target_link_libraries(test-chat PRIVATE server-context)
++    endif()
+     # TODO: disabled on loongarch64 because the ggml-ci node lacks Python 3.8
+     if (NOT ${CMAKE_SYSTEM_PROCESSOR} MATCHES "loongarch64")
+         llama_build_and_test(test-json-schema-to-grammar.cpp   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
