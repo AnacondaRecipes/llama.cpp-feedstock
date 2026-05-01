@@ -15,79 +15,77 @@ Updated for b8272.
  tests/test-backend-ops.cpp | 16 ++++++++++------
  1 file changed, 8 insertions(+), 8 deletions(-)
 
-diff --git a/tests/test-backend-ops.cpp b/tests/test-backend-ops.cpp
-index a1b2c3d4e..f5e6a7b8c 100644
 --- a/tests/test-backend-ops.cpp
 +++ b/tests/test-backend-ops.cpp
-@@ -3748,7 +3748,7 @@
+@@ -3853,7 +3853,7 @@ struct test_mul_mat : public test_case {
      }
-
+ 
      double max_nmse_err() override {
 -        return 5e-4;
 +        return 5e-3;
      }
-
+ 
      double max_nmse_err(ggml_backend_t backend) override {
-@@ -3884,7 +3884,7 @@
+@@ -3989,7 +3989,7 @@ struct test_mul_mat_id : public test_cas
      }
-
+ 
      double max_nmse_err() override {
 -        return 5e-4;
 +        return 5e-3;
      }
-
+ 
      double max_nmse_err(ggml_backend_t backend) override {
-@@ -3952,7 +3952,7 @@
+@@ -4057,7 +4057,7 @@ struct test_mul_mat_id_fusion : public t
      }
-
+ 
      double max_nmse_err() override {
 -        return 5e-4;
 +        return 5e-3;
      }
-
+ 
      uint64_t op_flops(ggml_tensor * t) override {
-@@ -4031,7 +4031,7 @@
+@@ -4136,7 +4136,7 @@ struct test_out_prod : public test_case
      }
-
+ 
      double max_nmse_err() override {
 -        return 5e-4;
 +        return 5e-3;
      }
-
+ 
      test_out_prod(ggml_type type_a = GGML_TYPE_F32, ggml_type type_b = GGML_TYPE_F32,
-@@ -4787,7 +4787,7 @@
+@@ -4895,7 +4895,7 @@ struct test_conv_transpose_2d : public t
      }
-
+ 
      double max_nmse_err() override {
 -        return 5e-4; // The default 1e-7 is too small for Vulkan.
 +        return 5e-3; // The default 1e-7 is too small for Vulkan.
      }
-
-     test_conv_transpose_2d(std::array<int64_t, 4> ne_input = {10, 10, 3, 1}, // [input_width, input_height, input_channels, 1]
-@@ -4939,7 +4939,7 @@
+ 
+     test_conv_transpose_2d(
+@@ -5049,7 +5049,7 @@ struct test_conv_2d : public test_case {
      }
-
+ 
      double max_nmse_err() override {
 -        return 5e-4;
 +        return 5e-3;
      }
-
+ 
      uint64_t op_flops(ggml_tensor * t) override {
-@@ -5071,7 +5071,7 @@
+@@ -5181,7 +5181,7 @@ struct test_conv_3d : public test_case {
      }
-
+ 
      double max_nmse_err() override {
 -        return 5e-4;
 +        return 5e-3;
      }
-
+ 
      uint64_t op_flops(ggml_tensor * t) override {
-@@ -6142,7 +6142,7 @@
+@@ -6252,7 +6252,7 @@ struct test_flash_attn_ext : public test
      }
-
+ 
      double max_nmse_err() override {
 -        return 5e-4;
 +        return 5e-3;
      }
-
+ 
      uint64_t op_flops(ggml_tensor * t) override {

@@ -8,15 +8,14 @@ parent directory. When the models are installed in a conda package, the script n
 Path(__file__).parent instead of sys.path[0] to correctly locate the models directory.
 
 ---
-diff --git a/convert_hf_to_gguf.py b/convert_hf_to_gguf.py
-index 1234567..abcdefg 100644
 --- a/convert_hf_to_gguf.py
 +++ b/convert_hf_to_gguf.py
-@@ -1568,7 +1568,7 @@ class LlamaModel:
+@@ -1797,7 +1797,7 @@ class TextModel(ModelBase):
          special_vocab.add_to_gguf(self.gguf_writer)
-
+ 
      def _set_vocab_builtin(self, model_name: Literal["gpt-neox", "llama-spm"], vocab_size: int):
 -        tokenizer_path = Path(sys.path[0]) / "models" / f"ggml-vocab-{model_name}.gguf"
 +        tokenizer_path = Path(__file__).parent / "models" / f"ggml-vocab-{model_name}.gguf"
          logger.warning(f"Using tokenizer from '{os.path.relpath(tokenizer_path, os.getcwd())}'")
          vocab_reader = gguf.GGUFReader(tokenizer_path, "r")
+ 
