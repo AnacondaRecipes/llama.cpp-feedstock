@@ -11,7 +11,7 @@ https://developer.apple.com/documentation/metal/mtldevice/1433409-lowpower#discu
 
 I did try linking to CoreGraphics, but MTLCreateSystemDefaultDevice was still returning nil.
 
-Updated for b6653: File renamed from ggml/src/ggml-metal/ggml-metal.m to ggml-metal-device.m
+Updated for b8994. File rename from ggml/src/ggml-metal/ggml-metal.m to ggml-metal-device.m happened in b6653.
 ---
  ggml/src/ggml-metal/ggml-metal-device.m | 19 +++++++++++++++++++
  1 file changed, 19 insertions(+)

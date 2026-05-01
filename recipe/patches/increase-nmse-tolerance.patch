@@ -9,7 +9,7 @@ This was observed on Windows instance for CUDA builds.
 Increases tolerance from 5e-4 to 5e-3 for 8 test operations
 that perform matrix computations sensitive to floating-point rounding.
 
-Updated for b8272.
+Updated for b8994.
 
 ---
  tests/test-backend-ops.cpp | 16 ++++++++++------
