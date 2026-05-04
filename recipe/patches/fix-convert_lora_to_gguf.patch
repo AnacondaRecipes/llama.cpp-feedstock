@@ -16,8 +16,6 @@ and the import statement and `if __name__ == '__main__':` block are updated to f
  convert_lora_to_gguf.py | 4 ++--
  1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/convert_lora_to_gguf.py b/convert_lora_to_gguf.py
-index 00a6733cb..6af6f3763 100755
 --- a/convert_lora_to_gguf.py
 +++ b/convert_lora_to_gguf.py
 @@ -24,7 +24,7 @@ if 'NO_LOCAL_GGUF' not in os.environ:
@@ -29,7 +27,7 @@ index 00a6733cb..6af6f3763 100755
  
  from gguf.constants import GGUFValueType
  
-@@ -288,7 +288,7 @@ def load_hparams_from_hf(hf_model_id: str) -> dict[str, Any]:
+@@ -298,7 +298,7 @@ def load_hparams_from_hf(hf_model_id: st
      return config.to_dict(), cache_dir
  
  
@@ -38,6 +36,3 @@ index 00a6733cb..6af6f3763 100755
      args = parse_args()
      logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO)
  
--- 
-2.39.5 (Apple Git-154)
-

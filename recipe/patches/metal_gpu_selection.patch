@@ -11,17 +11,15 @@ https://developer.apple.com/documentation/metal/mtldevice/1433409-lowpower#discu
 
 I did try linking to CoreGraphics, but MTLCreateSystemDefaultDevice was still returning nil.
 
-Updated for b6653: File renamed from ggml/src/ggml-metal/ggml-metal.m to ggml-metal-device.m
+Updated for b8994. File rename from ggml/src/ggml-metal/ggml-metal.m to ggml-metal-device.m happened in b6653.
 ---
  ggml/src/ggml-metal/ggml-metal-device.m | 19 +++++++++++++++++++
  1 file changed, 19 insertions(+)
 
-diff --git a/ggml/src/ggml-metal/ggml-metal-device.m b/ggml/src/ggml-metal/ggml-metal-device.m
-index dc391a0d4..2083e2a31 100644
 --- a/ggml/src/ggml-metal/ggml-metal-device.m
 +++ b/ggml/src/ggml-metal/ggml-metal-device.m
-@@ -449,6 +449,25 @@ ggml_metal_device_t ggml_metal_device_init(void) {
-
+@@ -634,6 +634,25 @@ ggml_metal_device_t ggml_metal_device_in
+ 
      if (dev->mtl_device == nil) {
          dev->mtl_device = MTLCreateSystemDefaultDevice();
 +        if (dev->mtl_device == nil) {
@@ -43,8 +41,6 @@ index dc391a0d4..2083e2a31 100644
 +                }
 +            }
 +        }
-
+ 
          if (dev->mtl_device) {
              dev->mtl_queue = [dev->mtl_device newCommandQueue];
---
-2.39.5 (Apple Git-154)

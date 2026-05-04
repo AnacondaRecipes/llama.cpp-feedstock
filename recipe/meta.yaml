@@ -1,9 +1,9 @@
 {% set name = "llama.cpp-meta" %}
-{% set upstream_release = "b8728" %}
-{% set upstream_commit = "5e9c6354638858f4c9aa0a70fd4a41a73f894dcc" %}
+{% set upstream_release = "b8994" %}
+{% set upstream_commit = "aab68217b7bd8907135dd41fbb5bcb85fca06045" %}
 {% set version = "0.0." + upstream_release[1:] %}
 {% set gguf_version = "0.18.0." + upstream_release[1:] %}
-{% set build_number = 1 %}
+{% set build_number = 0 %}
 
 # When output_set is llama_cpp_tools, PBP trips on undefined variables
 # because they are not part of the variant config.
@@ -22,7 +22,7 @@ package:
 
 source:
   url: https://github.com/ggml-org/llama.cpp/archive/{{ upstream_release }}.tar.gz
-  sha256: 27351204528caf769eaf64b0498b160167df1559da23c277c7a8f7c840b38819
+  sha256: c0fb25d008add462488f65df59bcfad1806608034502feba7dc95216e05becfa
 
   patches:
     - patches/increase-nmse-tolerance.patch
@@ -33,6 +33,7 @@ source:
     - patches/fix-convert_lora_to_gguf.patch
     - patches/fix-models-path.patch
     - patches/fix-test-llama-archs-backend-dl.patch
+    - patches/skip-test-chat-without-server.patch
 
 build:
   number: {{ build_number }}
