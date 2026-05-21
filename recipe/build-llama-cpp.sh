@@ -9,6 +9,7 @@ fi
 
 # GGML build options
 GGML_ARGS="-DGGML_NATIVE=OFF -DGGML_CPU_ALL_VARIANTS=ON -DGGML_BACKEND_DL=ON"
+GGML_OPENMP_FLAGS=()
 
 if [[ ${gpu_variant:0:5} = "cuda-" ]]; then
     # Let llama.cpp's CMakeLists.txt handle architecture selection
@@ -43,6 +44,15 @@ elif [[ ${blas_impl:-} = "mkl" ]]; then
     GGML_ARGS="${GGML_ARGS} -DGGML_BLAS=ON"
     GGML_ARGS="${GGML_ARGS} -DGGML_ACCELERATE=OFF"
     GGML_ARGS="${GGML_ARGS} -DGGML_BLAS_VENDOR=Intel10_64_dyn"
+    if [[ "${target_platform:-}" == linux-* ]]; then
+        GGML_OPENMP_FLAGS=(
+            -DOpenMP_C_FLAGS=-fopenmp
+            -DOpenMP_CXX_FLAGS=-fopenmp
+            -DOpenMP_C_LIB_NAMES=iomp5
+            -DOpenMP_CXX_LIB_NAMES=iomp5
+            -DOpenMP_iomp5_LIBRARY=${PREFIX}/lib/libiomp5${SHLIB_EXT}
+        )
+    fi
 elif [[ ${blas_impl:-} = "openblas" ]]; then
     GGML_ARGS="${GGML_ARGS} -DGGML_BLAS=ON"
     GGML_ARGS="${GGML_ARGS} -DGGML_ACCELERATE=OFF"
@@ -84,6 +94,7 @@ cmake -S . -B build_${gpu_variant} \
     -DCMAKE_BUILD_TYPE=Release \
     -DBUILD_SHARED_LIBS=ON  \
     ${GGML_ARGS} \
+    "${GGML_OPENMP_FLAGS[@]}" \
     ${LLAMA_ARGS}
 
 cmake --build build_${gpu_variant} --config Release --verbose
