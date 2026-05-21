@@ -38,6 +38,17 @@ source:
 build:
   number: {{ build_number }}
 
+requirements:
+  build:
+    # Work-around for SIR-3252
+    - {{ stdlib('c')}}
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - {{ compiler('cuda') }}                              # [(gpu_variant or "").startswith('cuda')]
+    - cmake
+    - ninja-base
+    - pkgconfig
+
 outputs:
   - name: libllama
     script: build-llama-cpp.sh   # [not win]
