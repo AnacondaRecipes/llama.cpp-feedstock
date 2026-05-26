@@ -3,6 +3,3 @@
 # and multiple CUDA variants (12.9, 13.0)
 # Default is 7200 seconds (2 hours), which is insufficient
 task_timeout: 25200  # 7 hours
-
-channels:
- - build
