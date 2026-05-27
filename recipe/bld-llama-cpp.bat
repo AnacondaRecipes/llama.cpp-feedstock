@@ -3,6 +3,7 @@ setlocal EnableDelayedExpansion
 
 REM GGML build options
 set GGML_ARGS=-DGGML_NATIVE=OFF -DGGML_CPU_ALL_VARIANTS=ON -DGGML_BACKEND_DL=ON
+set GGML_OPENMP_FLAGS=
 
 if "%gpu_variant:~0,5%"=="cuda-" (
     REM Let llama.cpp's CMakeLists.txt handle architecture selection
@@ -17,6 +18,7 @@ if "%blas_impl%"=="mkl" (
     set GGML_ARGS=!GGML_ARGS! -DGGML_BLAS=ON
     set GGML_ARGS=!GGML_ARGS! -DGGML_ACCELERATE=OFF
     set GGML_ARGS=!GGML_ARGS! -DGGML_BLAS_VENDOR=Intel10_64_dyn
+    set GGML_OPENMP_FLAGS=-DOpenMP_C_FLAGS=/openmp:llvm -DOpenMP_CXX_FLAGS=/openmp:llvm -DOpenMP_C_LIB_NAMES=libiomp5md -DOpenMP_CXX_LIB_NAMES=libiomp5md -DOpenMP_libiomp5md_LIBRARY=%LIBRARY_LIB%\libiomp5md.lib
 ) else if "%blas_impl%"=="openblas" (
     set GGML_ARGS=!GGML_ARGS! -DGGML_BLAS=ON
     set GGML_ARGS=!GGML_ARGS! -DGGML_ACCELERATE=OFF
@@ -61,6 +63,7 @@ cmake -S . -B build ^
     -DCMAKE_BUILD_TYPE=Release ^
     -DBUILD_SHARED_LIBS=ON  ^
     !GGML_ARGS! ^
+    !GGML_OPENMP_FLAGS! ^
     !LLAMA_ARGS!
 if errorlevel 1 exit 1
 
