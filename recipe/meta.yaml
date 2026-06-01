@@ -1,9 +1,9 @@
 {% set name = "llama.cpp-meta" %}
-{% set upstream_release = "b8994" %}
-{% set upstream_commit = "aab68217b7bd8907135dd41fbb5bcb85fca06045" %}
+{% set upstream_release = "b9453" %}
+{% set upstream_commit = "48b88c3b0057fcf1171f8d62ff9f6b10de27a11e" %}
 {% set version = "0.0." + upstream_release[1:] %}
 {% set gguf_version = "0.18.0." + upstream_release[1:] %}
-{% set build_number = 1 %}
+{% set build_number = 0 %}
 
 # When output_set is llama_cpp_tools, PBP trips on undefined variables
 # because they are not part of the variant config.
@@ -22,7 +22,7 @@ package:
 
 source:
   url: https://github.com/ggml-org/llama.cpp/archive/{{ upstream_release }}.tar.gz
-  sha256: c0fb25d008add462488f65df59bcfad1806608034502feba7dc95216e05becfa
+  sha256: 3d755128d1b329c186a96e4a13f7b4fe1fe80067b6f21c56d742153bfc165e1a
 
   patches:
     - patches/increase-nmse-tolerance.patch
@@ -30,6 +30,7 @@ source:
     - patches/metal_gpu_selection.patch     # [osx]
     - patches/disable-metal-bf16.patch      # [osx]
     - patches/disable-metal-flash-attention.patch  # [osx]
+    - patches/fix-convert_hf_to_gguf.patch
     - patches/fix-convert_lora_to_gguf.patch
     - patches/fix-models-path.patch
     - patches/fix-test-llama-archs-backend-dl.patch
@@ -313,7 +314,9 @@ outputs:
         # requirements/requirements-convert_legacy_llama.txt
         - numpy >=1.26.4 # loosen bounds to accept numpy 2, which appears to be compatible
         - sentencepiece >=0.1.98,<0.3.0
-        - transformers >=4.57.1,<5.0.0
+        # Upstream b9453 pins transformers==5.5.1; align to 5.x major
+        # (pkgs/main currently provides 5.3.0)
+        - transformers >=5.3.0,<6.0.0
         - protobuf >=4.21.0,<7.0.0 # loosen bounds to accept protobuf 5 and 6
         # requirements/requirements-convert_hf_to_gguf.txt
         # requirements/requirements-convert_llama_ggml_to_gguf.txt

@@ -14,6 +14,12 @@ if errorlevel 1 exit 1
 copy convert_lora_to_gguf.py %SP_DIR%\llama_cpp_tools\
 if errorlevel 1 exit 1
 
+:: Upstream b9445+ moved model definitions into a `conversion/` package;
+:: copy it under llama_cpp_tools/ so the redirected imports
+:: (`from llama_cpp_tools.conversion import ...`) resolve at runtime.
+xcopy conversion %SP_DIR%\llama_cpp_tools\conversion /E /I /Y
+if errorlevel 1 exit 1
+
 :: Copy the models directory and its contents
 xcopy models %SP_DIR%\llama_cpp_tools\models /E /I /Y
 if errorlevel 1 exit 1

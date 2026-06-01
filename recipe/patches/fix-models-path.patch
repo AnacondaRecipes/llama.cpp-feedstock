@@ -1,21 +1,24 @@
 From 3ea0eac09703ea067e29c7460afd72c063a6b19f Mon Sep 17 00:00:00 2001
 From: John Noller <jnoller@anaconda.com>
 Date: Sun, 20 Jul 2025 14:37:44 -0400
-Subject: [PATCH] fix convert_hf_to_gguf.py
+Subject: [PATCH] locate ggml-vocab gguf files relative to the conversion package
 
-convert_hf_to_gguf.py uses relative paths to the models directory that break when run from a different
-parent directory. When the models are installed in a conda package, the script needs to use
-Path(__file__).parent instead of sys.path[0] to correctly locate the models directory.
+`_set_vocab_builtin` (moved from convert_hf_to_gguf.py into conversion/base.py
+in b9445+) loads `models/ggml-vocab-*.gguf` via `Path(sys.path[0]) / "models"`,
+which only resolves when run from the source tree. The feedstock installs the
+vocab files at `llama_cpp_tools/models/`, so use
+`Path(__file__).parent.parent / "models"` (conversion/base.py becomes
+llama_cpp_tools/conversion/base.py, two parents up reaches the models dir).
 
 ---
---- a/convert_hf_to_gguf.py
-+++ b/convert_hf_to_gguf.py
-@@ -1797,7 +1797,7 @@ class TextModel(ModelBase):
+--- a/conversion/base.py
++++ b/conversion/base.py
+@@ -1969,7 +1969,7 @@ class TextModel(ModelBase):
          special_vocab.add_to_gguf(self.gguf_writer)
  
      def _set_vocab_builtin(self, model_name: Literal["gpt-neox", "llama-spm"], vocab_size: int):
 -        tokenizer_path = Path(sys.path[0]) / "models" / f"ggml-vocab-{model_name}.gguf"
-+        tokenizer_path = Path(__file__).parent / "models" / f"ggml-vocab-{model_name}.gguf"
++        tokenizer_path = Path(__file__).parent.parent / "models" / f"ggml-vocab-{model_name}.gguf"
          logger.warning(f"Using tokenizer from '{os.path.relpath(tokenizer_path, os.getcwd())}'")
          vocab_reader = gguf.GGUFReader(tokenizer_path, "r")
  

@@ -18,7 +18,7 @@ Updated for b8994. File rename from ggml/src/ggml-metal/ggml-metal.m to ggml-met
 
 --- a/ggml/src/ggml-metal/ggml-metal-device.m
 +++ b/ggml/src/ggml-metal/ggml-metal-device.m
-@@ -634,6 +634,25 @@ ggml_metal_device_t ggml_metal_device_in
+@@ -679,6 +679,25 @@ ggml_metal_device_t ggml_metal_device_in
  
      if (dev->mtl_device == nil) {
          dev->mtl_device = MTLCreateSystemDefaultDevice();

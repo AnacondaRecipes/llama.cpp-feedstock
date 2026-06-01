@@ -22,7 +22,7 @@ Can be removed when building with macOS 15+ SDK.
 
 --- a/ggml/src/ggml-metal/ggml-metal-device.m
 +++ b/ggml/src/ggml-metal/ggml-metal-device.m
-@@ -212,9 +212,10 @@ ggml_metal_library_t ggml_metal_library_
+@@ -213,9 +213,10 @@ ggml_metal_library_t ggml_metal_library_
                  // dictionary of preprocessor macros
                  NSMutableDictionary * prep = [NSMutableDictionary dictionary];
  
@@ -36,7 +36,7 @@ Can be removed when building with macOS 15+ SDK.
  
                  if (ggml_metal_device_get_props(dev)->has_tensor) {
                      [prep setObject:@"1" forKey:@"GGML_METAL_HAS_TENSOR"];
-@@ -669,9 +670,9 @@ ggml_metal_device_t ggml_metal_device_in
+@@ -714,9 +715,9 @@ ggml_metal_device_t ggml_metal_device_in
              dev->props.has_simdgroup_mm = [dev->mtl_device supportsFamily:MTLGPUFamilyApple7];
              dev->props.has_unified_memory = dev->mtl_device.hasUnifiedMemory;
  

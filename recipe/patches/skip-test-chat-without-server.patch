@@ -26,7 +26,7 @@ block are unaffected.
 
 --- a/tests/CMakeLists.txt
 +++ b/tests/CMakeLists.txt
-@@ -154,9 +154,11 @@ if (NOT WIN32 OR NOT BUILD_SHARED_LIBS)
+@@ -155,9 +155,11 @@ if (NOT WIN32 OR NOT BUILD_SHARED_LIBS)
      llama_build_and_test(test-grammar-parser.cpp)
      llama_build_and_test(test-grammar-integration.cpp)
      llama_build_and_test(test-llama-grammar.cpp)
