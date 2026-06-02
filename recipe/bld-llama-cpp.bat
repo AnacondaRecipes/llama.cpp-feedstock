@@ -33,6 +33,11 @@ if "%blas_impl%"=="mkl" (
 REM LLAMA build options
 set LLAMA_ARGS=-DLLAMA_BUILD_NUMBER=%LLAMA_BUILD_NUMBER% -DLLAMA_BUILD_COMMIT=%LLAMA_BUILD_COMMIT%
 set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_OPENSSL=ON
+REM Disable the unified `llama` router app: it #includes common/build-info.h but
+REM the upstream app/CMakeLists.txt does not wire up its include path, so the
+REM build fails with "fatal error: build-info.h: No such file or directory".
+REM Upstream workaround documented in ggml-org/llama.cpp#23628.
+set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_BUILD_APP=OFF
 if "%PKG_NAME%" == "libllama" (
     set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_BUILD_SERVER=OFF
     set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_BUILD_TOOLS=OFF

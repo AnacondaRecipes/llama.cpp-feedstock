@@ -17,7 +17,7 @@ Upstream issue: https://github.com/ggml-org/llama.cpp/issues/20611
 
 --- a/tests/test-llama-archs.cpp
 +++ b/tests/test-llama-archs.cpp
-@@ -607,6 +607,7 @@ static int test_backends(const llm_arch
+@@ -636,6 +636,7 @@ static int test_backends(const llm_arch
  int main(int argc, char ** argv) {
      // FIXME these tests are disabled in the CI for macOS-latest-cmake-arm64 because they are segfaulting
      common_init();

@@ -64,6 +64,11 @@ fi
 # LLAMA build options
 LLAMA_ARGS="-DLLAMA_BUILD_NUMBER=${LLAMA_BUILD_NUMBER} -DLLAMA_BUILD_COMMIT=${LLAMA_BUILD_COMMIT}"
 LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_OPENSSL=ON"
+# Disable the unified `llama` router app: it #includes common/build-info.h but the
+# upstream app/CMakeLists.txt does not wire up its include path, so the build fails
+# with `fatal error: build-info.h: No such file or directory` on every platform.
+# Upstream workaround documented in ggml-org/llama.cpp#23628.
+LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_BUILD_APP=OFF"
 if [[ "$PKG_NAME" == "libllama" ]]; then
     LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_BUILD_SERVER=OFF"
     LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_BUILD_TOOLS=OFF"
