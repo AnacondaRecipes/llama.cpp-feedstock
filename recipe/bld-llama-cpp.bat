@@ -23,11 +23,21 @@ if "%blas_impl%"=="mkl" (
     set GGML_ARGS=!GGML_ARGS! -DGGML_BLAS=ON
     set GGML_ARGS=!GGML_ARGS! -DGGML_ACCELERATE=OFF
     set GGML_ARGS=!GGML_ARGS! -DGGML_BLAS_VENDOR=OpenBLAS
+    REM openblas-devel on Windows installs headers under Library/include/openblas/.
+    set GGML_ARGS=!GGML_ARGS! -DGGML_OPENBLAS_INCLUDE_DIR=%LIBRARY_PREFIX%/include/openblas
 ) else (
     REM Note: LLAMA_CUDA=ON enables cublas.
     REM Tests fail when both mkl and cublas are used.
     REM This has also been reported here: https://github.com/ggerganov/llama.cpp/issues/4626
     set GGML_ARGS=!GGML_ARGS! -DGGML_BLAS=OFF
+)
+
+REM win-arm64 uses clang; FindOpenMP otherwise picks VS libomp140.aarch64.dll from the
+REM host toolset, which is not in the conda env and makes ctest fail with 0xc0000135.
+if /i "%target_platform%"=="win-arm64" (
+    if not "%blas_impl%"=="mkl" (
+        set GGML_OPENMP_FLAGS=-DOpenMP_C_FLAGS=-fopenmp=libomp -DOpenMP_CXX_FLAGS=-fopenmp=libomp -DOpenMP_C_LIB_NAMES=libomp -DOpenMP_CXX_LIB_NAMES=libomp -DOpenMP_libomp_LIBRARY=%LIBRARY_LIB%\libomp.lib
+    )
 )
 
 REM LLAMA build options
@@ -80,6 +90,14 @@ if errorlevel 1 exit 1
 
 if "%PKG_NAME%" == "llama.cpp-tests" (
     pushd build
+    REM With GGML_BACKEND_DL=ON, tests load backend DLLs from build/bin and need
+    REM openblas.dll and libomp.dll beside the test exes (or on PATH). 0xc0000135 otherwise.
+    REM Use !CD! not %%CD%%: inside parenthesized blocks %%CD%% is expanded before pushd.
+    set "PATH=!CD!\bin;%LIBRARY_PREFIX%\bin;%BUILD_PREFIX%\Library\bin;%PATH%"
+    if /i "%target_platform%"=="win-arm64" (
+        if exist "%LIBRARY_BIN%\libomp.dll" copy /Y "%LIBRARY_BIN%\libomp.dll" "bin\" >nul
+        if exist "%LIBRARY_BIN%\openblas.dll" copy /Y "%LIBRARY_BIN%\openblas.dll" "bin\" >nul
+    )
     REM test-tokenizers-ggml-vocabs requires git-lfs to download the model files
     ctest -L main -C Release --output-on-failure -j%CPU_COUNT% --timeout 900 -E "test-tokenizers-ggml-vocabs"
     if errorlevel 1 exit 1

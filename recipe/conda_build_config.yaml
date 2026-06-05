@@ -4,7 +4,7 @@
 # This helps us avoid mixing the two sets of packages in the same build on PBP.
 output_set:
   - llama
-  - llama_cpp_tools
+  - llama_cpp_tools  # [not (win and arm64)]
 
 # NOTE: c_stdlib and c_stdlib_version are intentionally NOT defined here.
 # When defined with only Linux/macOS selectors (no Windows value), conda-build
@@ -13,21 +13,31 @@ output_set:
 # platforms. See pytorch-feedstock and onnxruntime-feedstock for reference.
 
 c_compiler:                        # [win]
-  - vs2019                         # [win]
+  - vs2019                         # [win and x86_64]
+  - clang                          # [win and arm64]
 cxx_compiler:                      # [win]
-  - vs2019                         # [win]
+  - vs2019                         # [win and x86_64]
+  - clang                          # [win and arm64]
+
+cxx_compiler_version:  # [win and arm64]
+  - 20                 # [win and arm64]
+c_compiler_version:    # [win and arm64]
+  - 20                 # [win and arm64]
+
+# Upstream requires clang (not MSVC) for Windows ARM64 CPU backend; see
+# ggml/src/ggml-cpu/CMakeLists.txt and docs/build.md (arm64-windows-llvm preset).
 
 blas_impl:
-  - mkl                        # [win or (linux and x86_64)]
-  - openblas                   # [win or linux]
+  - mkl                        # [(win and x86_64) or (linux and x86_64)]
+  - openblas                   # [(win and x86_64) or linux or (win and arm64)]
   - accelerate                 # [osx]
-  - cublas                     # [win or linux]
+  - cublas                     # [(win and x86_64) or linux]
 
 gpu_variant:
-  - none
+  - none                       # [(win and x86_64) or (linux and x86_64) or (win and arm64)]
   - metal                      # [osx]
-  - cuda-12                    # [win or linux]
-  - cuda-13                    # [win or linux]
+  - cuda-12                    # [(win and x86_64) or linux]
+  - cuda-13                    # [(win and x86_64) or linux]
 
 # metal builds now require the MTLBuffer gpuAddress property, introduced in macOS 13.0
 # metal builds now require the MTLDataType.bfloat4 data type, introduced in macOS 14.0
@@ -35,12 +45,12 @@ gpu_variant:
 OSX_SDK_VER:                   # [osx]
   - 14.5                       # [osx]
 
-cuda_compiler_version:         # [win or linux]
+cuda_compiler_version:         # [(win and x86_64)  or linux]
   - none                       # [win or linux]
-  - 12.9                       # [win or linux]
-  - 13.0                       # [win or linux]
+  - 12.9                       # [(win and x86_64) or linux]
+  - 13.0                       # [(win and x86_64) or linux]
 
-zip_keys:                      # [win or linux]
-  -                            # [win or linux]
-    - gpu_variant              # [win or linux]
-    - cuda_compiler_version    # [win or linux]
+zip_keys:                      # [(win and x86_64) or linux]
+  -                            # [(win and x86_64) or linux]
+    - gpu_variant              # [(win and x86_64) or linux]
+    - cuda_compiler_version    # [(win and x86_64) or linux]

@@ -1,0 +1,30 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Eric L <noreply@anaconda.com>
+Date: Fri, 5 Jun 2026 12:00:00 +0000
+Subject: [PATCH] ggml: support GGML_CPU_ALL_VARIANTS on Windows ARM64
+
+GGML_CPU_ALL_VARIANTS only listed Linux, Android, and Apple as supported
+ARM platforms, causing CMake configure to fail on Windows ARM64 with:
+
+  Unsupported ARM target OS: Windows
+
+Windows on ARM only needs a single CPU backend variant for now; see
+https://github.com/ggml-org/llama.cpp/pull/14080
+
+---
+ ggml/src/CMakeLists.txt | 3 +++
+ 1 file changed, 3 insertions(+)
+
+--- a/ggml/src/CMakeLists.txt
++++ b/ggml/src/CMakeLists.txt
+@@ -425,6 +425,9 @@
+         elseif (APPLE)
+             ggml_add_cpu_backend_variant(apple_m1             DOTPROD)
+             ggml_add_cpu_backend_variant(apple_m2_m3          DOTPROD MATMUL_INT8)
+             ggml_add_cpu_backend_variant(apple_m4             DOTPROD MATMUL_INT8 NOSVE SME)
++        elseif (WIN32)
++            # Windows on ARM only needs a single CPU backend variant for now.
++            ggml_add_cpu_backend_variant(windows_arm64)
+         else()
+             message(FATAL_ERROR "Unsupported ARM target OS: ${CMAKE_SYSTEM_NAME}")
+         endif()

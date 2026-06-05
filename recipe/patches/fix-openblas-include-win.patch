@@ -1,0 +1,45 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Eric L <noreply@anaconda.com>
+Date: Fri, 5 Jun 2026 14:00:00 +0000
+Subject: [PATCH] ggml-blas: fix cblas.h include path on Windows
+
+FindBLAS often omits BLAS_INCLUDE_DIRS on Windows. openblas-devel installs
+headers under Library/include/openblas/ (not Library/include/ directly).
+
+---
+ ggml/src/ggml-blas/CMakeLists.txt | 25 +++++++++++++++++++++++++
+ 1 file changed, 25 insertions(+)
+
+--- a/ggml/src/ggml-blas/CMakeLists.txt
++++ b/ggml/src/ggml-blas/CMakeLists.txt
+@@ -11,6 +11,30 @@ if (BLAS_FOUND)
+ if (BLAS_FOUND)
+     message(STATUS "BLAS found, Libraries: ${BLAS_LIBRARIES}")
+ 
++    if (WIN32 AND ${GGML_BLAS_VENDOR} MATCHES "OpenBLAS")
++        set(_ggml_cblas_include "")
++        if (GGML_OPENBLAS_INCLUDE_DIR AND EXISTS "${GGML_OPENBLAS_INCLUDE_DIR}/cblas.h")
++            set(_ggml_cblas_include "${GGML_OPENBLAS_INCLUDE_DIR}")
++        else()
++            foreach (_ggml_prefix IN LISTS CMAKE_PREFIX_PATH)
++                if (EXISTS "${_ggml_prefix}/include/openblas/cblas.h")
++                    set(_ggml_cblas_include "${_ggml_prefix}/include/openblas")
++                    break()
++                elseif (EXISTS "${_ggml_prefix}/include/cblas.h")
++                    set(_ggml_cblas_include "${_ggml_prefix}/include")
++                    break()
++                endif()
++            endforeach()
++        endif()
++        if (_ggml_cblas_include STREQUAL "")
++            message(FATAL_ERROR "cblas.h not found; BLAS_INCLUDE_DIRS=${BLAS_INCLUDE_DIRS}, "
++                "CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}, "
++                "GGML_OPENBLAS_INCLUDE_DIR=${GGML_OPENBLAS_INCLUDE_DIR}")
++        endif()
++        set(BLAS_INCLUDE_DIRS "${_ggml_cblas_include}")
++        message(STATUS "BLAS include directory (Windows OpenBLAS): ${BLAS_INCLUDE_DIRS}")
++    endif()
++
+     ggml_add_backend_library(ggml-blas
+                              ggml-blas.cpp
+                             )
