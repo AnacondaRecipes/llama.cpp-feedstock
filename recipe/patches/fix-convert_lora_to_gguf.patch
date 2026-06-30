@@ -22,12 +22,12 @@ and the import statement and `if __name__ == '__main__':` block are updated to f
  from gguf.constants import GGUFValueType
  
  # reuse model definitions from the conversion/ package
--from conversion import LazyTorchTensor, ModelBase, get_model_class
-+from llama_cpp_tools.conversion import LazyTorchTensor, ModelBase, get_model_class
+-from conversion import LazyTorchTensor, ModelBase, get_model_class, ModelType, get_model_architecture
++from llama_cpp_tools.conversion import LazyTorchTensor, ModelBase, get_model_class, ModelType, get_model_architecture
  
  logger = logging.getLogger("lora-to-gguf")
  
-@@ -330,7 +330,7 @@ def load_hparams_from_hf(hf_model_id: st
+@@ -334,7 +334,7 @@ def load_hparams_from_hf(hf_model_id: st
      return config.to_dict(), cache_dir
  
  
