@@ -72,7 +72,12 @@ cmake -S . -B build ^
     !LLAMA_ARGS!
 if errorlevel 1 exit 1
 
-cmake --build build --config Release --verbose
+REM Cap ninja parallelism on CUDA builds — CLAIM_EXPIRED workaround (SIR-3267 followup).
+REM GGML_CPU_ALL_VARIANTS=ON generates 15 backends; combined with cublas linking the
+REM Windows worker's memory saturates and starves the TaskCluster heartbeat monitor.
+set BUILD_JOBS=%CPU_COUNT%
+if "%gpu_variant:~0,5%"=="cuda-" set BUILD_JOBS=4
+cmake --build build --config Release --verbose --parallel %BUILD_JOBS%
 if errorlevel 1 exit 1
 
 cmake --install build
