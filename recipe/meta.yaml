@@ -10,11 +10,14 @@
 # So we set them to 999.0a0 to avoid the render error.
 # Setting to 999.0a0 is safe because if they ever get used in the build, they
 # will generate a solve error.
-{% if output_set == "llama_cpp_tools" %}
-{% set mkl = "999.0a0" %}
-{% set openblas = "999.0a0" %}
-{% set cuda_compiler_version = "999.0a0" %}
-{% endif %}
+# NOTE: expressed as `{% set %}` with the `default` filter rather than a
+# `{% if %}` block because the Anaconda Linter's recipe parser does not support
+# `{% if %}` statements (parsing_jinja_failure). For the "llama" output_set these
+# variables are supplied by conda_build_config.yaml and are kept as-is; for the
+# "llama_cpp_tools" output_set they are undefined, so they fall back to 999.0a0.
+{% set mkl = mkl | default("999.0a0", true) %}
+{% set openblas = openblas | default("999.0a0", true) %}
+{% set cuda_compiler_version = cuda_compiler_version | default("999.0a0", true) %}
 
 package:
   name: {{ name|lower }}
@@ -298,6 +301,9 @@ outputs:
         - llama-convert-llama-ggml-to-gguf = llama_cpp_tools.convert_llama_ggml_to_gguf:main
         - llama-convert-lora-to-gguf = llama_cpp_tools.convert_lora_to_gguf:main
       skip: True # [py<39]
+      # Keep py314 skipped: mistral-common has no py314 build on pkgs/main yet
+      # (latest 1.11.2 tops out at py313). transformers/pytorch/sentencepiece are
+      # already py314-ready, so lift this once mistral-common ships for py314.
       skip: true # [py>313]
       skip: true # [output_set != "llama_cpp_tools"]
       number: {{ build_number }}
@@ -365,9 +371,8 @@ outputs:
         - gguf-dump = gguf.scripts.gguf_dump:main
         - gguf-set-metadata = gguf.scripts.gguf_set_metadata:main
         - gguf-new-metadata = gguf.scripts.gguf_new_metadata:main
-        - gguf-editor-gui = gguf.scripts.gguf_editor_gui:main      
+        - gguf-editor-gui = gguf.scripts.gguf_editor_gui:main
       skip: True # [py<39]
-      skip: true # [py>313]
       skip: true # [output_set != "llama_cpp_tools"]
       number: {{ build_number }}
 
