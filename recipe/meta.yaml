@@ -301,10 +301,6 @@ outputs:
         - llama-convert-llama-ggml-to-gguf = llama_cpp_tools.convert_llama_ggml_to_gguf:main
         - llama-convert-lora-to-gguf = llama_cpp_tools.convert_lora_to_gguf:main
       skip: True # [py<39]
-      # Keep py314 skipped: mistral-common has no py314 build on pkgs/main yet
-      # (latest 1.11.2 tops out at py313). transformers/pytorch/sentencepiece are
-      # already py314-ready, so lift this once mistral-common ships for py314.
-      skip: true # [py>313]
       skip: true # [output_set != "llama_cpp_tools"]
       number: {{ build_number }}
 
