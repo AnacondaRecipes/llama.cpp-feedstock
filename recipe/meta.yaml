@@ -2,7 +2,7 @@
 {% set upstream_release = "b9848" %}
 {% set upstream_commit = "931eb37f8cac5a6ca84d5641445d460af2a9d7dd" %}
 {% set version = "0.0." + upstream_release[1:] %}
-{% set gguf_version = "0.18.0." + upstream_release[1:] %}
+{% set gguf_version = "0.19.0." + upstream_release[1:] %}
 {% set build_number = 0 %}
 
 # When output_set is llama_cpp_tools, PBP trips on undefined variables
