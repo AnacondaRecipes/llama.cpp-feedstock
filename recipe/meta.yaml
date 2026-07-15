@@ -316,10 +316,15 @@ outputs:
         # requirements/requirements-convert_legacy_llama.txt
         - numpy >=1.26.4 # loosen bounds to accept numpy 2, which appears to be compatible
         - sentencepiece >=0.1.98,<0.3.0
-        # Upstream b9453 pins transformers==5.5.1; align to 5.x major
-        # (pkgs/main currently provides 5.3.0)
-        - transformers >=5.3.0,<6.0.0
-        - protobuf >=4.21.0,<7.0.0 # loosen bounds to accept protobuf 5 and 6
+        # Upstream b9848 pins transformers==4.57.6 for a rope/yarn converter
+        # fix (huggingface/transformers#45887, merge commit dfcb1a3, 2026-05-12;
+        # cherry-picked into the 4.57.x maintenance branch). pkgs/main lacks
+        # 4.57.6 (only has 4.57.1), but the same fix is an ancestor of
+        # transformers 5.9.0, so we require >=5.9.0 as the minimum version
+        # containing the fix.
+        - transformers >=5.9.0,<6.0.0
+        # Match upstream cap (requirements-convert_legacy_llama.txt@b9848).
+        - protobuf >=4.21.0,<5.0.0
         # requirements/requirements-convert_hf_to_gguf.txt
         # requirements/requirements-convert_llama_ggml_to_gguf.txt
         # requirements/requirements-convert_lora_to_gguf.txt
