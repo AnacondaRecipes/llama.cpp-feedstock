@@ -323,8 +323,14 @@ outputs:
         # transformers 5.9.0, so we require >=5.9.0 as the minimum version
         # containing the fix.
         - transformers >=5.9.0,<6.0.0
-        # Match upstream cap (requirements-convert_legacy_llama.txt@b9848).
-        - protobuf >=4.21.0,<5.0.0
+        # Upstream caps at protobuf<5.0, but we can't match that on pkgs/main:
+        # the only <5.0 build (protobuf 4.25.3) requires libabseil ~20240116,
+        # while every pytorch >=2.6.0 build on pkgs/main requires libabseil
+        # >=20250127. The tighter upstream cap is therefore unsolvable
+        # alongside our pytorch>=2.6.0 run-dep. The previous release (b9453)
+        # shipped with protobuf 5.x via the same widened bound and CI tests
+        # (`llama-convert-hf-to-gguf --help` etc.) passed on all platforms.
+        - protobuf >=5.29.3,<7.0.0
         # requirements/requirements-convert_hf_to_gguf.txt
         # requirements/requirements-convert_llama_ggml_to_gguf.txt
         # requirements/requirements-convert_lora_to_gguf.txt
