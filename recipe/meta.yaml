@@ -1,8 +1,8 @@
 {% set name = "llama.cpp-meta" %}
-{% set upstream_release = "b9453" %}
-{% set upstream_commit = "48b88c3b0057fcf1171f8d62ff9f6b10de27a11e" %}
+{% set upstream_release = "b9848" %}
+{% set upstream_commit = "931eb37f8cac5a6ca84d5641445d460af2a9d7dd" %}
 {% set version = "0.0." + upstream_release[1:] %}
-{% set gguf_version = "0.18.0." + upstream_release[1:] %}
+{% set gguf_version = "0.19.0." + upstream_release[1:] %}
 {% set build_number = 0 %}
 
 # When output_set is llama_cpp_tools, PBP trips on undefined variables
@@ -10,11 +10,14 @@
 # So we set them to 999.0a0 to avoid the render error.
 # Setting to 999.0a0 is safe because if they ever get used in the build, they
 # will generate a solve error.
-{% if output_set == "llama_cpp_tools" %}
-{% set mkl = "999.0a0" %}
-{% set openblas = "999.0a0" %}
-{% set cuda_compiler_version = "999.0a0" %}
-{% endif %}
+# NOTE: expressed as `{% set %}` with the `default` filter rather than a
+# `{% if %}` block because the Anaconda Linter's recipe parser does not support
+# `{% if %}` statements (parsing_jinja_failure). For the "llama" output_set these
+# variables are supplied by conda_build_config.yaml and are kept as-is; for the
+# "llama_cpp_tools" output_set they are undefined, so they fall back to 999.0a0.
+{% set mkl = mkl | default("999.0a0", true) %}
+{% set openblas = openblas | default("999.0a0", true) %}
+{% set cuda_compiler_version = cuda_compiler_version | default("999.0a0", true) %}
 
 package:
   name: {{ name|lower }}
@@ -22,7 +25,7 @@ package:
 
 source:
   url: https://github.com/ggml-org/llama.cpp/archive/{{ upstream_release }}.tar.gz
-  sha256: 3d755128d1b329c186a96e4a13f7b4fe1fe80067b6f21c56d742153bfc165e1a
+  sha256: 422610d99e6a579ed5aefdb02746768828315a7ed870b43fe7018dcb3714e807
 
   patches:
     - patches/increase-nmse-tolerance.patch
@@ -298,7 +301,6 @@ outputs:
         - llama-convert-llama-ggml-to-gguf = llama_cpp_tools.convert_llama_ggml_to_gguf:main
         - llama-convert-lora-to-gguf = llama_cpp_tools.convert_lora_to_gguf:main
       skip: True # [py<39]
-      skip: true # [py>313]
       skip: true # [output_set != "llama_cpp_tools"]
       number: {{ build_number }}
 
@@ -314,10 +316,35 @@ outputs:
         # requirements/requirements-convert_legacy_llama.txt
         - numpy >=1.26.4 # loosen bounds to accept numpy 2, which appears to be compatible
         - sentencepiece >=0.1.98,<0.3.0
-        # Upstream b9453 pins transformers==5.5.1; align to 5.x major
-        # (pkgs/main currently provides 5.3.0)
-        - transformers >=5.3.0,<6.0.0
-        - protobuf >=4.21.0,<7.0.0 # loosen bounds to accept protobuf 5 and 6
+        # Upstream b9848 pins transformers==4.57.6 for a rope/yarn converter
+        # fix (huggingface/transformers#45887, merge commit dfcb1a3, 2026-05-12;
+        # cherry-picked into the 4.57.x maintenance branch). pkgs/main lacks
+        # 4.57.6 (only has 4.57.1), but the same fix is an ancestor of
+        # transformers 5.9.0, so we require >=5.9.0 as the minimum version
+        # containing the fix.
+        - transformers >=5.9.0,<6.0.0
+        # Upstream requirements-convert_legacy_llama.txt lists
+        # `protobuf>=4.21.0,<5.0.0`, but that cap is stale: it was introduced
+        # in llama.cpp commit 04ac060 (Dec 2023, before protobuf 5.x existed)
+        # and has been carried forward unchanged for 2+ years without any
+        # release-note or PR justifying it. The convert scripts themselves do
+        # NOT import protobuf directly (no `import protobuf` / `google.protobuf`
+        # in convert_hf_to_gguf.py, convert_lora_to_gguf.py, or
+        # convert_llama_ggml_to_gguf.py at b9848). protobuf is only pulled in
+        # transitively by transformers' T5/mBART/XLNet tokenizer classes when
+        # those specific model families are instantiated, so we still ship it
+        # as a run: dep for feature completeness.
+        # We cannot match the upstream `<5.0` cap on pkgs/main because the
+        # only such build (protobuf 4.25.3) requires libabseil ~20240116,
+        # while every pytorch >=2.6.0 build on pkgs/main requires libabseil
+        # >=20250127. Widening to protobuf 5.x/6.x is safe here because
+        # (a) our recipe does not `pip install` (build-llama-cpp-tools.sh
+        # just cps files into $SP_DIR), so no dist-info metadata enforces
+        # upstream's constraint, and (b) sentencepiece 0.2.x on pkgs/main
+        # statically links libprotobuf and does not have a runtime protobuf
+        # dep, so the ABI decoupling insulates us from protobuf major-version
+        # shifts.
+        - protobuf >=5.29.3,<7.0.0
         # requirements/requirements-convert_hf_to_gguf.txt
         # requirements/requirements-convert_llama_ggml_to_gguf.txt
         # requirements/requirements-convert_lora_to_gguf.txt
@@ -365,9 +392,8 @@ outputs:
         - gguf-dump = gguf.scripts.gguf_dump:main
         - gguf-set-metadata = gguf.scripts.gguf_set_metadata:main
         - gguf-new-metadata = gguf.scripts.gguf_new_metadata:main
-        - gguf-editor-gui = gguf.scripts.gguf_editor_gui:main      
+        - gguf-editor-gui = gguf.scripts.gguf_editor_gui:main
       skip: True # [py<39]
-      skip: true # [py>313]
       skip: true # [output_set != "llama_cpp_tools"]
       number: {{ build_number }}
 
