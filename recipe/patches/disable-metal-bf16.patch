@@ -36,7 +36,7 @@ Can be removed when building with macOS 15+ SDK.
  
                  if (ggml_metal_device_get_props(dev)->has_tensor) {
                      [prep setObject:@"1" forKey:@"GGML_METAL_HAS_TENSOR"];
-@@ -714,9 +715,9 @@ ggml_metal_device_t ggml_metal_device_in
+@@ -718,9 +719,9 @@ ggml_metal_device_t ggml_metal_device_in
              dev->props.has_simdgroup_mm = [dev->mtl_device supportsFamily:MTLGPUFamilyApple7];
              dev->props.has_unified_memory = dev->mtl_device.hasUnifiedMemory;
  
