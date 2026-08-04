@@ -1,6 +1,6 @@
 {% set name = "llama.cpp-meta" %}
-{% set upstream_release = "b10068" %}
-{% set upstream_commit = "571d0d540df04f25298d0e159e520d9fc62ed121" %}
+{% set upstream_release = "b10241" %}
+{% set upstream_commit = "9bd4c09ea571a9020f30eeef169b552625b5b5a4" %}
 {% set version = "0.0." + upstream_release[1:] %}
 {% set gguf_version = "0.19.0." + upstream_release[1:] %}
 {% set build_number = 0 %}
@@ -25,7 +25,7 @@ package:
 
 source:
   url: https://github.com/ggml-org/llama.cpp/archive/{{ upstream_release }}.tar.gz
-  sha256: 192819ca7117147532f2c8d8938ab2fe9b25e872ea671a56be549ec30ea4f743
+  sha256: cadadd9975219589290acbe262c903790af9208d704046775248a9578176d1f5
 
   patches:
     - patches/increase-nmse-tolerance.patch

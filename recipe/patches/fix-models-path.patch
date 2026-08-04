@@ -13,7 +13,7 @@ llama_cpp_tools/conversion/base.py, two parents up reaches the models dir).
 ---
 --- a/conversion/base.py
 +++ b/conversion/base.py
-@@ -1994,7 +1994,7 @@ class TextModel(ModelBase):
+@@ -1997,7 +1997,7 @@ class TextModel(ModelBase):
          special_vocab.add_to_gguf(self.gguf_writer)
  
      def _set_vocab_builtin(self, model_name: Literal["gpt-neox", "llama-spm"], vocab_size: int):
