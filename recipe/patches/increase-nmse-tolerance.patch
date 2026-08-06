@@ -17,7 +17,7 @@ Updated for b8994.
 
 --- a/tests/test-backend-ops.cpp
 +++ b/tests/test-backend-ops.cpp
-@@ -4238,7 +4238,7 @@ struct test_mul_mat : public test_case {
+@@ -4252,7 +4252,7 @@ struct test_mul_mat : public test_case {
      }
  
      double max_nmse_err() override {
@@ -26,7 +26,7 @@ Updated for b8994.
      }
  
      double max_nmse_err(ggml_backend_t backend) override {
-@@ -4427,7 +4427,7 @@ struct test_mul_mat_id : public test_cas
+@@ -4441,7 +4441,7 @@ struct test_mul_mat_id : public test_cas
      }
  
      double max_nmse_err() override {
@@ -35,7 +35,7 @@ Updated for b8994.
      }
  
      double max_nmse_err(ggml_backend_t backend) override {
-@@ -4495,7 +4495,7 @@ struct test_mul_mat_id_fusion : public t
+@@ -4509,7 +4509,7 @@ struct test_mul_mat_id_fusion : public t
      }
  
      double max_nmse_err() override {
@@ -44,7 +44,7 @@ Updated for b8994.
      }
  
      uint64_t op_flops(ggml_tensor * t) override {
-@@ -4574,7 +4574,7 @@ struct test_out_prod : public test_case
+@@ -4588,7 +4588,7 @@ struct test_out_prod : public test_case
      }
  
      double max_nmse_err() override {
@@ -53,7 +53,7 @@ Updated for b8994.
      }
  
      test_out_prod(ggml_type type_a = GGML_TYPE_F32, ggml_type type_b = GGML_TYPE_F32,
-@@ -5379,7 +5379,7 @@ struct test_conv_transpose_2d : public t
+@@ -5393,7 +5393,7 @@ struct test_conv_transpose_2d : public t
      }
  
      double max_nmse_err() override {
@@ -62,7 +62,7 @@ Updated for b8994.
      }
  
      test_conv_transpose_2d(
-@@ -5533,7 +5533,7 @@ struct test_conv_2d : public test_case {
+@@ -5547,7 +5547,7 @@ struct test_conv_2d : public test_case {
      }
  
      double max_nmse_err() override {
@@ -71,7 +71,7 @@ Updated for b8994.
      }
  
      uint64_t op_flops(ggml_tensor * t) override {
-@@ -5668,7 +5668,7 @@ struct test_conv_3d : public test_case {
+@@ -5682,7 +5682,7 @@ struct test_conv_3d : public test_case {
      }
  
      double max_nmse_err() override {
@@ -80,7 +80,7 @@ Updated for b8994.
      }
  
      uint64_t op_flops(ggml_tensor * t) override {
-@@ -6814,7 +6814,7 @@ struct test_flash_attn_ext : public test
+@@ -6830,7 +6830,7 @@ struct test_flash_attn_ext : public test
      }
  
      double max_nmse_err() override {

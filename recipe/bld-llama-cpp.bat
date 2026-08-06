@@ -33,6 +33,9 @@ if "%blas_impl%"=="mkl" (
 REM LLAMA build options
 set LLAMA_ARGS=-DLLAMA_BUILD_NUMBER=%LLAMA_BUILD_NUMBER% -DLLAMA_BUILD_COMMIT=%LLAMA_BUILD_COMMIT%
 set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_OPENSSL=ON
+REM Disable common/subproc.cpp for parity with Linux (see build-llama-cpp.sh).
+REM Only server MCP/tools/router consume it, neither is exposed by our binaries.
+set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_SUBPROCESS=OFF
 REM Disable the unified `llama` router app: it #includes common/build-info.h but
 REM the upstream app/CMakeLists.txt does not wire up its include path, so the
 REM build fails with "fatal error: build-info.h: No such file or directory".

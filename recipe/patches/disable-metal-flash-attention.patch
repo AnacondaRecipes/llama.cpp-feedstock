@@ -20,7 +20,7 @@ when building with macOS 15+ SDK.
 
 --- a/ggml/src/ggml-metal/ggml-metal-device.m
 +++ b/ggml/src/ggml-metal/ggml-metal-device.m
-@@ -1245,6 +1245,10 @@ bool ggml_metal_device_supports_op(ggml_
+@@ -1290,6 +1290,10 @@ bool ggml_metal_device_supports_op(ggml_
          case GGML_OP_ROLL:
              return true;
          case GGML_OP_FLASH_ATTN_EXT:
