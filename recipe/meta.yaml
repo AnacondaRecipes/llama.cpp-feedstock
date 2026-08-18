@@ -38,6 +38,7 @@ source:
     - patches/fix-models-path.patch
     - patches/fix-test-llama-archs-backend-dl.patch
     - patches/skip-test-chat-without-server.patch
+    - patches/skip-test-mtmd-impl-without-tools.patch
 
 build:
   number: {{ build_number }}
