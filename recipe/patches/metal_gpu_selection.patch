@@ -18,29 +18,29 @@ Updated for b8994. File rename from ggml/src/ggml-metal/ggml-metal.m to ggml-met
 
 --- a/ggml/src/ggml-metal/ggml-metal-device.m
 +++ b/ggml/src/ggml-metal/ggml-metal-device.m
-@@ -718,6 +718,25 @@ ggml_metal_device_t ggml_metal_device_in
- 
-     if (dev->mtl_device == nil) {
-         dev->mtl_device = MTLCreateSystemDefaultDevice();
-+        if (dev->mtl_device == nil) {
-+          /*
-+            In macOS, in order for the system to provide a default Metal device object, you must link to the Core Graphics framework.
-+            You usually need to do this explicitly if you're writing apps that don't use graphics by default, such as command line tools.
-+            > https://developer.apple.com/documentation/metal/1433401-mtlcreatesystemdefaultdevice?language=objc
-+            Systems with Apple silicon only have one GPU, which removes the need to choose a GPU.
-+            > https://developer.apple.com/documentation/metal/mtldevice/1433409-lowpower#discussion
-+           */
-+            NSArray * devices = MTLCopyAllDevices();
-+            for (id<MTLDevice> dev_tmp in devices) {
-+                if (dev_tmp != nil) {
-+                    if (dev->mtl_device == nil) {
-+                        dev->mtl_device = dev_tmp;
-+                    } else {
-+                        [dev_tmp release];
+@@ -1096,6 +1096,25 @@ ggml_metal_device_t ggml_metal_device_in
+     @autoreleasepool {
+         if (dev->mtl_device == nil) {
+             dev->mtl_device = MTLCreateSystemDefaultDevice();
++            if (dev->mtl_device == nil) {
++              /*
++                In macOS, in order for the system to provide a default Metal device object, you must link to the Core Graphics framework.
++                You usually need to do this explicitly if you're writing apps that don't use graphics by default, such as command line tools.
++                > https://developer.apple.com/documentation/metal/1433401-mtlcreatesystemdefaultdevice?language=objc
++                Systems with Apple silicon only have one GPU, which removes the need to choose a GPU.
++                > https://developer.apple.com/documentation/metal/mtldevice/1433409-lowpower#discussion
++               */
++                NSArray * devices = MTLCopyAllDevices();
++                for (id<MTLDevice> dev_tmp in devices) {
++                    if (dev_tmp != nil) {
++                        if (dev->mtl_device == nil) {
++                            dev->mtl_device = dev_tmp;
++                        } else {
++                            [dev_tmp release];
++                        }
 +                    }
 +                }
 +            }
-+        }
  
-         if (dev->mtl_device) {
-             dev->mtl_queue = [dev->mtl_device newCommandQueue];
+             if (dev->mtl_device) {
+                 dev->mtl_queue = [dev->mtl_device newCommandQueue];

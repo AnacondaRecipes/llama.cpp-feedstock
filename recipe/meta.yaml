@@ -1,7 +1,14 @@
 {% set name = "llama.cpp-meta" %}
-{% set upstream_release = "b10488" %}
-{% set upstream_commit = "9d77fa17254e1dee4b9e92504c91611a60b1359f" %}
-{% set version = "0.0." + upstream_release[1:] %}
+{% set upstream_release = "b10760" %}
+{% set upstream_commit = "0f3a71be15af836d277c9f918adfafb45732677e" %}
+# Upstream now maintains two tag streams (ggml-org/ggml#1579): a slow-lane
+# vX.Y.Z semver anchor + fast-lane b<NUM> nightly builds. We ship the fast
+# lane and prefix our version with the semver anchor for downstream
+# visibility. `<anchor>.<b-num>` sorts strictly newer than the pre-b10760
+# `0.0.<b-num>` scheme, so no downgrade trap on solvers. Bump the anchor
+# when upstream cuts a new semver line (v0.4.0, v0.5.0, ...).
+{% set upstream_semver_line = "0.3.0" %}
+{% set version = upstream_semver_line + "." + upstream_release[1:] %}
 {% set gguf_version = "0.19.0." + upstream_release[1:] %}
 {% set build_number = 0 %}
 
@@ -25,7 +32,7 @@ package:
 
 source:
   url: https://github.com/ggml-org/llama.cpp/archive/{{ upstream_release }}.tar.gz
-  sha256: a006ca1a0268a3748686040d1ae021939d92ec0f58f341a30e52056298da4a0b
+  sha256: 8986285d34f7531e84b1ee6d35c88989fc6f3cf895f60610594997b8b7bad443
 
   patches:
     - patches/increase-nmse-tolerance.patch
@@ -338,14 +345,14 @@ outputs:
         # We cannot match the upstream `<5.0` cap on pkgs/main because the
         # only such build (protobuf 4.25.3) requires libabseil ~20240116,
         # while every pytorch >=2.6.0 build on pkgs/main requires libabseil
-        # >=20250127. Widening to protobuf 5.x/6.x is safe here because
+        # >=20250127. Widening to protobuf 5.x/6.x/7.x is safe here because
         # (a) our recipe does not `pip install` (build-llama-cpp-tools.sh
         # just cps files into $SP_DIR), so no dist-info metadata enforces
         # upstream's constraint, and (b) sentencepiece 0.2.x on pkgs/main
         # statically links libprotobuf and does not have a runtime protobuf
         # dep, so the ABI decoupling insulates us from protobuf major-version
-        # shifts.
-        - protobuf >=5.29.3,<7.0.0
+        # shifts. PKG-15573: protobuf 7.35.1 is now on pkgs/main.
+        - protobuf >=5.29.3,<8.0.0
         # requirements/requirements-convert_hf_to_gguf.txt
         # requirements/requirements-convert_llama_ggml_to_gguf.txt
         # requirements/requirements-convert_lora_to_gguf.txt
