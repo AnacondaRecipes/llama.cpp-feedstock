@@ -3,7 +3,7 @@
 {% set upstream_commit = "9d77fa17254e1dee4b9e92504c91611a60b1359f" %}
 {% set version = "0.0." + upstream_release[1:] %}
 {% set gguf_version = "0.19.0." + upstream_release[1:] %}
-{% set build_number = 0 %}
+{% set build_number = 1 %}
 
 # When output_set is llama_cpp_tools, PBP trips on undefined variables
 # because they are not part of the variant config.
@@ -338,14 +338,14 @@ outputs:
         # We cannot match the upstream `<5.0` cap on pkgs/main because the
         # only such build (protobuf 4.25.3) requires libabseil ~20240116,
         # while every pytorch >=2.6.0 build on pkgs/main requires libabseil
-        # >=20250127. Widening to protobuf 5.x/6.x is safe here because
+        # >=20250127. Widening to protobuf 5.x/6.x/7.x is safe here because
         # (a) our recipe does not `pip install` (build-llama-cpp-tools.sh
         # just cps files into $SP_DIR), so no dist-info metadata enforces
         # upstream's constraint, and (b) sentencepiece 0.2.x on pkgs/main
         # statically links libprotobuf and does not have a runtime protobuf
         # dep, so the ABI decoupling insulates us from protobuf major-version
-        # shifts.
-        - protobuf >=5.29.3,<7.0.0
+        # shifts. PKG-15573: protobuf 7.35.1 is now on pkgs/main.
+        - protobuf >=5.29.3,<8.0.0
         # requirements/requirements-convert_hf_to_gguf.txt
         # requirements/requirements-convert_llama_ggml_to_gguf.txt
         # requirements/requirements-convert_lora_to_gguf.txt
