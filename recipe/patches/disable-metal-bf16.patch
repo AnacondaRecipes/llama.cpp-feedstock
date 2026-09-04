@@ -1,51 +1,22 @@
-From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: Conda Build <noreply@anaconda.com>
-Date: Mon, 2 Dec 2025 10:00:00 +0000
-Subject: [PATCH] Disable Metal BF16 support for macOS SDK < 15
-
-AI assistant generated patch.
-
-Metal shader compiler in macOS SDK < 15 crashes when compiling BF16
-(bfloat16) shader code, causing test-backend-ops and test-thread-safety
-to fail with SEGFAULT/abort on macOS 12-14.
-
-This patch disables BF16 at both compile-time and runtime:
-1. Comments out the preprocessor macro setting (line ~261)
-2. Sets has_bfloat = false unconditionally (line ~549)
-
-This matches old llama.cpp behavior where BF16 was disabled by default.
-Can be removed when building with macOS 15+ SDK.
-
----
- ggml/src/ggml-metal/ggml-metal-device.m | 13 +++++++------
- 1 file changed, 7 insertions(+), 6 deletions(-)
-
 --- a/ggml/src/ggml-metal/ggml-metal-device.m
 +++ b/ggml/src/ggml-metal/ggml-metal-device.m
-@@ -214,9 +214,10 @@ ggml_metal_library_t ggml_metal_library_
-                 // dictionary of preprocessor macros
-                 NSMutableDictionary * prep = [NSMutableDictionary dictionary];
- 
--                if (ggml_metal_device_get_props(dev)->has_bfloat) {
--                    [prep setObject:@"1" forKey:@"GGML_METAL_HAS_BF16"];
--                }
-+                // Disabled for Anaconda: BF16 causes Metal shader compiler crashes on macOS SDK < 15
-+                // if (ggml_metal_device_get_props(dev)->has_bfloat) {
-+                //     [prep setObject:@"1" forKey:@"GGML_METAL_HAS_BF16"];
-+                // }
- 
-                 if (ggml_metal_device_get_props(dev)->has_tensor) {
-                     [prep setObject:@"1" forKey:@"GGML_METAL_HAS_TENSOR"];
-@@ -753,9 +754,9 @@ ggml_metal_device_t ggml_metal_device_in
+@@ -753,8 +753,17 @@ ggml_metal_device_t ggml_metal_device_in
              dev->props.has_simdgroup_mm = [dev->mtl_device supportsFamily:MTLGPUFamilyApple7];
              dev->props.has_unified_memory = dev->mtl_device.hasUnifiedMemory;
  
 -            dev->props.has_bfloat  = [dev->mtl_device supportsFamily:MTLGPUFamilyMetal3_GGML];
 -            dev->props.has_bfloat |= [dev->mtl_device supportsFamily:MTLGPUFamilyApple6];
--            if (getenv("GGML_METAL_BF16_DISABLE") != NULL) {
-+            // Disabled for conda-forge: BF16 causes Metal shader compiler crashes on macOS SDK < 15
-+            dev->props.has_bfloat = false;
-+            if (false && getenv("GGML_METAL_BF16_DISABLE") != NULL) {
++            // Anaconda: runtime OS-version gate for Metal BF16 (macOS 14.0+).
++            // Upstream detects BF16 via GPU family alone, but the Metal shader
++            // compiler on macOS <14 crashes when the GGML_METAL_HAS_BF16 macro
++            // is set on Apple 6+/Metal 3 GPUs. Gate by OS version so we still
++            // ship on Ventura workers without crashing older users.
++            if (@available(macOS 14.0, *)) {
++                dev->props.has_bfloat  = [dev->mtl_device supportsFamily:MTLGPUFamilyMetal3_GGML];
++                dev->props.has_bfloat |= [dev->mtl_device supportsFamily:MTLGPUFamilyApple6];
++            } else {
++                dev->props.has_bfloat = false;
++            }
+             if (getenv("GGML_METAL_BF16_DISABLE") != NULL) {
                  dev->props.has_bfloat = false;
              }
- 

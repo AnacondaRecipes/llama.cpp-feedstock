@@ -65,6 +65,7 @@ outputs:
         - LLAMA_BUILD_NUMBER={{ upstream_release[1:] }}
         - LLAMA_BUILD_COMMIT={{ upstream_commit}}
       skip: true # [output_set != "llama"]
+      skip: true  # [not (osx and arm64)]  # CANARY: osx-arm64-only
       # do not mix cublas and mkl/openblas
       skip: true # [((gpu_variant or "").startswith('cuda') and (blas_impl != "cublas")) or (not (gpu_variant or "").startswith('cuda') and (blas_impl == "cublas"))]
       # Use a build number difference to ensure that the GPU
@@ -149,6 +150,7 @@ outputs:
         - LLAMA_BUILD_NUMBER={{ upstream_release[1:] }}
         - LLAMA_BUILD_COMMIT={{ upstream_commit}}
       skip: true # [output_set != "llama"]
+      skip: true  # [not (osx and arm64)]  # CANARY: osx-arm64-only
       # do not mix cublas and mkl/openblas
       skip: true # [((gpu_variant or "").startswith('cuda') and (blas_impl != "cublas")) or (not (gpu_variant or "").startswith('cuda') and (blas_impl == "cublas"))]
       # Use a build number difference to ensure that the GPU
@@ -228,6 +230,7 @@ outputs:
         - LLAMA_BUILD_NUMBER={{ upstream_release[1:] }}
         - LLAMA_BUILD_COMMIT={{ upstream_commit}}
       skip: true # [output_set != "llama"] 
+      skip: true  # [not (osx and arm64)]  # CANARY: osx-arm64-only
       # do not mix cublas and mkl/openblas
       skip: true # [((gpu_variant or "").startswith('cuda') and (blas_impl != "cublas")) or (not (gpu_variant or "").startswith('cuda') and (blas_impl == "cublas"))]
       # Use a build number difference to ensure that the GPU
@@ -303,6 +306,7 @@ outputs:
         - llama-convert-lora-to-gguf = llama_cpp_tools.convert_lora_to_gguf:main
       skip: True # [py<39]
       skip: true # [output_set != "llama_cpp_tools"]
+      skip: true  # [not (osx and arm64)]  # CANARY: osx-arm64-only
       number: {{ build_number }}
 
     requirements:
@@ -396,6 +400,7 @@ outputs:
         - gguf-editor-gui = gguf.scripts.gguf_editor_gui:main
       skip: True # [py<39]
       skip: true # [output_set != "llama_cpp_tools"]
+      skip: true  # [not (osx and arm64)]  # CANARY: osx-arm64-only
       number: {{ build_number }}
 
     requirements:
