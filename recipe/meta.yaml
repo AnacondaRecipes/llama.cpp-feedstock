@@ -59,7 +59,7 @@ requirements:
     - {{ compiler('cuda') }}                              # [(gpu_variant or "").startswith('cuda')]
     - cmake
     - ninja-base
-    - pkgconfig
+    - pkg-config
 
 outputs:
   - name: libllama
@@ -97,7 +97,7 @@ outputs:
         - {{ compiler('cuda') }}                              # [(gpu_variant or "").startswith('cuda')]
         - cmake
         - ninja-base
-        - pkgconfig
+        - pkg-config
       host:
         - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
         - cuda-cudart-dev  {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
@@ -181,7 +181,7 @@ outputs:
         - {{ compiler('cuda') }}                              # [(gpu_variant or "").startswith('cuda')]
         - cmake
         - ninja-base
-        - pkgconfig
+        - pkg-config
       host:
         - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
         - cuda-cudart-dev  {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
@@ -258,7 +258,7 @@ outputs:
         - {{ compiler('cuda') }}                              # [(gpu_variant or "").startswith('cuda')]
         - cmake
         - ninja-base
-        - pkgconfig
+        - pkg-config
       host:
         - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
         - cuda-cudart-dev  {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
