@@ -86,11 +86,6 @@ outputs:
       missing_dso_whitelist:                                                                         # [(gpu_variant or "").startswith('cuda')]
         - "**/libcuda.so*"  # [(gpu_variant or "").startswith('cuda')]
         - "**/nvcuda.dll"   # [(gpu_variant or "").startswith('cuda')]
-      # ucrt is OS-provided on Windows 11 ARM64 and not shipped on the
-      # win-arm64 channel; the vs stdlib's run_exports would otherwise inject
-      # an unsatisfiable dep (openblas-feedstock#21 / nodejs convention).
-      ignore_run_exports:        # [win and arm64]
-        - ucrt                   # [win and arm64]
       run_exports:
         - {{ pin_subpackage('libllama', exact=True) }}
 
@@ -177,11 +172,6 @@ outputs:
       missing_dso_whitelist:                                                                         # [(gpu_variant or "").startswith('cuda')]
         - "**/libcuda.so*"  # [(gpu_variant or "").startswith('cuda')]
         - "**/nvcuda.dll"   # [(gpu_variant or "").startswith('cuda')]
-      # ucrt is OS-provided on Windows 11 ARM64 and not shipped on the
-      # win-arm64 channel; the vs stdlib's run_exports would otherwise inject
-      # an unsatisfiable dep (openblas-feedstock#21 / nodejs convention).
-      ignore_run_exports:        # [win and arm64]
-        - ucrt                   # [win and arm64]
       run_exports:
         - {{ pin_subpackage('llama.cpp', exact=True) }}
       
@@ -263,11 +253,6 @@ outputs:
       missing_dso_whitelist:                                                                         # [(gpu_variant or "").startswith('cuda')]
         - "**/libcuda.so*"  # [(gpu_variant or "").startswith('cuda')]
         - "**/nvcuda.dll"   # [(gpu_variant or "").startswith('cuda')]
-      # ucrt is OS-provided on Windows 11 ARM64 and not shipped on the
-      # win-arm64 channel; the vs stdlib's run_exports would otherwise inject
-      # an unsatisfiable dep (openblas-feedstock#21 / nodejs convention).
-      ignore_run_exports:        # [win and arm64]
-        - ucrt                   # [win and arm64]
 
     requirements:
       build:
