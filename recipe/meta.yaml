@@ -10,7 +10,7 @@
 {% set upstream_semver_line = "0.3.0" %}
 {% set version = upstream_semver_line + "." + upstream_release[1:] %}
 {% set gguf_version = "0.19.0." + upstream_release[1:] %}
-{% set build_number = 1 %}
+{% set build_number = 2 %}
 
 # When output_set is llama_cpp_tools, PBP trips on undefined variables
 # because they are not part of the variant config.
@@ -86,6 +86,11 @@ outputs:
       missing_dso_whitelist:                                                                         # [(gpu_variant or "").startswith('cuda')]
         - "**/libcuda.so*"  # [(gpu_variant or "").startswith('cuda')]
         - "**/nvcuda.dll"   # [(gpu_variant or "").startswith('cuda')]
+      # ucrt is OS-provided on Windows 11 ARM64 and not shipped on the
+      # win-arm64 channel; the vs stdlib's run_exports would otherwise inject
+      # an unsatisfiable dep (openblas-feedstock#21 / nodejs convention).
+      ignore_run_exports:        # [win and arm64]
+        - ucrt                   # [win and arm64]
       run_exports:
         - {{ pin_subpackage('libllama', exact=True) }}
 
@@ -108,6 +113,7 @@ outputs:
         - intel-openmp {{ mkl }}                              # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
         - libgomp                                             # [linux and not (blas_impl == "mkl")]
         - llvm-openmp {{ cxx_compiler_version }}              # [osx and not (blas_impl == "mkl")]
+        - llvm-openmp {{ cxx_compiler_version }}              # [win and arm64]
         - vcomp14                                             # [(win and x86_64) and not (blas_impl == "mkl")]
         - openssl
       run:
@@ -115,6 +121,7 @@ outputs:
         - {{ pin_compatible('intel-openmp') }}                # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
         - libgomp                                             # [linux and not (blas_impl == "mkl")]
         - llvm-openmp                                         # [osx and not (blas_impl == "mkl")]
+        - llvm-openmp                                         # [win and arm64]
         - vcomp14                                             # [(win and x86_64) and not (blas_impl == "mkl")]
         - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
         - __cuda                                              # [(gpu_variant or "").startswith('cuda')]
@@ -170,6 +177,11 @@ outputs:
       missing_dso_whitelist:                                                                         # [(gpu_variant or "").startswith('cuda')]
         - "**/libcuda.so*"  # [(gpu_variant or "").startswith('cuda')]
         - "**/nvcuda.dll"   # [(gpu_variant or "").startswith('cuda')]
+      # ucrt is OS-provided on Windows 11 ARM64 and not shipped on the
+      # win-arm64 channel; the vs stdlib's run_exports would otherwise inject
+      # an unsatisfiable dep (openblas-feedstock#21 / nodejs convention).
+      ignore_run_exports:        # [win and arm64]
+        - ucrt                   # [win and arm64]
       run_exports:
         - {{ pin_subpackage('llama.cpp', exact=True) }}
       
@@ -192,6 +204,7 @@ outputs:
         - intel-openmp {{ mkl }}                              # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
         - libgomp                                             # [linux and not (blas_impl == "mkl")]
         - llvm-openmp {{ cxx_compiler_version }}              # [osx and not (blas_impl == "mkl")]
+        - llvm-openmp {{ cxx_compiler_version }}              # [win and arm64]
         - vcomp14                                             # [(win and x86_64) and not (blas_impl == "mkl")]
         - openssl
         - {{ pin_subpackage('libllama', exact=True) }}
@@ -201,6 +214,7 @@ outputs:
         - {{ pin_compatible('intel-openmp') }}                # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
         - libgomp                                             # [linux and not (blas_impl == "mkl")]
         - llvm-openmp                                         # [osx and not (blas_impl == "mkl")]
+        - llvm-openmp                                         # [win and arm64]
         - vcomp14                                             # [(win and x86_64) and not (blas_impl == "mkl")]
         - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
         - __cuda                                              # [(gpu_variant or "").startswith('cuda')]
@@ -249,6 +263,11 @@ outputs:
       missing_dso_whitelist:                                                                         # [(gpu_variant or "").startswith('cuda')]
         - "**/libcuda.so*"  # [(gpu_variant or "").startswith('cuda')]
         - "**/nvcuda.dll"   # [(gpu_variant or "").startswith('cuda')]
+      # ucrt is OS-provided on Windows 11 ARM64 and not shipped on the
+      # win-arm64 channel; the vs stdlib's run_exports would otherwise inject
+      # an unsatisfiable dep (openblas-feedstock#21 / nodejs convention).
+      ignore_run_exports:        # [win and arm64]
+        - ucrt                   # [win and arm64]
 
     requirements:
       build:

@@ -4,7 +4,9 @@
 # This helps us avoid mixing the two sets of packages in the same build on PBP.
 output_set:
   - llama
-  - llama_cpp_tools
+  # gguf/llama.cpp-tools require pytorch and sentencepiece, neither of which
+  # is available on win-arm64 yet.
+  - llama_cpp_tools            # [not (win and arm64)]
 
 # NOTE: c_stdlib and c_stdlib_version are intentionally NOT defined here.
 # When defined with only Linux/macOS selectors (no Windows value), conda-build
@@ -12,22 +14,34 @@ output_set:
 # these, conda-build uses its internal defaults which work correctly on all
 # platforms. See pytorch-feedstock and onnxruntime-feedstock for reference.
 
+# win-arm64 must use clang: ggml's CPU backend rejects MSVC for ARM
+# ("MSVC is not supported for ARM, use clang" in ggml/src/ggml-cpu/CMakeLists.txt),
+# and upstream's own win-arm64 release binaries are clang-built (release.yml).
 c_compiler:                        # [win]
-  - vs2019                         # [win]
+  - vs2019                         # [win and x86_64]
+  - clang                          # [win and arm64]
 cxx_compiler:                      # [win]
-  - vs2019                         # [win]
+  - vs2019                         # [win and x86_64]
+  - clang                          # [win and arm64]
+# 20.1.8 matches llvm-openmp on win-arm64 and the clang generation used by
+# openblas-feedstock there (its win CBC pins clang/flang 20.1.8).
+c_compiler_version:                # [win and arm64]
+  - 20.1.8                         # [win and arm64]
+cxx_compiler_version:              # [win and arm64]
+  - 20.1.8                         # [win and arm64]
 
 blas_impl:
-  - mkl                        # [win or (linux and x86_64)]
+  - mkl                        # [(win and x86_64) or (linux and x86_64)]
   - openblas                   # [win or linux]
   - accelerate                 # [osx]
-  - cublas                     # [win or linux]
+  - cublas                     # [(win and x86_64) or linux]
 
 gpu_variant:
   - none
   - metal                      # [osx]
-  - cuda-12                    # [win or linux]
-  - cuda-13                    # [win or linux]
+  # No CUDA toolkit exists for win-arm64 yet (waiting on NVIDIA).
+  - cuda-12                    # [(win and x86_64) or linux]
+  - cuda-13                    # [(win and x86_64) or linux]
 
 # metal builds now require the MTLBuffer gpuAddress property, introduced in macOS 13.0
 # metal builds now require the MTLDataType.bfloat4 data type, introduced in macOS 14.0
@@ -37,8 +51,8 @@ OSX_SDK_VER:                   # [osx]
 
 cuda_compiler_version:         # [win or linux]
   - none                       # [win or linux]
-  - 12.9                       # [win or linux]
-  - 13.0                       # [win or linux]
+  - 12.9                       # [(win and x86_64) or linux]
+  - 13.0                       # [(win and x86_64) or linux]
 
 zip_keys:                      # [win or linux]
   -                            # [win or linux]
