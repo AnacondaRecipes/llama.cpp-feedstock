@@ -2,8 +2,17 @@
 setlocal EnableDelayedExpansion
 
 REM GGML build options
-set GGML_ARGS=-DGGML_NATIVE=OFF -DGGML_CPU_ALL_VARIANTS=ON -DGGML_BACKEND_DL=ON
+set GGML_ARGS=-DGGML_NATIVE=OFF -DGGML_BACKEND_DL=ON
 set GGML_OPENMP_FLAGS=
+
+REM GGML_CPU_ALL_VARIANTS has no ARM-on-Windows variant table (upstream CMake
+REM fatal-errors "Unsupported ARM target OS: Windows"); upstream's own win-arm64
+REM release builds ship a single CPU backend with GGML_CPU_ALL_VARIANTS=OFF.
+if "%target_platform%"=="win-arm64" (
+    set GGML_ARGS=!GGML_ARGS! -DGGML_CPU_ALL_VARIANTS=OFF
+) else (
+    set GGML_ARGS=!GGML_ARGS! -DGGML_CPU_ALL_VARIANTS=ON
+)
 
 if "%gpu_variant:~0,5%"=="cuda-" (
     REM Let llama.cpp's CMakeLists.txt handle architecture selection
