@@ -3,9 +3,12 @@ upstream_sources:
   - github:
       identifier: ggml-org/llama.cpp
       use_max_tag: true
-      include_regex: ^b\d+$
-      from_pattern: ^b(\d+)$
-      to_pattern: 0.0.\1
+      # Upstream ggml-org/llama.cpp stabilised on vX.Y.Z semver tags
+      # (ggml-org/ggml#1579). We track those directly; b#### nightlies
+      # are ignored by the auto-bumper.
+      include_regex: ^v\d+\.\d+\.\d+$
+      from_pattern: ^v(\d+\.\d+\.\d+)$
+      to_pattern: \1
     packages:
       - gguf
       - libllama

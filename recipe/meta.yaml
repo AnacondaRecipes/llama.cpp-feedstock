@@ -1,11 +1,9 @@
 {% set name = "llama.cpp-meta" %}
 # Upstream has stabilised on vX.Y.Z semver anchors (ggml-org/ggml#1579),
-# so we ship those tags directly starting v0.4.1. Semver tags are dual-
-# tagged on the mainline (v0.4.1 == b10964 — same commit), so the b-number
-# rev-count still supplies a monotonic suffix for the gguf output, which
-# has to sort above the previous `0.19.0.10760` upload.
-# Conda sort: `0.0.<b> < 0.3.0.<b> < 0.4.1` — safe transition from the
-# earlier hybrid scheme (PKG-16388, PR #49).
+# so we ship those tags directly. Semver tags are dual-tagged on the
+# mainline (v0.4.1 == b10964 — same commit), so the b-number rev-count
+# still supplies a monotonic suffix for the gguf output, which has to
+# sort above the previous `0.19.0.10760` upload.
 {% set version = "0.4.1" %}
 {% set upstream_release_bnum = "10964" %}
 {% set upstream_commit = "b29c606e28a01b1bc8c1351026a0fa6e616bf6c4" %}
@@ -312,7 +310,7 @@ outputs:
         - llama-convert-hf-to-gguf = llama_cpp_tools.convert_hf_to_gguf:main
         - llama-convert-llama-ggml-to-gguf = llama_cpp_tools.convert_llama_ggml_to_gguf:main
         - llama-convert-lora-to-gguf = llama_cpp_tools.convert_lora_to_gguf:main
-      skip: True # [py<39]
+      skip: True # [py<310]
       skip: true # [output_set != "llama_cpp_tools"]
       number: {{ build_number }}
 
@@ -405,7 +403,7 @@ outputs:
         - gguf-set-metadata = gguf.scripts.gguf_set_metadata:main
         - gguf-new-metadata = gguf.scripts.gguf_new_metadata:main
         - gguf-editor-gui = gguf.scripts.gguf_editor_gui:main
-      skip: True # [py<39]
+      skip: True # [py<310]
       skip: true # [output_set != "llama_cpp_tools"]
       number: {{ build_number }}
 
@@ -416,10 +414,16 @@ outputs:
         - pip
       run:
         - python
-        - numpy >=1.17
+        # Bounds from gguf-py/pyproject.toml [project.dependencies] at v0.4.1.
+        - numpy >=2.2.6
         - tqdm >=4.27
         - pyyaml >=5.1
         - requests >=2.25
+        # sentencepiece is a SOFT import in gguf-py/gguf/vocab.py (try/except
+        # ImportError); upstream doesn't list it in [project.dependencies], but
+        # any workflow that touches SentencePiece-family vocabs needs it, so we
+        # ship it as a run: dep for feature completeness. Upstream bound comes
+        # from requirements/requirements-convert_legacy_llama.txt.
         - sentencepiece >=0.1.98,<0.3.0
       run_constrained:
         - pyside6 >=6.9,<7.0
