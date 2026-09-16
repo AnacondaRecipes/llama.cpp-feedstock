@@ -414,8 +414,13 @@ outputs:
         - pip
       run:
         - python
-        # Bounds from gguf-py/pyproject.toml [project.dependencies] at v0.4.1.
-        - numpy >=2.2.6
+        # Bounds from gguf-py/pyproject.toml [project.dependencies] at v0.4.1
+        # is `numpy (>=2.2.6)`, but pkgs/main tops out at numpy 2.2.5 for
+        # py3.10 on every subdir (2.2.6+ builds start at py3.11). Relax to
+        # 2.2.5 to keep py3.10 satisfiable — one patch version off upstream's
+        # declaration. Bump to >=2.2.6 when either (a) pkgs/main ships a
+        # numpy 2.2.6+ py3.10 build, or (b) the py-skip floor moves to py3.11.
+        - numpy >=2.2.5
         - tqdm >=4.27
         - pyyaml >=5.1
         - requests >=2.25
