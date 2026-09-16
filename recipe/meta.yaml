@@ -217,6 +217,7 @@ outputs:
         - llama-cli --version
         - llama-server --version
         - test "$(stat -f %l "$PREFIX/bin/llama-cli")" -eq 1  # [osx]
+        - test "$(stat -f %l "$PREFIX/bin/llama-server")" -eq 1  # [osx]
         - test "$(stat -f %l "$PREFIX/bin/ggml-metal-tuning")" -eq 1  # [osx and gpu_variant == "metal"]
         - test -f $PREFIX/bin/llama-cli      # [unix]
         - test -f $PREFIX/bin/llama-server   # [unix]
