@@ -10,7 +10,7 @@
 {% set upstream_semver_line = "0.3.0" %}
 {% set version = upstream_semver_line + "." + upstream_release[1:] %}
 {% set gguf_version = "0.19.0." + upstream_release[1:] %}
-{% set build_number = 2 %}
+{% set build_number = 3 %}
 
 # When output_set is llama_cpp_tools, PBP trips on undefined variables
 # because they are not part of the variant config.
@@ -154,6 +154,9 @@ outputs:
     version: {{ version }}
 
     build:
+      # Keep dyld executable paths local to each macOS environment.
+      no_link:  # [osx]
+        - bin/*  # [osx]
       script_env:
         - LLAMA_BUILD_NUMBER={{ upstream_release[1:] }}
         - LLAMA_BUILD_COMMIT={{ upstream_commit}}
@@ -213,6 +216,9 @@ outputs:
       commands:
         - llama-cli --version
         - llama-server --version
+        - test "$(stat -f %l "$PREFIX/bin/llama-cli")" -eq 1  # [osx]
+        - test "$(stat -f %l "$PREFIX/bin/llama-server")" -eq 1  # [osx]
+        - test "$(stat -f %l "$PREFIX/bin/ggml-metal-tuning")" -eq 1  # [osx and gpu_variant == "metal"]
         - test -f $PREFIX/bin/llama-cli      # [unix]
         - test -f $PREFIX/bin/llama-server   # [unix]
         - if not exist %PREFIX%/Library/bin/llama-cli.exe exit 1      # [win]
