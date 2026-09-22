@@ -310,7 +310,10 @@ outputs:
         - llama-convert-hf-to-gguf = llama_cpp_tools.convert_hf_to_gguf:main
         - llama-convert-llama-ggml-to-gguf = llama_cpp_tools.convert_llama_ggml_to_gguf:main
         - llama-convert-lora-to-gguf = llama_cpp_tools.convert_lora_to_gguf:main
-      skip: True # [py<310]
+      # gguf sibling (below) declares numpy >=2.2.6 truthfully; pkgs/main
+      # only ships numpy 2.2.6+ for py>=3.11, so this output tracks the
+      # same py<311 floor to keep the pin_subpackage(gguf, exact) satisfiable.
+      skip: True # [py<311]
       skip: true # [output_set != "llama_cpp_tools"]
       number: {{ build_number }}
 
@@ -403,7 +406,10 @@ outputs:
         - gguf-set-metadata = gguf.scripts.gguf_set_metadata:main
         - gguf-new-metadata = gguf.scripts.gguf_new_metadata:main
         - gguf-editor-gui = gguf.scripts.gguf_editor_gui:main
-      skip: True # [py<310]
+      # Upstream requires-python is ">=3.10" AND declares numpy >=2.2.6;
+      # pkgs/main only ships numpy 2.2.6+ for py>=3.11, so we honour the
+      # tighter of the two constraints rather than rewriting metadata.
+      skip: True # [py<311]
       skip: true # [output_set != "llama_cpp_tools"]
       number: {{ build_number }}
 
@@ -414,13 +420,11 @@ outputs:
         - pip
       run:
         - python
-        # Bounds from gguf-py/pyproject.toml [project.dependencies] at v0.4.1
-        # is `numpy (>=2.2.6)`, but pkgs/main tops out at numpy 2.2.5 for
-        # py3.10 on every subdir (2.2.6+ builds start at py3.11). Relax to
-        # 2.2.5 to keep py3.10 satisfiable — one patch version off upstream's
-        # declaration. Bump to >=2.2.6 when either (a) pkgs/main ships a
-        # numpy 2.2.6+ py3.10 build, or (b) the py-skip floor moves to py3.11.
-        - numpy >=2.2.5
+        # Matches upstream gguf-py/pyproject.toml [project.dependencies] at
+        # v0.4.1 verbatim. numpy 2.2.6+ requires py>=3.11 on pkgs/main, and
+        # the py-skip floor above enforces that so this bound is satisfiable
+        # on every subdir we build for.
+        - numpy >=2.2.6
         - tqdm >=4.27
         - pyyaml >=5.1
         - requests >=2.25
@@ -431,7 +435,9 @@ outputs:
         # from requirements/requirements-convert_legacy_llama.txt.
         - sentencepiece >=0.1.98,<0.3.0
       run_constrained:
-        - pyside6 >=6.9,<7.0
+        # Upstream `gui` extra caps at python_version < "3.14"; mirror that
+        # so py3.14+ envs don't inherit a constraint upstream doesn't set.
+        - pyside6 >=6.9,<7.0  # [py<314]
     
     test:
       source_files:
