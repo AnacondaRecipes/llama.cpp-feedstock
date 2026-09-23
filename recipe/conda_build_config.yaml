@@ -34,14 +34,14 @@ blas_impl:
   - mkl                        # [(win and x86_64) or (linux and x86_64)]
   - openblas                   # [win or linux]
   - accelerate                 # [osx]
-  - cublas                     # [(win and x86_64) or linux]
+  - cublas                     # [win or linux]
 
 gpu_variant:
   - none
   - metal                      # [osx]
-  # No CUDA toolkit exists for win-arm64 yet (waiting on NVIDIA).
+  # NVIDIA's win-arm64 CUDA toolkit starts at 13.4: no cuda-12 there.
   - cuda-12                    # [(win and x86_64) or linux]
-  - cuda-13                    # [(win and x86_64) or linux]
+  - cuda-13                    # [win or linux]
 
 # metal builds now require the MTLBuffer gpuAddress property, introduced in macOS 13.0
 # metal builds now require the MTLDataType.bfloat4 data type, introduced in macOS 14.0
@@ -53,6 +53,7 @@ cuda_compiler_version:         # [win or linux]
   - none                       # [win or linux]
   - 12.9                       # [(win and x86_64) or linux]
   - 13.0                       # [(win and x86_64) or linux]
+  - 13.4                       # [win and arm64]
 
 zip_keys:                      # [win or linux]
   -                            # [win or linux]
