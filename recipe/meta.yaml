@@ -1,12 +1,11 @@
 {% set name = "llama.cpp-meta" %}
 # Upstream has stabilised on vX.Y.Z semver anchors (ggml-org/ggml#1579),
 # so we ship those tags directly. Semver tags are dual-tagged on the
-# mainline (v0.4.1 == b10964 — same commit), so the b-number rev-count
-# still supplies a monotonic suffix for the gguf output, which has to
-# sort above the previous `0.19.0.10760` upload.
-{% set version = "0.4.1" %}
-{% set upstream_release_bnum = "10964" %}
-{% set upstream_commit = "b29c606e28a01b1bc8c1351026a0fa6e616bf6c4" %}
+# mainline (v0.5.0 == b11146 — same commit), so the b-number rev-count
+# still supplies a monotonic suffix for the gguf output.
+{% set version = "0.5.0" %}
+{% set upstream_release_bnum = "11146" %}
+{% set upstream_commit = "7fe450e19305b828c199d602c23a8337aaa1f03b" %}
 {% set gguf_version = "0.19.0." + upstream_release_bnum %}
 {% set build_number = 0 %}
 
@@ -30,7 +29,7 @@ package:
 
 source:
   url: https://github.com/ggml-org/llama.cpp/archive/v{{ version }}.tar.gz
-  sha256: ef3d5b1907a391500ae11b5e61a8e2022e0deaac9790899cad9c4e02f03bfb9a
+  sha256: fef9ed754f4e031fb5c663c29260feda4ebc241abb68d64a81c0f1df5f1748e2
 
   patches:
     - patches/increase-nmse-tolerance.patch
