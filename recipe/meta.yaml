@@ -136,9 +136,11 @@ outputs:
         - test-openmp.bat  # [win and blas_impl == "mkl"]
         # Verify GGML_BACKEND_DIR baked in at build time lets ggml_backend_load_all()
         # find plugins from any caller location (not just $PREFIX/bin). PKG-18403.
-        - $CC test-backend-load.c -I$PREFIX/include -L$PREFIX/lib -lllama -o test-backend-load && ./test-backend-load  # [unix]
-        - cl.exe test-backend-load.c /I%LIBRARY_INC% /link /LIBPATH:%LIBRARY_LIB% llama.lib && test-backend-load.exe  # [win and not arm64]
-        - clang.exe test-backend-load.c -I%LIBRARY_INC% -L%LIBRARY_LIB% -lllama -o test-backend-load.exe && test-backend-load.exe  # [win and arm64]
+        # ggml_backend_* symbols live in libggml/libggml-base, so link both explicitly —
+        # Windows import libs don't chain through llama.lib's DT_NEEDED equivalent.
+        - $CC test-backend-load.c -I$PREFIX/include -L$PREFIX/lib -lllama -lggml -lggml-base -o test-backend-load && ./test-backend-load  # [unix]
+        - cl.exe test-backend-load.c /I%LIBRARY_INC% /link /LIBPATH:%LIBRARY_LIB% llama.lib ggml.lib ggml-base.lib && test-backend-load.exe  # [win and not arm64]
+        - clang.exe test-backend-load.c -I%LIBRARY_INC% -L%LIBRARY_LIB% -lllama -lggml -lggml-base -o test-backend-load.exe && test-backend-load.exe  # [win and arm64]
 
     about:
       home: https://github.com/ggml-org/llama.cpp
