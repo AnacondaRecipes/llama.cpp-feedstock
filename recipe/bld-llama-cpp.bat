@@ -2,7 +2,7 @@
 setlocal EnableDelayedExpansion
 
 REM GGML build options
-set GGML_ARGS=-DGGML_NATIVE=OFF -DGGML_BACKEND_DL=ON
+set GGML_ARGS=-DGGML_NATIVE=OFF -DGGML_BACKEND_DL=ON -DGGML_BACKEND_DIR=%LIBRARY_BIN:\=/%
 set GGML_OPENMP_FLAGS=
 
 REM GGML_CPU_ALL_VARIANTS has no ARM-on-Windows variant table (upstream CMake

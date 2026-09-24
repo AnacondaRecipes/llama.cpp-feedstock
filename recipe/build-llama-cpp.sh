@@ -8,7 +8,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 fi
 
 # GGML build options
-GGML_ARGS="-DGGML_NATIVE=OFF -DGGML_CPU_ALL_VARIANTS=ON -DGGML_BACKEND_DL=ON"
+GGML_ARGS="-DGGML_NATIVE=OFF -DGGML_CPU_ALL_VARIANTS=ON -DGGML_BACKEND_DL=ON -DGGML_BACKEND_DIR=${PREFIX}/bin"
 GGML_OPENMP_FLAGS=()
 
 if [[ ${gpu_variant:0:5} = "cuda-" ]]; then

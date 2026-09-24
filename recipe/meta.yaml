@@ -121,10 +121,11 @@ outputs:
 
     test:
       requires:
-        - c-compiler  # [win and blas_impl == "mkl"]
+        - {{ compiler('c') }}
       files:
         - test-openmp.bat  # [win and blas_impl == "mkl"]
         - test-openmp.sh  # [linux and blas_impl == "mkl"]
+        - test-backend-load.c
       commands:
         - test -f $PREFIX/include/llama.h    # [unix]
         - test -f $PREFIX/lib/libllama.so    # [linux]
@@ -134,6 +135,11 @@ outputs:
         - if not exist %PREFIX%/Library/bin/llama.dll exit 1    # [win]
         - bash test-openmp.sh  # [linux and blas_impl == "mkl"]
         - test-openmp.bat  # [win and blas_impl == "mkl"]
+        # Verify GGML_BACKEND_DIR baked in at build time lets ggml_backend_load_all()
+        # find plugins from any caller location (not just $PREFIX/bin). PKG-18403.
+        - $CC test-backend-load.c -I$PREFIX/include -L$PREFIX/lib -lllama -o test-backend-load && ./test-backend-load  # [unix]
+        - cl.exe test-backend-load.c /I%LIBRARY_INC% /link /LIBPATH:%LIBRARY_LIB% llama.lib && test-backend-load.exe  # [win and not arm64]
+        - clang.exe test-backend-load.c -I%LIBRARY_INC% -L%LIBRARY_LIB% -lllama -o test-backend-load.exe && test-backend-load.exe  # [win and arm64]
 
     about:
       home: https://github.com/ggml-org/llama.cpp
