@@ -13,6 +13,12 @@ libggml.so / libggml.dylib) to the default search paths, located via
 GetModuleHandleExW on Windows and dladdr elsewhere. Backends installed next
 to ggml are then found regardless of the caller's location.
 
+Related: ggml-org/llama.cpp#17491 (closed as stale / not planned) proposed
+LD_LIBRARY_PATH support for the same class of bug from a runtime-config
+angle. This patch takes the library-intrinsic angle instead: no consumer
+config, works for library callers whose executable lives outside the ggml
+install dir.
+
 Upstream status: to be proposed to ggml-org/llama.cpp.
 ---
   ggml/src/ggml-backend-reg.cpp | 32 +++++++++++++++++++++++++++++++-
