@@ -64,12 +64,6 @@ fi
 # LLAMA build options
 LLAMA_ARGS="-DLLAMA_BUILD_NUMBER=${LLAMA_BUILD_NUMBER} -DLLAMA_BUILD_COMMIT=${LLAMA_BUILD_COMMIT}"
 LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_OPENSSL=ON"
-# Disable common/subproc.cpp (added b10241, ggml-org/llama.cpp#26102). It pulls
-# vendored sheredom/subprocess.h whose Linux path calls
-# posix_spawn_file_actions_addchdir_np() unconditionally, requiring glibc>=2.29;
-# AR CentOS 7 sysroot ships glibc 2.28. Only server MCP/tools/router use this,
-# and neither is exposed by our binaries.
-LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_SUBPROCESS=OFF"
 # Disable the unified `llama` router app: it #includes common/build-info.h but the
 # upstream app/CMakeLists.txt does not wire up its include path, so the build fails
 # with `fatal error: build-info.h: No such file or directory` on every platform.
@@ -110,7 +104,22 @@ cmake -S . -B build_${gpu_variant} \
 
 cmake --build build_${gpu_variant} --config Release --verbose
 cmake --install build_${gpu_variant}
- 
+
+# Move ggml backend plugins next to libggml so the module-dir search
+# (ggml-search-module-dir.patch) finds them from any caller. Avoids a
+# compile-time GGML_BACKEND_DIR whose gcc-hard-coded length is broken by
+# conda-build's NUL-padded prefix rewrite (PKG-18403). Runs per-output
+# build; each output gets its own $PREFIX, and outputs without plugins
+# fall through the no-glob-match harmlessly. The MODULE plugins are .so
+# on both linux and osx (CMAKE_SHARED_MODULE_SUFFIX); libggml itself
+# (which is a real shared library, .dylib on osx) already sits in lib/.
+shopt -s nullglob
+plugins=("${PREFIX}"/bin/libggml-*.so)
+if (( ${#plugins[@]} > 0 )); then
+    mv "${plugins[@]}" "${PREFIX}"/lib/
+fi
+shopt -u nullglob
+
 if [[ "$PKG_NAME" == "llama.cpp-tests" ]]; then
     # Tests like test_chat use relative paths to load the model template files that break when run from a different 
     # parent directory. Tests (per upstream CI workflows) should be run from the build directory.

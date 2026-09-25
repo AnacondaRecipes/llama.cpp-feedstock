@@ -1,12 +1,11 @@
 {% set name = "llama.cpp-meta" %}
 # Upstream has stabilised on vX.Y.Z semver anchors (ggml-org/ggml#1579),
 # so we ship those tags directly. Semver tags are dual-tagged on the
-# mainline (v0.4.1 == b10964 — same commit), so the b-number rev-count
-# still supplies a monotonic suffix for the gguf output, which has to
-# sort above the previous `0.19.0.10760` upload.
-{% set version = "0.4.1" %}
-{% set upstream_release_bnum = "10964" %}
-{% set upstream_commit = "b29c606e28a01b1bc8c1351026a0fa6e616bf6c4" %}
+# mainline (v0.5.0 == b11146 — same commit), so the b-number rev-count
+# still supplies a monotonic suffix for the gguf output.
+{% set version = "0.5.0" %}
+{% set upstream_release_bnum = "11146" %}
+{% set upstream_commit = "7fe450e19305b828c199d602c23a8337aaa1f03b" %}
 {% set gguf_version = "0.19.0." + upstream_release_bnum %}
 {% set build_number = 0 %}
 
@@ -30,11 +29,12 @@ package:
 
 source:
   url: https://github.com/ggml-org/llama.cpp/archive/v{{ version }}.tar.gz
-  sha256: ef3d5b1907a391500ae11b5e61a8e2022e0deaac9790899cad9c4e02f03bfb9a
+  sha256: fef9ed754f4e031fb5c663c29260feda4ebc241abb68d64a81c0f1df5f1748e2
 
   patches:
     - patches/increase-nmse-tolerance.patch
     - patches/increase-nmse-tolerance-aarch64.patch  # [linux and aarch64]
+    - patches/ggml-search-module-dir.patch
     - patches/metal_gpu_selection.patch     # [osx]
     - patches/disable-metal-bf16.patch      # [osx]
     - patches/disable-metal-flash-attention.patch  # [osx]
@@ -121,10 +121,11 @@ outputs:
 
     test:
       requires:
-        - c-compiler  # [win and blas_impl == "mkl"]
+        - {{ compiler('c') }}
       files:
         - test-openmp.bat  # [win and blas_impl == "mkl"]
         - test-openmp.sh  # [linux and blas_impl == "mkl"]
+        - test-backend-load.c
       commands:
         - test -f $PREFIX/include/llama.h    # [unix]
         - test -f $PREFIX/lib/libllama.so    # [linux]
@@ -133,7 +134,16 @@ outputs:
         - if not exist %PREFIX%/Library/lib/llama.lib exit 1    # [win]
         - if not exist %PREFIX%/Library/bin/llama.dll exit 1    # [win]
         - bash test-openmp.sh  # [linux and blas_impl == "mkl"]
-        - test-openmp.bat  # [win and blas_impl == "mkl"]
+        - call test-openmp.bat  # [win and blas_impl == "mkl"]
+        # Verify backends load from any caller location, not just next to the calling
+        # executable. PKG-18403. Mechanism: ggml-search-module-dir.patch adds the
+        # ggml library's own dir to the plugin search paths via dladdr / GetModuleHandleExW.
+        # ggml_backend_* symbols live in libggml/libggml-base, so link both explicitly —
+        # Windows import libs don't chain through llama.lib's DT_NEEDED equivalent, and
+        # macOS test binary needs an explicit -rpath to find libllama at run time.
+        - $CC test-backend-load.c -I$PREFIX/include -L$PREFIX/lib -Wl,-rpath,$PREFIX/lib -lllama -lggml -lggml-base -o test-backend-load && ./test-backend-load  # [unix]
+        - cl.exe test-backend-load.c /I%LIBRARY_INC% /link /LIBPATH:%LIBRARY_LIB% llama.lib ggml.lib ggml-base.lib && test-backend-load.exe  # [win and not arm64]
+        - clang.exe test-backend-load.c -I%LIBRARY_INC% -L%LIBRARY_LIB% -lllama -lggml -lggml-base -o test-backend-load.exe && test-backend-load.exe  # [win and arm64]
 
     about:
       home: https://github.com/ggml-org/llama.cpp
