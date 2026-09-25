@@ -64,12 +64,15 @@ fi
 # LLAMA build options
 LLAMA_ARGS="-DLLAMA_BUILD_NUMBER=${LLAMA_BUILD_NUMBER} -DLLAMA_BUILD_COMMIT=${LLAMA_BUILD_COMMIT}"
 LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_OPENSSL=ON"
-# Disable common/subproc.cpp (added b10241, ggml-org/llama.cpp#26102). It pulls
-# vendored sheredom/subprocess.h whose Linux path calls
+# Disable common/subproc.cpp (added b10241, ggml-org/llama.cpp#26102) on Linux
+# only. It pulls vendored sheredom/subprocess.h whose Linux path calls
 # posix_spawn_file_actions_addchdir_np() unconditionally, requiring glibc>=2.29;
-# AR CentOS 7 sysroot ships glibc 2.28. Only server MCP/tools/router use this,
-# and neither is exposed by our binaries.
-LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_SUBPROCESS=OFF"
+# AR CentOS 7 sysroot ships glibc 2.28. macOS uses libSystem (no glibc) and
+# Windows has its own path — both build subproc.cpp cleanly. Keep SUBPROCESS
+# enabled off-Linux so llama-server tools and router mode work (users hit this).
+if [[ "${target_platform}" == linux-* ]]; then
+    LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_SUBPROCESS=OFF"
+fi
 # Disable the unified `llama` router app: it #includes common/build-info.h but the
 # upstream app/CMakeLists.txt does not wire up its include path, so the build fails
 # with `fatal error: build-info.h: No such file or directory` on every platform.
