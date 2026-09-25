@@ -134,7 +134,7 @@ outputs:
         - if not exist %PREFIX%/Library/lib/llama.lib exit 1    # [win]
         - if not exist %PREFIX%/Library/bin/llama.dll exit 1    # [win]
         - bash test-openmp.sh  # [linux and blas_impl == "mkl"]
-        - test-openmp.bat  # [win and blas_impl == "mkl"]
+        - call test-openmp.bat  # [win and blas_impl == "mkl"]
         # Verify backends load from any caller location, not just next to the calling
         # executable. PKG-18403. Mechanism: ggml-search-module-dir.patch adds the
         # ggml library's own dir to the plugin search paths via dladdr / GetModuleHandleExW.
