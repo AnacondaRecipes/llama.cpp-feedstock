@@ -116,9 +116,11 @@ cmake --install build_${gpu_variant}
 # compile-time GGML_BACKEND_DIR whose gcc-hard-coded length is broken by
 # conda-build's NUL-padded prefix rewrite (PKG-18403). Runs per-output
 # build; each output gets its own $PREFIX, and outputs without plugins
-# fall through the no-glob-match harmlessly.
+# fall through the no-glob-match harmlessly. The MODULE plugins are .so
+# on both linux and osx (CMAKE_SHARED_MODULE_SUFFIX); libggml itself
+# (which is a real shared library, .dylib on osx) already sits in lib/.
 shopt -s nullglob
-plugins=("${PREFIX}"/bin/libggml-*${SHLIB_EXT})
+plugins=("${PREFIX}"/bin/libggml-*.so)
 if (( ${#plugins[@]} > 0 )); then
     mv "${plugins[@]}" "${PREFIX}"/lib/
 fi
