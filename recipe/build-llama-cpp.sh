@@ -8,7 +8,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 fi
 
 # GGML build options
-GGML_ARGS="-DGGML_NATIVE=OFF -DGGML_CPU_ALL_VARIANTS=ON -DGGML_BACKEND_DL=ON -DGGML_BACKEND_DIR=${PREFIX}/bin"
+GGML_ARGS="-DGGML_NATIVE=OFF -DGGML_CPU_ALL_VARIANTS=ON -DGGML_BACKEND_DL=ON"
 GGML_OPENMP_FLAGS=()
 
 if [[ ${gpu_variant:0:5} = "cuda-" ]]; then
@@ -110,7 +110,20 @@ cmake -S . -B build_${gpu_variant} \
 
 cmake --build build_${gpu_variant} --config Release --verbose
 cmake --install build_${gpu_variant}
- 
+
+# Move ggml backend plugins next to libggml so the module-dir search
+# (ggml-search-module-dir.patch) finds them from any caller. Avoids a
+# compile-time GGML_BACKEND_DIR whose gcc-hard-coded length is broken by
+# conda-build's NUL-padded prefix rewrite (PKG-18403). Runs per-output
+# build; each output gets its own $PREFIX, and outputs without plugins
+# fall through the no-glob-match harmlessly.
+shopt -s nullglob
+plugins=("${PREFIX}"/bin/libggml-*${SHLIB_EXT})
+if (( ${#plugins[@]} > 0 )); then
+    mv "${plugins[@]}" "${PREFIX}"/lib/
+fi
+shopt -u nullglob
+
 if [[ "$PKG_NAME" == "llama.cpp-tests" ]]; then
     # Tests like test_chat use relative paths to load the model template files that break when run from a different 
     # parent directory. Tests (per upstream CI workflows) should be run from the build directory.

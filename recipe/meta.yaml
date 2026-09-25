@@ -135,20 +135,13 @@ outputs:
         - if not exist %PREFIX%/Library/bin/llama.dll exit 1    # [win]
         - bash test-openmp.sh  # [linux and blas_impl == "mkl"]
         - test-openmp.bat  # [win and blas_impl == "mkl"]
-        # Verify backends load from any caller location, not just $PREFIX/bin. PKG-18403.
-        # Two mechanisms: (a) -DGGML_BACKEND_DIR compiled into libggml on unix (relocatable
-        # via conda-build's prefix rewriting); (b) ggml-search-module-dir.patch adds
-        # dladdr/GetModuleHandleExW-based self-locate for callers that can't rely on (a),
-        # required on Windows where conda-build cannot rewrite paths inside binaries.
+        # Verify backends load from any caller location, not just next to the calling
+        # executable. PKG-18403. Mechanism: ggml-search-module-dir.patch adds the
+        # ggml library's own dir to the plugin search paths via dladdr / GetModuleHandleExW.
         # ggml_backend_* symbols live in libggml/libggml-base, so link both explicitly —
         # Windows import libs don't chain through llama.lib's DT_NEEDED equivalent, and
         # macOS test binary needs an explicit -rpath to find libllama at run time.
-        - $CC test-backend-load.c -I$PREFIX/include -L$PREFIX/lib -Wl,-rpath,$PREFIX/lib -lllama -lggml -lggml-base -o test-backend-load  # [unix]
-        # linux diagnostic (one CI round) — pin down why ggml devices: 0 despite plugins in bin/
-        - strings $PREFIX/lib/libggml.so.0* | grep -E '/bin$' || true  # [linux]
-        - ls $PREFIX/bin/libggml-cpu* | head -3  # [linux]
-        - GGML_LOG_LEVEL=debug ./test-backend-load  # [linux]
-        - ./test-backend-load  # [osx]
+        - $CC test-backend-load.c -I$PREFIX/include -L$PREFIX/lib -Wl,-rpath,$PREFIX/lib -lllama -lggml -lggml-base -o test-backend-load && ./test-backend-load  # [unix]
         - cl.exe test-backend-load.c /I%LIBRARY_INC% /link /LIBPATH:%LIBRARY_LIB% llama.lib ggml.lib ggml-base.lib && test-backend-load.exe  # [win and not arm64]
         - clang.exe test-backend-load.c -I%LIBRARY_INC% -L%LIBRARY_LIB% -lllama -lggml -lggml-base -o test-backend-load.exe && test-backend-load.exe  # [win and arm64]
 
