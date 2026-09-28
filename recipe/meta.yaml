@@ -121,7 +121,7 @@ outputs:
 
     test:
       requires:
-        - {{ compiler('c') }}
+        - {{ compiler('c') }}  # analint: compilers_must_be_in_build  # need clang.exe on win-arm64 for backend-load test; bare c-compiler pulls vs2022_win-arm64 (cl.exe) instead
       files:
         - test-openmp.bat  # [win and blas_impl == "mkl"]
         - test-openmp.sh  # [linux and blas_impl == "mkl"]
