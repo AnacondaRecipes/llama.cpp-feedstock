@@ -32,6 +32,10 @@ if "%blas_impl%"=="mkl" (
     set GGML_ARGS=!GGML_ARGS! -DGGML_BLAS=ON
     set GGML_ARGS=!GGML_ARGS! -DGGML_ACCELERATE=OFF
     set GGML_ARGS=!GGML_ARGS! -DGGML_BLAS_VENDOR=OpenBLAS
+    REM win-arm64 uses clang.exe (gcc-style CLI, not clang-cl). Pin OpenMP explicitly
+    REM against CMake's find_package(OpenMP) default so a future CMake / llvm-openmp
+    REM update can't silently re-detect a different runtime.
+    if "%target_platform%"=="win-arm64" set GGML_OPENMP_FLAGS=-DOpenMP_C_FLAGS=-fopenmp=libomp -DOpenMP_CXX_FLAGS=-fopenmp=libomp -DOpenMP_C_LIB_NAMES=libomp -DOpenMP_CXX_LIB_NAMES=libomp -DOpenMP_libomp_LIBRARY=%LIBRARY_LIB%\libomp.lib
 ) else (
     REM Note: LLAMA_CUDA=ON enables cublas.
     REM Tests fail when both mkl and cublas are used.
@@ -42,9 +46,6 @@ if "%blas_impl%"=="mkl" (
 REM LLAMA build options
 set LLAMA_ARGS=-DLLAMA_BUILD_NUMBER=%LLAMA_BUILD_NUMBER% -DLLAMA_BUILD_COMMIT=%LLAMA_BUILD_COMMIT%
 set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_OPENSSL=ON
-REM Disable common/subproc.cpp for parity with Linux (see build-llama-cpp.sh).
-REM Only server MCP/tools/router consume it, neither is exposed by our binaries.
-set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_SUBPROCESS=OFF
 REM Disable the unified `llama` router app: it #includes common/build-info.h but
 REM the upstream app/CMakeLists.txt does not wire up its include path, so the
 REM build fails with "fatal error: build-info.h: No such file or directory".

@@ -1,0 +1,77 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Xianglong Kong <xkong@anaconda.com>
+Subject: [PATCH] ggml: also search the ggml library's directory for backends
+
+With GGML_BACKEND_DL, ggml_backend_load_all() searches GGML_BACKEND_DIR, the
+executable's directory and the current directory. Library callers whose
+executable lives elsewhere (any program linking libllama/libggml from a
+conda env) find no backends. A compile-time GGML_BACKEND_DIR is not an
+option on Windows: conda-build cannot relocate paths inside Windows binaries.
+
+Add the directory of the module containing the registry (ggml.dll /
+libggml.so / libggml.dylib) to the default search paths, located via
+GetModuleHandleExW on Windows and dladdr elsewhere. Backends installed next
+to ggml are then found regardless of the caller's location.
+
+Related: ggml-org/llama.cpp#17491 (closed as stale / not planned) proposed
+LD_LIBRARY_PATH support for the same class of bug from a runtime-config
+angle. This patch takes the library-intrinsic angle instead: no consumer
+config, works for library callers whose executable lives outside the ggml
+install dir.
+
+Upstream status: to be proposed to ggml-org/llama.cpp.
+---
+  ggml/src/ggml-backend-reg.cpp | 32 +++++++++++++++++++++++++++++++-
+  1 file changed, 31 insertions(+), 1 deletion(-)
+
+diff --git a/ggml/src/ggml-backend-reg.cpp b/ggml/src/ggml-backend-reg.cpp
+index 1c18b82..7c4a1a4 100644
+--- a/ggml/src/ggml-backend-reg.cpp
++++ b/ggml/src/ggml-backend-reg.cpp
+@@ -461,6 +461,32 @@ static fs::path get_executable_path() {
+ #endif
+ }
+ 
++// directory of the module (shared library) containing this registry code, so
++// plugins installed next to ggml are found wherever the calling executable is
++static fs::path get_module_path() {
++#if defined(_WIN32)
++    HMODULE module = NULL;
++    if (!GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
++                            reinterpret_cast<LPCWSTR>(&get_module_path), &module)) {
++        return {};
++    }
++    std::vector<wchar_t> path(MAX_PATH);
++    DWORD len = GetModuleFileNameW(module, path.data(), path.size());
++    if (len == 0 || len >= path.size()) {
++        return {};
++    }
++    return fs::path(std::wstring(path.data(), len)).parent_path();
++#elif defined(__APPLE__) || defined(__linux__) || defined(__FreeBSD__)
++    Dl_info info;
++    if (dladdr(reinterpret_cast<void *>(&get_module_path), &info) == 0 || info.dli_fname == nullptr) {
++        return {};
++    }
++    return fs::u8path(info.dli_fname).parent_path();
++#else
++    return {};
++#endif
++}
++
+ static fs::path backend_filename_prefix() {
+ #ifdef _WIN32
+     return fs::u8path("ggml-");
+@@ -488,8 +514,12 @@ static ggml_backend_reg_t ggml_backend_load_best(const char * name, bool silent,
+ #ifdef GGML_BACKEND_DIR
+         search_paths.push_back(fs::u8path(GGML_BACKEND_DIR));
+ #endif
+-        // default search paths: executable directory, current directory
++        // default search paths: executable directory, ggml library directory, current directory
+         search_paths.push_back(get_executable_path());
++        const fs::path module_path = get_module_path();
++        if (!module_path.empty()) {
++            search_paths.push_back(module_path);
++        }
+         std::error_code cwd_ec;
+         const fs::path cwd = fs::current_path(cwd_ec);
+         if (cwd_ec) {
