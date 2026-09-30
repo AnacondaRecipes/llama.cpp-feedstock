@@ -7,7 +7,7 @@
 {% set upstream_release_bnum = "11146" %}
 {% set upstream_commit = "7fe450e19305b828c199d602c23a8337aaa1f03b" %}
 {% set gguf_version = "0.19.0." + upstream_release_bnum %}
-{% set build_number = 0 %}
+{% set build_number = 1 %}
 
 # When output_set is llama_cpp_tools, PBP trips on undefined variables
 # because they are not part of the variant config.
