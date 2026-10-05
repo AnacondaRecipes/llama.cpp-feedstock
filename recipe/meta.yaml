@@ -22,6 +22,8 @@
 {% set mkl = mkl | default("999.0a0", true) %}
 {% set openblas = openblas | default("999.0a0", true) %}
 {% set cuda_compiler_version = cuda_compiler_version | default("999.0a0", true) %}
+{% set openssl = openssl | default("999.0a0", true) %}
+{% set vcomp14 = vcomp14 | default("999.0a0", true) %}
 
 package:
   name: {{ name|lower }}
