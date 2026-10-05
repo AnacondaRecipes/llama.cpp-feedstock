@@ -1,6 +1,18 @@
+From 41cd399537ce34c4e067ea791932339867aaeb09 Mon Sep 17 00:00:00 2001
+From: Xianglong Kong <xkong@anaconda.com>
+Date: Mon, 5 Oct 2026 15:12:02 -0500
+Subject: [PATCH] Skip test-mtmd-impl when the mtmd target is not built
+
+test-mtmd-impl links the mtmd library, which only exists when tools are built; the libllama build disables tools, so guard the test with if (TARGET mtmd).
+---
+ tests/CMakeLists.txt | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/tests/CMakeLists.txt b/tests/CMakeLists.txt
+index 115cd24..45c1a76 100644
 --- a/tests/CMakeLists.txt
 +++ b/tests/CMakeLists.txt
-@@ -335,8 +335,10 @@ llama_build_and_test(test-mtmd-c-api.c)
+@@ -322,8 +322,10 @@ llama_build_and_test(test-mtmd-c-api.c)
  target_link_libraries(${LLAMA_TEST_NAME} PRIVATE mtmd)
  unset(LLAMA_TEST_NAME)
  

@@ -1,5 +1,6 @@
-From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From 62dcac28af87ad9d138e1edef494443039cbc615 Mon Sep 17 00:00:00 2001
 From: Xianglong Kong <xkong@anaconda.com>
+Date: Mon, 5 Oct 2026 15:12:01 -0500
 Subject: [PATCH] ggml: also search the ggml library's directory for backends
 
 With GGML_BACKEND_DL, ggml_backend_load_all() searches GGML_BACKEND_DIR, the
@@ -21,8 +22,8 @@ install dir.
 
 Upstream status: to be proposed to ggml-org/llama.cpp.
 ---
-  ggml/src/ggml-backend-reg.cpp | 32 +++++++++++++++++++++++++++++++-
-  1 file changed, 31 insertions(+), 1 deletion(-)
+ ggml/src/ggml-backend-reg.cpp | 32 +++++++++++++++++++++++++++++++-
+ 1 file changed, 31 insertions(+), 1 deletion(-)
 
 diff --git a/ggml/src/ggml-backend-reg.cpp b/ggml/src/ggml-backend-reg.cpp
 index 1c18b82..7c4a1a4 100644

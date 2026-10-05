@@ -84,8 +84,12 @@ outputs:
       missing_dso_whitelist:                                                                         # [(gpu_variant or "").startswith('cuda')]
         - "**/libcuda.so*"  # [(gpu_variant or "").startswith('cuda')]
         - "**/nvcuda.dll"   # [(gpu_variant or "").startswith('cuda')]
+      # Hand-written instead of pin_subpackage(exact=True): with a custom PKG_HASH string,
+      # conda-build <26.9.0 (PBP workers) exports the placeholder h1234567 (conda/conda-build#6100).
       run_exports:
-        - {{ pin_subpackage('libllama', exact=True) }}
+        - libllama {{ version }} cuda{{ cuda_compiler_version | replace('.', '') }}_*  # [(gpu_variant or "").startswith('cuda')]
+        - libllama {{ version }} cpu_{{ blas_impl }}_*                                 # [gpu_variant == "none"]
+        - libllama {{ version }} mps_*                                                 # [gpu_variant == "metal"]
 
     requirements:
       build:
@@ -107,8 +111,8 @@ outputs:
         - libgomp                                             # [linux and not (blas_impl == "mkl")]
         - llvm-openmp {{ cxx_compiler_version }}              # [osx and not (blas_impl == "mkl")]
         - llvm-openmp {{ cxx_compiler_version }}              # [win and arm64]
-        - vcomp14                                             # [(win and x86_64) and not (blas_impl == "mkl")]
-        - openssl
+        - vcomp14 {{ vcomp14 }}                               # [(win and x86_64) and not (blas_impl == "mkl")]
+        - openssl {{ openssl }}
       run:
         - {{ pin_compatible('cuda-version', max_pin='x.x') }} # [(gpu_variant or "").startswith('cuda')]
         - {{ pin_compatible('intel-openmp') }}                # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
@@ -183,8 +187,11 @@ outputs:
       missing_dso_whitelist:                                                                         # [(gpu_variant or "").startswith('cuda')]
         - "**/libcuda.so*"  # [(gpu_variant or "").startswith('cuda')]
         - "**/nvcuda.dll"   # [(gpu_variant or "").startswith('cuda')]
+      # Hand-written for the same reason as libllama's run_exports (conda/conda-build#6100).
       run_exports:
-        - {{ pin_subpackage('llama.cpp', exact=True) }}
+        - llama.cpp {{ version }} cuda{{ cuda_compiler_version | replace('.', '') }}_*  # [(gpu_variant or "").startswith('cuda')]
+        - llama.cpp {{ version }} cpu_{{ blas_impl }}_*                                 # [gpu_variant == "none"]
+        - llama.cpp {{ version }} mps_*                                                 # [gpu_variant == "metal"]
       
     requirements:
       build:
@@ -206,8 +213,8 @@ outputs:
         - libgomp                                             # [linux and not (blas_impl == "mkl")]
         - llvm-openmp {{ cxx_compiler_version }}              # [osx and not (blas_impl == "mkl")]
         - llvm-openmp {{ cxx_compiler_version }}              # [win and arm64]
-        - vcomp14                                             # [(win and x86_64) and not (blas_impl == "mkl")]
-        - openssl
+        - vcomp14 {{ vcomp14 }}                               # [(win and x86_64) and not (blas_impl == "mkl")]
+        - openssl {{ openssl }}
         - {{ pin_subpackage('libllama', exact=True) }}
       run:
         - {{ pin_subpackage('libllama', exact=True) }}
@@ -286,8 +293,8 @@ outputs:
         - mkl-devel {{ mkl }}                                 # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
         - intel-openmp {{ mkl }}                              # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
         - libgomp                                             # [linux and not (blas_impl == "mkl")]
-        - vcomp14                                             # [(win and x86_64) and not (blas_impl == "mkl")]
-        - openssl
+        - vcomp14 {{ vcomp14 }}                               # [(win and x86_64) and not (blas_impl == "mkl")]
+        - openssl {{ openssl }}
         - {{ pin_subpackage('libllama', exact=True) }}
         - {{ pin_subpackage('llama.cpp', exact=True) }}
       run:

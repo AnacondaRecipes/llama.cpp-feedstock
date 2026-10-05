@@ -1,7 +1,8 @@
-From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: Conda Build <noreply@anaconda.com>
-Date: Mon, 2 Dec 2025 10:00:00 +0000
-Subject: [PATCH] Disable Metal Flash Attention due to numerical precision issues
+From 4d8ab4197cc5903bab1b8b8291137925badddac4 Mon Sep 17 00:00:00 2001
+From: Xianglong Kong <xkong@anaconda.com>
+Date: Mon, 5 Oct 2026 15:12:01 -0500
+Subject: [PATCH] Disable Metal Flash Attention due to numerical precision
+ issues
 
 AI assistant generated patch.
 
@@ -13,14 +14,15 @@ causing Flash Attention operations to fall back to CPU (correct precision).
 
 Can be removed when Metal Flash Attention precision is fixed upstream or
 when building with macOS 15+ SDK.
-
 ---
  ggml/src/ggml-metal/ggml-metal-device.m | 4 ++++
  1 file changed, 4 insertions(+)
 
+diff --git a/ggml/src/ggml-metal/ggml-metal-device.m b/ggml/src/ggml-metal/ggml-metal-device.m
+index 419e54f..6a53a4f 100644
 --- a/ggml/src/ggml-metal/ggml-metal-device.m
 +++ b/ggml/src/ggml-metal/ggml-metal-device.m
-@@ -1718,6 +1718,10 @@ bool ggml_metal_device_supports_op(ggml_
+@@ -1744,6 +1744,10 @@ bool ggml_metal_device_supports_op(ggml_metal_device_t dev, const struct ggml_te
          case GGML_OP_ROLL:
              return ggml_is_contiguous(op->src[0]);
          case GGML_OP_FLASH_ATTN_EXT:

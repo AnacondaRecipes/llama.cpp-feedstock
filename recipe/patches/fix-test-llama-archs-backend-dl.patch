@@ -1,5 +1,6 @@
-From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From 9124fb814eb1c3bbc7d6e54d23ececa419264ca3 Mon Sep 17 00:00:00 2001
 From: Xianglong Kong <xkong@anaconda.com>
+Date: Mon, 5 Oct 2026 15:12:01 -0500
 Subject: [PATCH] tests: fix test-llama-archs with GGML_BACKEND_DL=ON
 
 When building with GGML_BACKEND_DL=ON, backends are compiled as dynamic
@@ -10,14 +11,15 @@ failures.
 This matches the pattern used by test-backend-ops and test-opt.
 
 Upstream issue: https://github.com/ggml-org/llama.cpp/issues/20611
-
 ---
  tests/test-llama-archs.cpp | 1 +
  1 file changed, 1 insertion(+)
 
+diff --git a/tests/test-llama-archs.cpp b/tests/test-llama-archs.cpp
+index 7a76efc..9caf241 100644
 --- a/tests/test-llama-archs.cpp
 +++ b/tests/test-llama-archs.cpp
-@@ -792,6 +792,7 @@ int main(int argc, char ** argv) {
+@@ -1058,6 +1058,7 @@ int main(int argc, char ** argv) {
      // init the logger at max verbosity. filter with a custom callback respecting the user-configure verbosity
      common_log_set_verbosity_thold(LOG_LEVEL_DEBUG);
      common_init();

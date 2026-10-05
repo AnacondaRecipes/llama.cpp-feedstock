@@ -1,7 +1,8 @@
-From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From b8ae852faa29d88a05a4a1264e7a3d1da93e4318 Mon Sep 17 00:00:00 2001
 From: Xianglong Kong <xkong@anaconda.com>
 Date: Mon, 1 Jun 2026 12:00:00 -0500
-Subject: [PATCH] redirect conversion package import to llama_cpp_tools.conversion
+Subject: [PATCH] redirect conversion package import to
+ llama_cpp_tools.conversion
 
 Upstream b9445+ refactored the model definitions out of convert_hf_to_gguf.py
 into a new top-level `conversion/` Python package. The convert scripts now
@@ -12,11 +13,12 @@ This feedstock installs the scripts as `llama_cpp_tools.<script>` console
 entry points and also copies the `conversion/` package alongside them as
 `llama_cpp_tools.conversion`. Redirect the import so the entry point resolves
 after install.
-
 ---
  convert_hf_to_gguf.py | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
+diff --git a/convert_hf_to_gguf.py b/convert_hf_to_gguf.py
+index e09616b..8d56cf9 100755
 --- a/convert_hf_to_gguf.py
 +++ b/convert_hf_to_gguf.py
 @@ -15,7 +15,7 @@ if 'NO_LOCAL_GGUF' not in os.environ:
