@@ -360,41 +360,22 @@ outputs:
         # https://github.com/ggml-org/llama.cpp/tree/master/requirements
         - python
         # requirements/requirements-convert_legacy_llama.txt
-        - numpy >=1.26.4 # loosen bounds to accept numpy 2, which appears to be compatible
+        # Upstream numpy~=2.2.6 caps <2.3 only for Ubuntu 22.04 pip installs (ggml-org/llama.cpp#28654,
+        # which lowered it from ~=2.4.6); the floor matches upstream and gguf. Conversions verified on numpy 2.3.
+        - numpy >=2.2.6
         - sentencepiece >=0.1.98,<0.3.0
-        # Upstream b9848 pins transformers==4.57.6 for a rope/yarn converter
-        # fix (huggingface/transformers#45887, merge commit dfcb1a3, 2026-05-12;
-        # cherry-picked into the 4.57.x maintenance branch). pkgs/main lacks
-        # 4.57.6 (only has 4.57.1), but the same fix is an ancestor of
-        # transformers 5.9.0, so we require >=5.9.0 as the minimum version
-        # containing the fix.
+        # Upstream pins ==4.57.6 for the rope/yarn fix huggingface/transformers#45887 (ggml-org/llama.cpp#23966);
+        # 5.9.0 is the first 5.x release containing it and 4.57.6 is not on pkgs/main. YaRN conversion verified on 5.9.0.
         - transformers >=5.9.0,<6.0.0
-        # Upstream requirements-convert_legacy_llama.txt lists
-        # `protobuf>=4.21.0,<5.0.0`, but that cap is stale: it was introduced
-        # in llama.cpp commit 04ac060 (Dec 2023, before protobuf 5.x existed)
-        # and has been carried forward unchanged for 2+ years without any
-        # release-note or PR justifying it. The convert scripts themselves do
-        # NOT import protobuf directly (no `import protobuf` / `google.protobuf`
-        # in convert_hf_to_gguf.py, convert_lora_to_gguf.py, or
-        # convert_llama_ggml_to_gguf.py at b9848). protobuf is only pulled in
-        # transitively by transformers' T5/mBART/XLNet tokenizer classes when
-        # those specific model families are instantiated, so we still ship it
-        # as a run: dep for feature completeness.
-        # We cannot match the upstream `<5.0` cap on pkgs/main because the
-        # only such build (protobuf 4.25.3) requires libabseil ~20240116,
-        # while every pytorch >=2.6.0 build on pkgs/main requires libabseil
-        # >=20250127. Widening to protobuf 5.x/6.x/7.x is safe here because
-        # (a) our recipe does not `pip install` (build-llama-cpp-tools.sh
-        # just cps files into $SP_DIR), so no dist-info metadata enforces
-        # upstream's constraint, and (b) sentencepiece 0.2.x on pkgs/main
-        # statically links libprotobuf and does not have a runtime protobuf
-        # dep, so the ABI decoupling insulates us from protobuf major-version
-        # shifts. PKG-15573: protobuf 7.35.1 is now on pkgs/main.
+        # Upstream caps protobuf <5.0; no protobuf 4.x on pkgs/main co-installs with pytorch (libabseil pin).
+        # Needed by sentencepiece_model_pb2 (T5 converter); T5 conversion verified on 5.29.3 and 7.35.1.
         - protobuf >=5.29.3,<8.0.0
         # requirements/requirements-convert_hf_to_gguf.txt
         # requirements/requirements-convert_llama_ggml_to_gguf.txt
         # requirements/requirements-convert_lora_to_gguf.txt
         - mistral-common >=1.8.3
+        # Upstream torch==2.11.0 is a pip pin; its own comment gives 2.6.0 as the minimum (Embedding Gemma).
+        # torch>=2.7 dtypes (float8_e8m0fnu) are getattr-guarded. Conversions verified on 2.6.0 and 2.14.0.
         - pytorch >=2.6.0
         - {{ pin_subpackage('gguf', exact=True) }}
 
@@ -405,6 +386,8 @@ outputs:
         - llama-convert-hf-to-gguf --help
         - llama-convert-llama-ggml-to-gguf --help
         - llama-convert-lora-to-gguf --help
+        # --help exits before the converter's package imports; exercise them (static + dynamic) offline.
+        - python -c "import pathlib, tempfile; from llama_cpp_tools.conversion import get_model_class; from llama_cpp_tools.conversion.base import ModelBase; ModelBase.load_hparams_guess(pathlib.Path(tempfile.mkdtemp())); assert get_model_class('LlamaForCausalLM').__name__"
         - test -d $SP_DIR/llama_cpp_tools/models  # [unix]
         - test -f $SP_DIR/llama_cpp_tools/models/ggml-vocab-llama-bpe.gguf  # [unix]
         - test -d $SP_DIR/llama_cpp_tools/models/templates  # [unix]
