@@ -353,16 +353,14 @@ outputs:
     requirements:
       host:
         - python
-        - poetry-core >=1.0.0
-        - pip
       run:
         # This is an aggregate of requirements from multiple files in the llama.cpp-tools repo, see:
         # https://github.com/ggml-org/llama.cpp/tree/master/requirements
         - python
         # requirements/requirements-convert_legacy_llama.txt
-        # Upstream numpy~=2.2.6 caps <2.3 only for Ubuntu 22.04 pip installs (ggml-org/llama.cpp#28654,
-        # which lowered it from ~=2.4.6); the floor matches upstream and gguf. Conversions verified on numpy 2.3.
-        - numpy >=2.2.6
+        # Bounds from upstream pyproject.toml; requirements' ~=2.2.6 (<2.3) is only for Ubuntu 22.04 pip
+        # installs (ggml-org/llama.cpp#28654). Conversions verified on numpy 2.3.
+        - numpy >=2.2.6,<3.0.0
         - sentencepiece >=0.1.98,<0.3.0
         # Upstream pins ==4.57.6 for the rope/yarn fix huggingface/transformers#45887 (ggml-org/llama.cpp#23966);
         # 5.9.0 is the first 5.x release containing it and 4.57.6 is not on pkgs/main. YaRN conversion verified on 5.9.0.
@@ -374,9 +372,9 @@ outputs:
         # requirements/requirements-convert_llama_ggml_to_gguf.txt
         # requirements/requirements-convert_lora_to_gguf.txt
         - mistral-common >=1.8.3
-        # Upstream torch==2.11.0 is a pip pin; its own comment gives 2.6.0 as the minimum (Embedding Gemma).
+        # Bounds from upstream pyproject.toml; requirements' torch==2.11.0 is a pip/CPU-wheel pin.
         # torch>=2.7 dtypes (float8_e8m0fnu) are getattr-guarded. Conversions verified on 2.6.0 and 2.14.0.
-        - pytorch >=2.6.0
+        - pytorch >=2.6.0,<3.0.0
         - {{ pin_subpackage('gguf', exact=True) }}
 
     test:
@@ -387,7 +385,9 @@ outputs:
         - llama-convert-llama-ggml-to-gguf --help
         - llama-convert-lora-to-gguf --help
         # --help exits before the converter's package imports; exercise them (static + dynamic) offline.
-        - python -c "import pathlib, tempfile; from llama_cpp_tools.conversion import get_model_class; from llama_cpp_tools.conversion.base import ModelBase; ModelBase.load_hparams_guess(pathlib.Path(tempfile.mkdtemp())); assert get_model_class('LlamaForCausalLM').__name__"
+        - python -c "import pathlib, tempfile, llama_cpp_tools.convert_legacy_llama; from llama_cpp_tools.conversion import get_model_class; from llama_cpp_tools.conversion.base import ModelBase; ModelBase.load_hparams_guess(pathlib.Path(tempfile.mkdtemp())); assert get_model_class('LlamaForCausalLM').__name__"
+        # Real offline conversion: tiny LoRA adapter on a config-only Llama base must yield a GGUF with 2 tensors.
+        - python -c "import json, pathlib, subprocess, tempfile, torch; from safetensors.torch import save_file; from gguf import GGUFReader; d = pathlib.Path(tempfile.mkdtemp()); b = d / 'base'; a = d / 'adapter'; b.mkdir(); a.mkdir(); (b / 'config.json').write_text(json.dumps(dict(architectures=['LlamaForCausalLM'], model_type='llama', hidden_size=16, intermediate_size=32, num_attention_heads=2, num_key_value_heads=2, num_hidden_layers=1, vocab_size=32, max_position_embeddings=64, rms_norm_eps=1e-5))); (a / 'adapter_config.json').write_text(json.dumps(dict(peft_type='LORA', r=2, lora_alpha=4, target_modules=['q_proj'], base_model_name_or_path=str(b)))); p = 'base_model.model.model.layers.0.self_attn.q_proj.'; save_file(dict(zip([p + 'lora_A.weight', p + 'lora_B.weight'], [torch.rand(2, 16), torch.rand(16, 2)])), str(a / 'adapter_model.safetensors')); subprocess.run(['llama-convert-lora-to-gguf', '--base', str(b), '--outfile', str(d / 'out.gguf'), str(a)], check=True); assert len(GGUFReader(str(d / 'out.gguf')).tensors) == 2"
         - test -d $SP_DIR/llama_cpp_tools/models  # [unix]
         - test -f $SP_DIR/llama_cpp_tools/models/ggml-vocab-llama-bpe.gguf  # [unix]
         - test -d $SP_DIR/llama_cpp_tools/models/templates  # [unix]
@@ -396,8 +396,6 @@ outputs:
         - if not exist %SP_DIR%\llama_cpp_tools\models\ggml-vocab-llama-bpe.gguf exit 1  # [win]
         - if not exist %SP_DIR%\llama_cpp_tools\models\templates exit 1  # [win]
         - if not exist %SP_DIR%\llama_cpp_tools\models\templates\README.md exit 1  # [win]
-      requires:
-        - pip
 
     about:
       home: https://github.com/ggml-org/llama.cpp

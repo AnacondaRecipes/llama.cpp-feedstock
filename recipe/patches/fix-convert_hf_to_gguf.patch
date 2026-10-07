@@ -1,15 +1,15 @@
-From 2445aa0707d4d2fd1b22e9e04997fcd1c775c355 Mon Sep 17 00:00:00 2001
+From 68013221cb55a367f0bca634a75bdce140290d85 Mon Sep 17 00:00:00 2001
 From: Xianglong Kong <xkong@anaconda.com>
 Date: Mon, 1 Jun 2026 12:00:00 -0500
-Subject: [PATCH] redirect conversion package imports to
- llama_cpp_tools.conversion
+Subject: [PATCH] relocate converter imports under llama_cpp_tools
 
-The recipe installs upstream's conversion/ package as llama_cpp_tools.conversion, so every absolute 'conversion' import must be redirected: the module-level import in convert_hf_to_gguf.py, its function-level imports for Mistral-format and DeepSeek-V4 models, ModelBase.load_hparams_guess() in conversion/base.py, and the dynamic model-module imports in conversion/__init__.py (made package-relative via __name__). The last two run for every HF-format model.
+The recipe installs upstream's conversion/ package as llama_cpp_tools.conversion and examples/convert_legacy_llama.py as llama_cpp_tools.convert_legacy_llama, so every import of them must be redirected: the module-level import in convert_hf_to_gguf.py, its function-level imports for Mistral-format and DeepSeek-V4 models, ModelBase.load_hparams_guess() in conversion/base.py, the dynamic model-module imports in conversion/__init__.py (made package-relative via __name__), and the --model-metadata-dir path of convert_llama_ggml_to_gguf.py. load_hparams_guess() and the dynamic imports run for every HF-format model.
 ---
- conversion/__init__.py |  6 +++---
- conversion/base.py     |  2 +-
- convert_hf_to_gguf.py  | 10 +++++-----
- 3 files changed, 9 insertions(+), 9 deletions(-)
+ conversion/__init__.py        |  6 +++---
+ conversion/base.py            |  2 +-
+ convert_hf_to_gguf.py         | 10 +++++-----
+ convert_llama_ggml_to_gguf.py |  2 +-
+ 4 files changed, 10 insertions(+), 10 deletions(-)
 
 diff --git a/conversion/__init__.py b/conversion/__init__.py
 index 051ddf9..c4cd218 100644
@@ -94,3 +94,16 @@ index e09616b..0463df1 100755
              model_class = DeepseekV4DSparkModel
  
          if args.mtp or args.no_mtp:
+diff --git a/convert_llama_ggml_to_gguf.py b/convert_llama_ggml_to_gguf.py
+index 52827e6..3c264b1 100755
+--- a/convert_llama_ggml_to_gguf.py
++++ b/convert_llama_ggml_to_gguf.py
+@@ -358,7 +358,7 @@ class GGMLToGGUF:
+ 
+ 
+ def handle_metadata(cfg, hp):
+-    import examples.convert_legacy_llama as convert
++    import llama_cpp_tools.convert_legacy_llama as convert
+ 
+     assert cfg.model_metadata_dir.is_dir(), 'Metadata dir is not a directory'
+     hf_config_path   = cfg.model_metadata_dir / "config.json"

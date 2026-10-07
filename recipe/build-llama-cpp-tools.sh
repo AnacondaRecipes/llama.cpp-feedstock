@@ -12,6 +12,10 @@ cp convert_lora_to_gguf.py $SP_DIR/llama_cpp_tools/
 # (`from llama_cpp_tools.conversion import ...`) resolve at runtime.
 cp -r conversion $SP_DIR/llama_cpp_tools/
 
+# convert_llama_ggml_to_gguf.py --model-metadata-dir imports this helper (redirected to
+# llama_cpp_tools.convert_legacy_llama by fix-convert_hf_to_gguf.patch).
+cp examples/convert_legacy_llama.py $SP_DIR/llama_cpp_tools/
+
 # Copy the models directory and its contents
 cp -r models $SP_DIR/llama_cpp_tools/
 

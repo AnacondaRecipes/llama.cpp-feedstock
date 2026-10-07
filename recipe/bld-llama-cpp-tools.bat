@@ -20,6 +20,11 @@ if errorlevel 1 exit 1
 xcopy conversion %SP_DIR%\llama_cpp_tools\conversion /E /I /Y
 if errorlevel 1 exit 1
 
+:: convert_llama_ggml_to_gguf.py --model-metadata-dir imports this helper (redirected to
+:: llama_cpp_tools.convert_legacy_llama by fix-convert_hf_to_gguf.patch).
+copy examples\convert_legacy_llama.py %SP_DIR%\llama_cpp_tools\
+if errorlevel 1 exit 1
+
 :: Copy the models directory and its contents
 xcopy models %SP_DIR%\llama_cpp_tools\models /E /I /Y
 if errorlevel 1 exit 1
