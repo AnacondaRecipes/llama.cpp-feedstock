@@ -248,7 +248,11 @@ outputs:
         Server example and tools for llama.cpp, using libllama
       license: MIT
       license_family: MIT
-      license_file: LICENSE
+      # cpp-httplib (static) and nlohmann/json are compiled into llama-common, which these binaries link.
+      license_file:
+        - LICENSE
+        - vendor/cpp-httplib/LICENSE
+        - licenses/LICENSE-jsonhpp
       dev_url: https://github.com/ggml-org/llama.cpp
       doc_url: https://github.com/ggml-org/llama.cpp
 
@@ -321,7 +325,11 @@ outputs:
         Test executables for llama.cpp
       license: MIT
       license_family: MIT
-      license_file: LICENSE
+      # cpp-httplib (static) and nlohmann/json are compiled into llama-common, which these binaries link.
+      license_file:
+        - LICENSE
+        - vendor/cpp-httplib/LICENSE
+        - licenses/LICENSE-jsonhpp
       dev_url: https://github.com/ggml-org/llama.cpp
       doc_url: https://github.com/ggml-org/llama.cpp
 
@@ -394,10 +402,9 @@ outputs:
       imports:
         - llama_cpp_tools
       commands:
-        # Skip --help on osx: PyTorch has ABI issue (Symbol not found: __ZN2at3mps14getMPSProfilerEv)
-        - llama-convert-hf-to-gguf --help  # [not osx]
-        - llama-convert-llama-ggml-to-gguf --help  # [not osx]
-        - llama-convert-lora-to-gguf --help  # [not osx]
+        - llama-convert-hf-to-gguf --help
+        - llama-convert-llama-ggml-to-gguf --help
+        - llama-convert-lora-to-gguf --help
         - test -d $SP_DIR/llama_cpp_tools/models  # [unix]
         - test -f $SP_DIR/llama_cpp_tools/models/ggml-vocab-llama-bpe.gguf  # [unix]
         - test -d $SP_DIR/llama_cpp_tools/models/templates  # [unix]
