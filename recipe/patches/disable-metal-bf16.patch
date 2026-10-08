@@ -1,6 +1,6 @@
-From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: Conda Build <noreply@anaconda.com>
-Date: Mon, 2 Dec 2025 10:00:00 +0000
+From b50d8d18a28f009e07964ec0ed3fd0d808c5f73c Mon Sep 17 00:00:00 2001
+From: Xianglong Kong <xkong@anaconda.com>
+Date: Mon, 5 Oct 2026 15:12:01 -0500
 Subject: [PATCH] Disable Metal BF16 support for macOS SDK < 15
 
 AI assistant generated patch.
@@ -15,14 +15,15 @@ This patch disables BF16 at both compile-time and runtime:
 
 This matches old llama.cpp behavior where BF16 was disabled by default.
 Can be removed when building with macOS 15+ SDK.
-
 ---
  ggml/src/ggml-metal/ggml-metal-device.m | 13 +++++++------
  1 file changed, 7 insertions(+), 6 deletions(-)
 
+diff --git a/ggml/src/ggml-metal/ggml-metal-device.m b/ggml/src/ggml-metal/ggml-metal-device.m
+index 2996caa..419e54f 100644
 --- a/ggml/src/ggml-metal/ggml-metal-device.m
 +++ b/ggml/src/ggml-metal/ggml-metal-device.m
-@@ -438,9 +438,10 @@ ggml_metal_library_t ggml_metal_library_
+@@ -454,9 +454,10 @@ ggml_metal_library_t ggml_metal_library_init(ggml_metal_device_t dev) {
  
      // shared MTLCompileOptions preprocessor macros (matches the build-time defines)
      NSMutableDictionary * prep = [NSMutableDictionary dictionary];
@@ -36,7 +37,7 @@ Can be removed when building with macOS 15+ SDK.
      if (ggml_metal_device_get_props(dev)->has_tensor) {
          [prep setObject:@"1" forKey:@"GGML_METAL_HAS_TENSOR"];
      }
-@@ -1137,9 +1138,9 @@ ggml_metal_device_t ggml_metal_device_in
+@@ -1156,9 +1157,9 @@ ggml_metal_device_t ggml_metal_device_init(int device, int n_devices) {
                  dev->props.has_simdgroup_mm = [dev->mtl_device supportsFamily:MTLGPUFamilyApple7];
                  dev->props.has_unified_memory = dev->mtl_device.hasUnifiedMemory;
  

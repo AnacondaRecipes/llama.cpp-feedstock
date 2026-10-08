@@ -1,22 +1,62 @@
-From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From 68013221cb55a367f0bca634a75bdce140290d85 Mon Sep 17 00:00:00 2001
 From: Xianglong Kong <xkong@anaconda.com>
 Date: Mon, 1 Jun 2026 12:00:00 -0500
-Subject: [PATCH] redirect conversion package import to llama_cpp_tools.conversion
+Subject: [PATCH] relocate converter imports under llama_cpp_tools
 
-Upstream b9445+ refactored the model definitions out of convert_hf_to_gguf.py
-into a new top-level `conversion/` Python package. The convert scripts now
-do `from conversion import ...`, which only resolves when run from the source
-tree.
-
-This feedstock installs the scripts as `llama_cpp_tools.<script>` console
-entry points and also copies the `conversion/` package alongside them as
-`llama_cpp_tools.conversion`. Redirect the import so the entry point resolves
-after install.
-
+The recipe installs upstream's conversion/ package as llama_cpp_tools.conversion and examples/convert_legacy_llama.py as llama_cpp_tools.convert_legacy_llama, so every import of them must be redirected: the module-level import in convert_hf_to_gguf.py, its function-level imports for Mistral-format and DeepSeek-V4 models, ModelBase.load_hparams_guess() in conversion/base.py, the dynamic model-module imports in conversion/__init__.py (made package-relative via __name__), and the --model-metadata-dir path of convert_llama_ggml_to_gguf.py. load_hparams_guess() and the dynamic imports run for every HF-format model.
 ---
- convert_hf_to_gguf.py | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ conversion/__init__.py        |  6 +++---
+ conversion/base.py            |  2 +-
+ convert_hf_to_gguf.py         | 10 +++++-----
+ convert_llama_ggml_to_gguf.py |  2 +-
+ 4 files changed, 10 insertions(+), 10 deletions(-)
 
+diff --git a/conversion/__init__.py b/conversion/__init__.py
+index 051ddf9..c4cd218 100644
+--- a/conversion/__init__.py
++++ b/conversion/__init__.py
+@@ -382,7 +382,7 @@ def load_all_models() -> None:
+         for module_name in _TEXT_MODEL_MODULES:
+             if module_name not in _loaded_text_modules:
+                 try:
+-                    __import__(f"conversion.{module_name}")
++                    __import__(f"{__name__}.{module_name}")
+                     _loaded_text_modules.add(module_name)
+                 except Exception as e:
+                     logger.warning(f"Failed to load model module {module_name}: {e}")
+@@ -391,7 +391,7 @@ def load_all_models() -> None:
+         for module_name in _MMPROJ_MODEL_MODULES:
+             if module_name not in _loaded_mmproj_modules:
+                 try:
+-                    __import__(f"conversion.{module_name}")
++                    __import__(f"{__name__}.{module_name}")
+                     _loaded_mmproj_modules.add(module_name)
+                 except Exception as e:
+                     logger.warning(f"Failed to load model module {module_name}: {e}")
+@@ -403,7 +403,7 @@ def get_model_class(name: str, mmproj: bool = False) -> Type[ModelBase]:
+     if name not in relevant_map:
+         raise NotImplementedError(f"Architecture {name!r} not supported!")
+     module_name = relevant_map[name]
+-    __import__(f"conversion.{module_name}")
++    __import__(f"{__name__}.{module_name}")
+     model_type = ModelType.MMPROJ if mmproj else ModelType.TEXT
+     return ModelBase._model_classes[model_type][name]
+ 
+diff --git a/conversion/base.py b/conversion/base.py
+index 0f3bd9a..b3509ca 100644
+--- a/conversion/base.py
++++ b/conversion/base.py
+@@ -1252,7 +1252,7 @@ class ModelBase:
+     @staticmethod
+     def load_hparams_guess(dir_model: Path) -> dict[str, Any] | None:
+         # some models ship no config.json, will try to guess them
+-        from conversion import load_all_models
++        from llama_cpp_tools.conversion import load_all_models
+         load_all_models()
+ 
+         for matcher, loader in ModelBase._hparams_loaders:
+diff --git a/convert_hf_to_gguf.py b/convert_hf_to_gguf.py
+index e09616b..0463df1 100755
 --- a/convert_hf_to_gguf.py
 +++ b/convert_hf_to_gguf.py
 @@ -15,7 +15,7 @@ if 'NO_LOCAL_GGUF' not in os.environ:
@@ -28,3 +68,42 @@ after install.
      ModelBase,
      ModelType,
      get_model_architecture,
+@@ -253,13 +253,13 @@ def main() -> None:
+                 sys.exit(1)
+         elif args.mmproj:
+             assert hparams.get("vision_encoder") is not None, "This model does not support multimodal"
+-            from conversion.pixtral import PixtralModel
++            from llama_cpp_tools.conversion.pixtral import PixtralModel
+             model_class = PixtralModel
+         elif hparams.get("moe") is not None:
+-            from conversion.mistral import MistralMoeModel
++            from llama_cpp_tools.conversion.mistral import MistralMoeModel
+             model_class = MistralMoeModel
+         else:
+-            from conversion.mistral import MistralModel
++            from llama_cpp_tools.conversion.mistral import MistralModel
+             model_class = MistralModel
+ 
+         if sum((args.mtp, args.no_mtp, args.dspark)) > 1:
+@@ -270,7 +270,7 @@ def main() -> None:
+             if is_mistral_format or model_architecture != "DeepseekV4ForCausalLM":
+                 logger.error("--dspark is only supported for DeepseekV4ForCausalLM")
+                 sys.exit(1)
+-            from conversion.deepseek import DeepseekV4DSparkModel
++            from llama_cpp_tools.conversion.deepseek import DeepseekV4DSparkModel
+             model_class = DeepseekV4DSparkModel
+ 
+         if args.mtp or args.no_mtp:
+diff --git a/convert_llama_ggml_to_gguf.py b/convert_llama_ggml_to_gguf.py
+index 52827e6..3c264b1 100755
+--- a/convert_llama_ggml_to_gguf.py
++++ b/convert_llama_ggml_to_gguf.py
+@@ -358,7 +358,7 @@ class GGMLToGGUF:
+ 
+ 
+ def handle_metadata(cfg, hp):
+-    import examples.convert_legacy_llama as convert
++    import llama_cpp_tools.convert_legacy_llama as convert
+ 
+     assert cfg.model_metadata_dir.is_dir(), 'Metadata dir is not a directory'
+     hf_config_path   = cfg.model_metadata_dir / "config.json"

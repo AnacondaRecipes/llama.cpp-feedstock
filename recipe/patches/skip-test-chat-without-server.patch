@@ -1,6 +1,6 @@
-From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From dec39defb5de6a7611c78e3d4cd09f295b5c9518 Mon Sep 17 00:00:00 2001
 From: Xianglong Kong <xkong@anaconda.com>
-Date: Thu, 1 May 2026 12:00:00 -0500
+Date: Fri, 1 May 2026 12:00:00 -0500
 Subject: [PATCH] tests: skip test-chat when LLAMA_BUILD_SERVER is OFF
 
 Upstream b8994 made test-chat depend on the server-context library
@@ -19,11 +19,12 @@ producing redefinition errors).
 Wrap the test-chat target in `if (LLAMA_BUILD_SERVER)` so it is only
 built when the server library is available. Other tests in the same
 block are unaffected.
-
 ---
  tests/CMakeLists.txt | 8 +++++---
  1 file changed, 5 insertions(+), 3 deletions(-)
 
+diff --git a/tests/CMakeLists.txt b/tests/CMakeLists.txt
+index c44189c..115cd24 100644
 --- a/tests/CMakeLists.txt
 +++ b/tests/CMakeLists.txt
 @@ -160,9 +160,11 @@ if (NOT WIN32 OR NOT BUILD_SHARED_LIBS)
@@ -39,5 +40,5 @@ block are unaffected.
 +        target_link_libraries(test-chat PRIVATE server-context)
 +    endif()
      llama_build_and_test(test-json-schema-to-grammar.cpp)
-
+ 
      if (NOT GGML_BACKEND_DL)

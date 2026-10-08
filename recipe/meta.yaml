@@ -1,11 +1,11 @@
 {% set name = "llama.cpp-meta" %}
 # Upstream has stabilised on vX.Y.Z semver anchors (ggml-org/ggml#1579),
 # so we ship those tags directly. Semver tags are dual-tagged on the
-# mainline (v0.5.0 == b11146 — same commit), so the b-number rev-count
+# mainline (v0.6.0 == b11429 — same commit), so the b-number rev-count
 # still supplies a monotonic suffix for the gguf output.
-{% set version = "0.5.0" %}
-{% set upstream_release_bnum = "11146" %}
-{% set upstream_commit = "7fe450e19305b828c199d602c23a8337aaa1f03b" %}
+{% set version = "0.6.0" %}
+{% set upstream_release_bnum = "11429" %}
+{% set upstream_commit = "d81235049384534c167caea52b85a694f6103d14" %}
 {% set gguf_version = "0.19.0." + upstream_release_bnum %}
 {% set build_number = 0 %}
 
@@ -22,6 +22,8 @@
 {% set mkl = mkl | default("999.0a0", true) %}
 {% set openblas = openblas | default("999.0a0", true) %}
 {% set cuda_compiler_version = cuda_compiler_version | default("999.0a0", true) %}
+{% set openssl = openssl | default("999.0a0", true) %}
+{% set vcomp14 = vcomp14 | default("999.0a0", true) %}
 
 package:
   name: {{ name|lower }}
@@ -29,7 +31,7 @@ package:
 
 source:
   url: https://github.com/ggml-org/llama.cpp/archive/v{{ version }}.tar.gz
-  sha256: fef9ed754f4e031fb5c663c29260feda4ebc241abb68d64a81c0f1df5f1748e2
+  sha256: 09b36dba235fcac180efff18514da7038e65d8e5b9e4aefa59238468abfdec12
 
   patches:
     - patches/increase-nmse-tolerance.patch
@@ -84,8 +86,12 @@ outputs:
       missing_dso_whitelist:                                                                         # [(gpu_variant or "").startswith('cuda')]
         - "**/libcuda.so*"  # [(gpu_variant or "").startswith('cuda')]
         - "**/nvcuda.dll"   # [(gpu_variant or "").startswith('cuda')]
+      # Hand-written instead of pin_subpackage(exact=True): with a custom PKG_HASH string,
+      # conda-build <26.9.0 (PBP workers) exports the placeholder h1234567 (conda/conda-build#6100).
       run_exports:
-        - {{ pin_subpackage('libllama', exact=True) }}
+        - libllama {{ version }} cuda{{ cuda_compiler_version | replace('.', '') }}_*  # [(gpu_variant or "").startswith('cuda')]
+        - libllama {{ version }} cpu_{{ blas_impl }}_*                                 # [gpu_variant == "none"]
+        - libllama {{ version }} mps_*                                                 # [gpu_variant == "metal"]
 
     requirements:
       build:
@@ -107,8 +113,8 @@ outputs:
         - libgomp                                             # [linux and not (blas_impl == "mkl")]
         - llvm-openmp {{ cxx_compiler_version }}              # [osx and not (blas_impl == "mkl")]
         - llvm-openmp {{ cxx_compiler_version }}              # [win and arm64]
-        - vcomp14                                             # [(win and x86_64) and not (blas_impl == "mkl")]
-        - openssl
+        - vcomp14 {{ vcomp14 }}                               # [(win and x86_64) and not (blas_impl == "mkl")]
+        - openssl {{ openssl }}
       run:
         - {{ pin_compatible('cuda-version', max_pin='x.x') }} # [(gpu_variant or "").startswith('cuda')]
         - {{ pin_compatible('intel-openmp') }}                # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
@@ -183,8 +189,11 @@ outputs:
       missing_dso_whitelist:                                                                         # [(gpu_variant or "").startswith('cuda')]
         - "**/libcuda.so*"  # [(gpu_variant or "").startswith('cuda')]
         - "**/nvcuda.dll"   # [(gpu_variant or "").startswith('cuda')]
+      # Hand-written for the same reason as libllama's run_exports (conda/conda-build#6100).
       run_exports:
-        - {{ pin_subpackage('llama.cpp', exact=True) }}
+        - llama.cpp {{ version }} cuda{{ cuda_compiler_version | replace('.', '') }}_*  # [(gpu_variant or "").startswith('cuda')]
+        - llama.cpp {{ version }} cpu_{{ blas_impl }}_*                                 # [gpu_variant == "none"]
+        - llama.cpp {{ version }} mps_*                                                 # [gpu_variant == "metal"]
       
     requirements:
       build:
@@ -206,8 +215,8 @@ outputs:
         - libgomp                                             # [linux and not (blas_impl == "mkl")]
         - llvm-openmp {{ cxx_compiler_version }}              # [osx and not (blas_impl == "mkl")]
         - llvm-openmp {{ cxx_compiler_version }}              # [win and arm64]
-        - vcomp14                                             # [(win and x86_64) and not (blas_impl == "mkl")]
-        - openssl
+        - vcomp14 {{ vcomp14 }}                               # [(win and x86_64) and not (blas_impl == "mkl")]
+        - openssl {{ openssl }}
         - {{ pin_subpackage('libllama', exact=True) }}
       run:
         - {{ pin_subpackage('libllama', exact=True) }}
@@ -239,7 +248,11 @@ outputs:
         Server example and tools for llama.cpp, using libllama
       license: MIT
       license_family: MIT
-      license_file: LICENSE
+      # cpp-httplib (static) and nlohmann/json are compiled into llama-common, which these binaries link.
+      license_file:
+        - LICENSE
+        - vendor/cpp-httplib/LICENSE
+        - licenses/LICENSE-jsonhpp
       dev_url: https://github.com/ggml-org/llama.cpp
       doc_url: https://github.com/ggml-org/llama.cpp
 
@@ -286,8 +299,8 @@ outputs:
         - mkl-devel {{ mkl }}                                 # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
         - intel-openmp {{ mkl }}                              # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
         - libgomp                                             # [linux and not (blas_impl == "mkl")]
-        - vcomp14                                             # [(win and x86_64) and not (blas_impl == "mkl")]
-        - openssl
+        - vcomp14 {{ vcomp14 }}                               # [(win and x86_64) and not (blas_impl == "mkl")]
+        - openssl {{ openssl }}
         - {{ pin_subpackage('libllama', exact=True) }}
         - {{ pin_subpackage('llama.cpp', exact=True) }}
       run:
@@ -312,7 +325,11 @@ outputs:
         Test executables for llama.cpp
       license: MIT
       license_family: MIT
-      license_file: LICENSE
+      # cpp-httplib (static) and nlohmann/json are compiled into llama-common, which these binaries link.
+      license_file:
+        - LICENSE
+        - vendor/cpp-httplib/LICENSE
+        - licenses/LICENSE-jsonhpp
       dev_url: https://github.com/ggml-org/llama.cpp
       doc_url: https://github.com/ggml-org/llama.cpp
 
@@ -336,59 +353,41 @@ outputs:
     requirements:
       host:
         - python
-        - poetry-core >=1.0.0
-        - pip
       run:
         # This is an aggregate of requirements from multiple files in the llama.cpp-tools repo, see:
         # https://github.com/ggml-org/llama.cpp/tree/master/requirements
         - python
         # requirements/requirements-convert_legacy_llama.txt
-        - numpy >=1.26.4 # loosen bounds to accept numpy 2, which appears to be compatible
+        # Bounds from upstream pyproject.toml; requirements' ~=2.2.6 (<2.3) is only for Ubuntu 22.04 pip
+        # installs (ggml-org/llama.cpp#28654). Conversions verified on numpy 2.3.
+        - numpy >=2.2.6,<3.0.0
         - sentencepiece >=0.1.98,<0.3.0
-        # Upstream b9848 pins transformers==4.57.6 for a rope/yarn converter
-        # fix (huggingface/transformers#45887, merge commit dfcb1a3, 2026-05-12;
-        # cherry-picked into the 4.57.x maintenance branch). pkgs/main lacks
-        # 4.57.6 (only has 4.57.1), but the same fix is an ancestor of
-        # transformers 5.9.0, so we require >=5.9.0 as the minimum version
-        # containing the fix.
+        # Upstream pins ==4.57.6 for the rope/yarn fix huggingface/transformers#45887 (ggml-org/llama.cpp#23966);
+        # 5.9.0 is the first 5.x release containing it and 4.57.6 is not on pkgs/main. YaRN conversion verified on 5.9.0.
         - transformers >=5.9.0,<6.0.0
-        # Upstream requirements-convert_legacy_llama.txt lists
-        # `protobuf>=4.21.0,<5.0.0`, but that cap is stale: it was introduced
-        # in llama.cpp commit 04ac060 (Dec 2023, before protobuf 5.x existed)
-        # and has been carried forward unchanged for 2+ years without any
-        # release-note or PR justifying it. The convert scripts themselves do
-        # NOT import protobuf directly (no `import protobuf` / `google.protobuf`
-        # in convert_hf_to_gguf.py, convert_lora_to_gguf.py, or
-        # convert_llama_ggml_to_gguf.py at b9848). protobuf is only pulled in
-        # transitively by transformers' T5/mBART/XLNet tokenizer classes when
-        # those specific model families are instantiated, so we still ship it
-        # as a run: dep for feature completeness.
-        # We cannot match the upstream `<5.0` cap on pkgs/main because the
-        # only such build (protobuf 4.25.3) requires libabseil ~20240116,
-        # while every pytorch >=2.6.0 build on pkgs/main requires libabseil
-        # >=20250127. Widening to protobuf 5.x/6.x/7.x is safe here because
-        # (a) our recipe does not `pip install` (build-llama-cpp-tools.sh
-        # just cps files into $SP_DIR), so no dist-info metadata enforces
-        # upstream's constraint, and (b) sentencepiece 0.2.x on pkgs/main
-        # statically links libprotobuf and does not have a runtime protobuf
-        # dep, so the ABI decoupling insulates us from protobuf major-version
-        # shifts. PKG-15573: protobuf 7.35.1 is now on pkgs/main.
+        # Upstream caps protobuf <5.0; no protobuf 4.x on pkgs/main co-installs with pytorch (libabseil pin).
+        # Needed by sentencepiece_model_pb2 (T5 converter); T5 conversion verified on 5.29.3 and 7.35.1.
         - protobuf >=5.29.3,<8.0.0
         # requirements/requirements-convert_hf_to_gguf.txt
         # requirements/requirements-convert_llama_ggml_to_gguf.txt
         # requirements/requirements-convert_lora_to_gguf.txt
         - mistral-common >=1.8.3
-        - pytorch >=2.6.0
+        # Bounds from upstream pyproject.toml; requirements' torch==2.11.0 is a pip/CPU-wheel pin.
+        # torch>=2.7 dtypes (float8_e8m0fnu) are getattr-guarded. Conversions verified on 2.6.0 and 2.14.0.
+        - pytorch >=2.6.0,<3.0.0
         - {{ pin_subpackage('gguf', exact=True) }}
 
     test:
       imports:
         - llama_cpp_tools
       commands:
-        # Skip --help on osx: PyTorch has ABI issue (Symbol not found: __ZN2at3mps14getMPSProfilerEv)
-        - llama-convert-hf-to-gguf --help  # [not osx]
-        - llama-convert-llama-ggml-to-gguf --help  # [not osx]
-        - llama-convert-lora-to-gguf --help  # [not osx]
+        - llama-convert-hf-to-gguf --help
+        - llama-convert-llama-ggml-to-gguf --help
+        - llama-convert-lora-to-gguf --help
+        # --help exits before the converter's package imports; exercise them (static + dynamic) offline.
+        - python -c "import pathlib, tempfile, llama_cpp_tools.convert_legacy_llama; from llama_cpp_tools.conversion import get_model_class; from llama_cpp_tools.conversion.base import ModelBase; ModelBase.load_hparams_guess(pathlib.Path(tempfile.mkdtemp())); assert get_model_class('LlamaForCausalLM').__name__"
+        # Real offline conversion: tiny LoRA adapter on a config-only Llama base must yield a GGUF with 2 tensors.
+        - python -c "import json, pathlib, subprocess, tempfile, torch; from safetensors.torch import save_file; from gguf import GGUFReader; d = pathlib.Path(tempfile.mkdtemp()); b = d / 'base'; a = d / 'adapter'; b.mkdir(); a.mkdir(); (b / 'config.json').write_text(json.dumps(dict(architectures=['LlamaForCausalLM'], model_type='llama', hidden_size=16, intermediate_size=32, num_attention_heads=2, num_key_value_heads=2, num_hidden_layers=1, vocab_size=32, max_position_embeddings=64, rms_norm_eps=1e-5))); (a / 'adapter_config.json').write_text(json.dumps(dict(peft_type='LORA', r=2, lora_alpha=4, target_modules=['q_proj'], base_model_name_or_path=str(b)))); p = 'base_model.model.model.layers.0.self_attn.q_proj.'; save_file(dict(zip([p + 'lora_A.weight', p + 'lora_B.weight'], [torch.rand(2, 16), torch.rand(16, 2)])), str(a / 'adapter_model.safetensors')); subprocess.run(['llama-convert-lora-to-gguf', '--base', str(b), '--outfile', str(d / 'out.gguf'), str(a)], check=True); assert len(GGUFReader(str(d / 'out.gguf')).tensors) == 2"
         - test -d $SP_DIR/llama_cpp_tools/models  # [unix]
         - test -f $SP_DIR/llama_cpp_tools/models/ggml-vocab-llama-bpe.gguf  # [unix]
         - test -d $SP_DIR/llama_cpp_tools/models/templates  # [unix]
@@ -397,8 +396,6 @@ outputs:
         - if not exist %SP_DIR%\llama_cpp_tools\models\ggml-vocab-llama-bpe.gguf exit 1  # [win]
         - if not exist %SP_DIR%\llama_cpp_tools\models\templates exit 1  # [win]
         - if not exist %SP_DIR%\llama_cpp_tools\models\templates\README.md exit 1  # [win]
-      requires:
-        - pip
 
     about:
       home: https://github.com/ggml-org/llama.cpp
