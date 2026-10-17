@@ -90,8 +90,10 @@ else
 fi
 if [[ "$PKG_NAME" == "llama.cpp-tests" && "${target_platform}" == linux-* ]]; then
     # test-backend-ops links only ggml since v0.7.0, so it no longer gets Threads::Threads
-    # from llama-common; its std::thread use needs libpthread on glibc < 2.34.
-    LDFLAGS="${LDFLAGS} -pthread"
+    # from llama-common; its std::thread use needs libpthread on glibc < 2.34. Passed as a
+    # cache variable because build_${gpu_variant} is reused from the earlier outputs, so a
+    # changed LDFLAGS would not reach the cached CMAKE_EXE_LINKER_FLAGS.
+    LLAMA_ARGS="${LLAMA_ARGS} -DCMAKE_CXX_STANDARD_LIBRARIES=-lpthread"
 fi
 # TODO add LLAMA_LLGUIDANCE? 
 # TODO set LLAMA_USE_SYSTEM_GGML once ggml gets its own feedstock
