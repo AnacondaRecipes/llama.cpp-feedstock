@@ -121,7 +121,6 @@ outputs:
         - llvm-openmp                                         # [osx and not (blas_impl == "mkl")]
         - llvm-openmp                                         # [win and arm64]
         - vcomp14                                             # [(win and x86_64) and not (blas_impl == "mkl")]
-        - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
         - __cuda                                              # [(gpu_variant or "").startswith('cuda')]
 
     test:
@@ -157,7 +156,11 @@ outputs:
         Inference of Meta's LLaMA model (and others) in pure C/C++
       license: MIT
       license_family: MIT
-      license_file: LICENSE
+      # cpp-httplib (static) and nlohmann/json are compiled into llama-common, which this output ships.
+      license_file:
+        - LICENSE
+        - vendor/cpp-httplib/LICENSE
+        - licenses/LICENSE-jsonhpp
       dev_url: https://github.com/ggml-org/llama.cpp
       doc_url: https://github.com/ggml-org/llama.cpp
 
@@ -225,7 +228,6 @@ outputs:
         - llvm-openmp                                         # [osx and not (blas_impl == "mkl")]
         - llvm-openmp                                         # [win and arm64]
         - vcomp14                                             # [(win and x86_64) and not (blas_impl == "mkl")]
-        - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
         - __cuda                                              # [(gpu_variant or "").startswith('cuda')]
 
     test:
@@ -309,7 +311,6 @@ outputs:
         - {{ pin_compatible('intel-openmp') }}                # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
         - libgomp                                             # [linux and not (blas_impl == "mkl")]
         - vcomp14                                             # [(win and x86_64) and not (blas_impl == "mkl")]
-        - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
         - __cuda                                              # [(gpu_variant or "").startswith('cuda')]
 
     test:
