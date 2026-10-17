@@ -1,4 +1,4 @@
-From 3ea0eac09703ea067e29c7460afd72c063a6b19f Mon Sep 17 00:00:00 2001
+From c925fc7b22e09522ffee1dc77e57555d34f0b6e8 Mon Sep 17 00:00:00 2001
 From: John Noller <jnoller@anaconda.com>
 Date: Sun, 20 Jul 2025 14:37:44 -0400
 Subject: [PATCH] fix convert_lora_to_gguf.py
@@ -6,9 +6,9 @@ Subject: [PATCH] fix convert_lora_to_gguf.py
 Co-authored-by: Charles Bousseau <cbousseau@anaconda.com>
 
 convert_lora_to_gguf.py uses relative, unqualified imports that fail when the tools/scripts
-are correctly packaged and namespaced. Additionally, there is no main definition to run the script, 
+are correctly packaged and namespaced. Additionally, there is no main definition to run the script,
 and the logic is contained in the `if __name__ == '__main__':` block breaking the entry point
-definitions. 
+definitions.
 
 This patch can be dropped if/when the upstream repo is refactored to follow python package conventions
 and the import statement and `if __name__ == '__main__':` block are updated to follow best practices.
@@ -16,6 +16,8 @@ and the import statement and `if __name__ == '__main__':` block are updated to f
  convert_lora_to_gguf.py | 4 ++--
  1 file changed, 2 insertions(+), 2 deletions(-)
 
+diff --git a/convert_lora_to_gguf.py b/convert_lora_to_gguf.py
+index f9adecb..4c1bafa 100755
 --- a/convert_lora_to_gguf.py
 +++ b/convert_lora_to_gguf.py
 @@ -25,7 +25,7 @@ import gguf
@@ -27,7 +29,7 @@ and the import statement and `if __name__ == '__main__':` block are updated to f
  
  logger = logging.getLogger("lora-to-gguf")
  
-@@ -334,7 +334,7 @@ def load_hparams_from_hf(hf_model_id: st
+@@ -337,7 +337,7 @@ def load_hparams_from_hf(hf_model_id: str, trust_remote_code: bool) -> tuple[dic
      return config.to_dict(), cache_dir
  
  

@@ -1,9 +1,9 @@
-From aaf1a25c65647aec4c6fd583582d324392bff1ef Mon Sep 17 00:00:00 2001
+From 9e555d835928ed9c36ce030fe5b49f8fbf224018 Mon Sep 17 00:00:00 2001
 From: Charles Bousseau <cbousseau@anaconda.com>
 Date: Sun, 20 Jul 2025 14:03:26 -0400
 Subject: [PATCH] metal gpu selection
 
-In macOS, in order for the system to provide a default Metal device object, you must link to the Core Graphics framework. 
+In macOS, in order for the system to provide a default Metal device object, you must link to the Core Graphics framework.
 You usually need to do this explicitly if you're writing apps that don't use graphics by default, such as command line tools.
 https://developer.apple.com/documentation/metal/1433401-mtlcreatesystemdefaultdevice?language=objc
 Systems with Apple silicon only have one GPU, which removes the need to choose a GPU.
@@ -16,9 +16,11 @@ Updated for b8994. File rename from ggml/src/ggml-metal/ggml-metal.m to ggml-met
  ggml/src/ggml-metal/ggml-metal-device.m | 19 +++++++++++++++++++
  1 file changed, 19 insertions(+)
 
+diff --git a/ggml/src/ggml-metal/ggml-metal-device.m b/ggml/src/ggml-metal/ggml-metal-device.m
+index d1bce8b..046441b 100644
 --- a/ggml/src/ggml-metal/ggml-metal-device.m
 +++ b/ggml/src/ggml-metal/ggml-metal-device.m
-@@ -1096,6 +1096,25 @@ ggml_metal_device_t ggml_metal_device_in
+@@ -1116,6 +1116,25 @@ ggml_metal_device_t ggml_metal_device_init(int device, int n_devices) {
      @autoreleasepool {
          if (dev->mtl_device == nil) {
              dev->mtl_device = MTLCreateSystemDefaultDevice();

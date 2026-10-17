@@ -1,11 +1,11 @@
 {% set name = "llama.cpp-meta" %}
 # Upstream has stabilised on vX.Y.Z semver anchors (ggml-org/ggml#1579),
 # so we ship those tags directly. Semver tags are dual-tagged on the
-# mainline (v0.6.0 == b11429 — same commit), so the b-number rev-count
+# mainline (v0.7.0 == b11669 — same commit), so the b-number rev-count
 # still supplies a monotonic suffix for the gguf output.
-{% set version = "0.6.0" %}
-{% set upstream_release_bnum = "11429" %}
-{% set upstream_commit = "d81235049384534c167caea52b85a694f6103d14" %}
+{% set version = "0.7.0" %}
+{% set upstream_release_bnum = "11669" %}
+{% set upstream_commit = "620d2225cc436ab0b001e3200e590e3b286ef9ab" %}
 {% set gguf_version = "0.19.0." + upstream_release_bnum %}
 {% set build_number = 0 %}
 
@@ -31,7 +31,7 @@ package:
 
 source:
   url: https://github.com/ggml-org/llama.cpp/archive/v{{ version }}.tar.gz
-  sha256: 09b36dba235fcac180efff18514da7038e65d8e5b9e4aefa59238468abfdec12
+  sha256: 55d67acf3ad2ad747a9bbeb75f9f0e173dbcc0d1753a471038a90c819421c5e1
 
   patches:
     - patches/increase-nmse-tolerance.patch
@@ -43,7 +43,6 @@ source:
     - patches/fix-convert_hf_to_gguf.patch
     - patches/fix-convert_lora_to_gguf.patch
     - patches/fix-models-path.patch
-    - patches/fix-test-llama-archs-backend-dl.patch
     - patches/skip-test-chat-without-server.patch
     - patches/skip-test-mtmd-impl-without-tools.patch
 

@@ -134,13 +134,10 @@ if [[ "$PKG_NAME" == "llama.cpp-tests" ]]; then
         # test-tokenizers-ggml-vocabs: Requires git-lfs to download model files
         # test-thread-safety: GGML_ASSERT(buf_dst) fails in ggml_metal_cpy_tensor_async during concurrent decode
         # test-llama-archs: aborts in ggml_backend_meta_get_split_state on Metal (b8994 regression)
-        # test-recurrent-state-rollback: same GGML_ASSERT(buf_dst) failure in
-        #   ggml_metal_cpy_tensor_async during decode; test became a real check at
-        #   ggml-org/llama.cpp#25758 (b10068). No upstream fix as of v0.4.1 (b10964).
-        # test-save-load-state: same GGML_ASSERT(buf_dst) failure at
-        #   ggml-metal-context.m:377, surfaced as a required test at b10760;
-        #   still failing at v0.4.1 (b10964).
-        ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 --repeat until-pass:3 -E "(test-tokenizers-ggml-vocabs|test-thread-safety|test-llama-archs|test-recurrent-state-rollback|test-save-load-state)"
+        # test-llama-context: same GGML_ASSERT(buf_dst) failure at ggml-metal-context.m:380
+        #   during state copy/rollback; v0.7.0 merged test-recurrent-state-rollback and
+        #   test-save-load-state (both skipped here since b10068/b10760) into this test.
+        ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 --repeat until-pass:3 -E "(test-tokenizers-ggml-vocabs|test-thread-safety|test-llama-archs|test-llama-context)"
     elif [[ ${gpu_variant:0:5} = "cuda-" ]]; then
         # Check GPU compute capability - skip test-backend-ops on older GPUs (<=7.5)
         # T4 (SM 7.5) has limited shared memory causing Flash Attention crashes

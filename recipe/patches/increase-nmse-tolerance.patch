@@ -1,4 +1,4 @@
-From 356f317a1894cf9de0dc38de7935d72cf021a4ec Mon Sep 17 00:00:00 2001
+From 13bdf4970bc1d8b10ee11a1482831b024a20c14e Mon Sep 17 00:00:00 2001
 From: Charles Bousseau <cbousseau@anaconda.com>
 Date: Wed, 6 Aug 2025 22:09:29 +0200
 Subject: [PATCH] tests: increase NMSE tolerance
@@ -15,10 +15,10 @@ Updated for b11146 (v0.5.0).
  1 file changed, 8 insertions(+), 8 deletions(-)
 
 diff --git a/tests/test-backend-ops.cpp b/tests/test-backend-ops.cpp
-index d889302..8c8b32f 100644
+index ba7f7eb..c3aba2b 100644
 --- a/tests/test-backend-ops.cpp
 +++ b/tests/test-backend-ops.cpp
-@@ -4995,7 +4995,7 @@ struct test_mul_mat : public test_case {
+@@ -5213,7 +5213,7 @@ struct test_mul_mat : public test_case {
      }
  
      double max_nmse_err() override {
@@ -27,7 +27,7 @@ index d889302..8c8b32f 100644
      }
  
      double max_nmse_err(ggml_backend_t backend) override {
-@@ -5254,7 +5254,7 @@ struct test_mul_mat_id : public test_case {
+@@ -5473,7 +5473,7 @@ struct test_mul_mat_id : public test_case {
      }
  
      double max_nmse_err() override {
@@ -36,7 +36,7 @@ index d889302..8c8b32f 100644
      }
  
      double max_nmse_err(ggml_backend_t backend) override {
-@@ -5371,7 +5371,7 @@ struct test_mul_mat_id_fusion : public test_case {
+@@ -5616,7 +5616,7 @@ struct test_mul_mat_id_fusion : public test_case {
      }
  
      double max_nmse_err() override {
@@ -45,7 +45,7 @@ index d889302..8c8b32f 100644
      }
  
      uint64_t op_flops(ggml_tensor * t) override {
-@@ -5483,7 +5483,7 @@ struct test_out_prod : public test_case {
+@@ -5728,7 +5728,7 @@ struct test_out_prod : public test_case {
      }
  
      double max_nmse_err() override {
@@ -54,7 +54,7 @@ index d889302..8c8b32f 100644
      }
  
      test_out_prod(ggml_type type_a = GGML_TYPE_F32, ggml_type type_b = GGML_TYPE_F32,
-@@ -6296,7 +6296,7 @@ struct test_conv_transpose_2d : public test_case {
+@@ -6556,7 +6556,7 @@ struct test_conv_transpose_2d : public test_case {
      }
  
      double max_nmse_err() override {
@@ -63,7 +63,7 @@ index d889302..8c8b32f 100644
      }
  
      test_conv_transpose_2d(
-@@ -6444,7 +6444,7 @@ struct test_conv_2d : public test_case {
+@@ -6704,7 +6704,7 @@ struct test_conv_2d : public test_case {
      }
  
      double max_nmse_err() override {
@@ -72,7 +72,7 @@ index d889302..8c8b32f 100644
      }
  
      uint64_t op_flops(ggml_tensor * t) override {
-@@ -6636,7 +6636,7 @@ struct test_conv_3d : public test_case {
+@@ -6896,7 +6896,7 @@ struct test_conv_3d : public test_case {
      }
  
      double max_nmse_err() override {
@@ -81,7 +81,7 @@ index d889302..8c8b32f 100644
      }
  
      uint64_t op_flops(ggml_tensor * t) override {
-@@ -8101,7 +8101,7 @@ struct test_flash_attn_ext : public test_case {
+@@ -8409,7 +8409,7 @@ struct test_flash_attn_ext : public test_case {
      }
  
      double max_nmse_err() override {

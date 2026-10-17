@@ -1,7 +1,8 @@
-From 3ea0eac09703ea067e29c7460afd72c063a6b19f Mon Sep 17 00:00:00 2001
+From 5cb7872f7923b0e05c311a6b80e47fecc40539a2 Mon Sep 17 00:00:00 2001
 From: John Noller <jnoller@anaconda.com>
 Date: Sun, 20 Jul 2025 14:37:44 -0400
-Subject: [PATCH] locate ggml-vocab gguf files relative to the conversion package
+Subject: [PATCH] locate ggml-vocab gguf files relative to the conversion
+ package
 
 `_set_vocab_builtin` (moved from convert_hf_to_gguf.py into conversion/base.py
 in b9445+) loads `models/ggml-vocab-*.gguf` via `Path(sys.path[0]) / "models"`,
@@ -9,11 +10,15 @@ which only resolves when run from the source tree. The feedstock installs the
 vocab files at `llama_cpp_tools/models/`, so use
 `Path(__file__).parent.parent / "models"` (conversion/base.py becomes
 llama_cpp_tools/conversion/base.py, two parents up reaches the models dir).
-
 ---
+ conversion/base.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/conversion/base.py b/conversion/base.py
+index 49152f0..b3374aa 100644
 --- a/conversion/base.py
 +++ b/conversion/base.py
-@@ -2074,7 +2074,7 @@ class TextModel(ModelBase):
+@@ -2430,7 +2430,7 @@ class TextModel(ModelBase):
          special_vocab.add_to_gguf(self.gguf_writer)
  
      def _set_vocab_builtin(self, model_name: Literal["gpt-neox", "llama-spm"], vocab_size: int):

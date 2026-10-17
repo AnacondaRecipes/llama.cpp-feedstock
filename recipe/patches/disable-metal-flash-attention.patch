@@ -1,4 +1,4 @@
-From 4d8ab4197cc5903bab1b8b8291137925badddac4 Mon Sep 17 00:00:00 2001
+From 84cfb24d1a03a13a0c052bfb326588db4ce88cd7 Mon Sep 17 00:00:00 2001
 From: Xianglong Kong <xkong@anaconda.com>
 Date: Mon, 5 Oct 2026 15:12:01 -0500
 Subject: [PATCH] Disable Metal Flash Attention due to numerical precision
@@ -19,10 +19,10 @@ when building with macOS 15+ SDK.
  1 file changed, 4 insertions(+)
 
 diff --git a/ggml/src/ggml-metal/ggml-metal-device.m b/ggml/src/ggml-metal/ggml-metal-device.m
-index 419e54f..6a53a4f 100644
+index c7cfb54..35e6ffd 100644
 --- a/ggml/src/ggml-metal/ggml-metal-device.m
 +++ b/ggml/src/ggml-metal/ggml-metal-device.m
-@@ -1744,6 +1744,10 @@ bool ggml_metal_device_supports_op(ggml_metal_device_t dev, const struct ggml_te
+@@ -1745,6 +1745,10 @@ bool ggml_metal_device_supports_op(ggml_metal_device_t dev, const struct ggml_te
          case GGML_OP_ROLL:
              return ggml_is_contiguous(op->src[0]);
          case GGML_OP_FLASH_ATTN_EXT:
