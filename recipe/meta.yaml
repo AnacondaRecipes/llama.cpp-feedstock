@@ -34,8 +34,6 @@ source:
   sha256: 55d67acf3ad2ad747a9bbeb75f9f0e173dbcc0d1753a471038a90c819421c5e1
 
   patches:
-    - patches/increase-nmse-tolerance.patch
-    - patches/increase-nmse-tolerance-aarch64.patch  # [linux and aarch64]
     - patches/ggml-search-module-dir.patch
     - patches/metal_gpu_selection.patch     # [osx]
     - patches/disable-metal-bf16.patch      # [osx]
