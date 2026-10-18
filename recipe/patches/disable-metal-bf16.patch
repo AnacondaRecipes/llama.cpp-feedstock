@@ -1,31 +1,35 @@
-From 70445ca53c6012bf1cb1e601657e2a6e3f85b039 Mon Sep 17 00:00:00 2001
+From b4f224f217c79f9477e351841c62d7cafc083cae Mon Sep 17 00:00:00 2001
 From: Xianglong Kong <xkong@anaconda.com>
 Date: Mon, 5 Oct 2026 15:12:01 -0500
 Subject: [PATCH] Disable Metal BF16 support before macOS 15
 
 AI assistant generated patch.
 
-The Metal shader library is compiled at runtime (GGML_METAL_EMBED_LIBRARY),
-and the macOS < 15 Metal shader compiler crashes when compiling BF16
-(bfloat16) kernels, causing test-backend-ops and test-thread-safety to fail
-with SEGFAULT/abort on the macOS 13 CI hosts.
+BF16 on Metal was disabled because test-backend-ops and test-thread-safety
+aborted with it enabled on the macOS 13 CI hosts. The failure mechanism is
+not established: upstream already drops the BF16 kernels for Metal < 3.1
+(kernels/common.h) while has_bfloat still advertises BF16 ops.
 
-Clear has_bfloat at runtime when macOS < 15; GGML_METAL_HAS_BF16 is derived
-from it, so BF16 stays enabled on macOS 15 and later. Upstream
+Clear has_bfloat at runtime when macOS < 15; GGML_METAL_HAS_BF16 and the
+BF16 checks in ggml_metal_device_supports_op derive from it. Upstream
 GGML_METAL_BF16_DISABLE still works.
+
+Tested: on macOS 15.7.3 / Apple M4 Pro, test-backend-ops passes all 218
+BF16 MUL_MAT cases on Metal. macOS 14 and 15.0-15.6 are untested, so the
+cutoff is conservative.
 ---
  ggml/src/ggml-metal/ggml-metal-device.m | 5 +++++
  1 file changed, 5 insertions(+)
 
 diff --git a/ggml/src/ggml-metal/ggml-metal-device.m b/ggml/src/ggml-metal/ggml-metal-device.m
-index 046441b..80ea3aa 100644
+index 046441b..615acf3 100644
 --- a/ggml/src/ggml-metal/ggml-metal-device.m
 +++ b/ggml/src/ggml-metal/ggml-metal-device.m
 @@ -1159,6 +1159,11 @@ ggml_metal_device_t ggml_metal_device_init(int device, int n_devices) {
  
                  dev->props.has_bfloat  = [dev->mtl_device supportsFamily:MTLGPUFamilyMetal3_GGML];
                  dev->props.has_bfloat |= [dev->mtl_device supportsFamily:MTLGPUFamilyApple6];
-+                // Anaconda: the runtime Metal shader compiler crashes on BF16 kernels before macOS 15
++                // Anaconda: BF16 ops abort on the macOS 13 CI hosts; disabled before macOS 15 (14.x untested)
 +                if (@available(macOS 15.0, iOS 18.0, tvOS 18.0, visionOS 2.0, *)) {
 +                } else {
 +                    dev->props.has_bfloat = false;
