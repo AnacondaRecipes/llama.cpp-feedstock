@@ -1,35 +1,37 @@
-From 4d8ab4197cc5903bab1b8b8291137925badddac4 Mon Sep 17 00:00:00 2001
+From 11a8efa75c72a9f0c3d8fd20a1d57c73b54664c4 Mon Sep 17 00:00:00 2001
 From: Xianglong Kong <xkong@anaconda.com>
 Date: Mon, 5 Oct 2026 15:12:01 -0500
-Subject: [PATCH] Disable Metal Flash Attention due to numerical precision
- issues
+Subject: [PATCH] Disable Metal Flash Attention before macOS 15
 
 AI assistant generated patch.
 
-Metal Flash Attention produces incorrect numerical results on macOS SDK < 15,
-with NMSE errors 14-32x higher than acceptable tolerance (0.068-0.160 vs 0.005).
+On the macOS 13 CI hosts, Metal Flash Attention results exceeded the
+test-backend-ops tolerance (NMSE 0.068-0.160 vs 0.005).
 
-This patch makes ggml_metal_device_supports_op return false for GGML_OP_FLASH_ATTN_EXT,
-causing Flash Attention operations to fall back to CPU (correct precision).
+Make ggml_metal_device_supports_op return false for GGML_OP_FLASH_ATTN_EXT
+only when macOS < 15, so those operations fall back to CPU there.
 
-Can be removed when Metal Flash Attention precision is fixed upstream or
-when building with macOS 15+ SDK.
+Tested: on macOS 15.7.3 / Apple M4 Pro, test-backend-ops passes all 4984
+supported FLASH_ATTN_EXT cases on Metal (359 cases are unsupported, as in
+upstream). macOS 14 and 15.0-15.6 are untested, so the cutoff is
+conservative.
 ---
- ggml/src/ggml-metal/ggml-metal-device.m | 4 ++++
- 1 file changed, 4 insertions(+)
+ ggml/src/ggml-metal/ggml-metal-device.m | 5 +++++
+ 1 file changed, 5 insertions(+)
 
 diff --git a/ggml/src/ggml-metal/ggml-metal-device.m b/ggml/src/ggml-metal/ggml-metal-device.m
-index 419e54f..6a53a4f 100644
+index 615acf3..fc14e26 100644
 --- a/ggml/src/ggml-metal/ggml-metal-device.m
 +++ b/ggml/src/ggml-metal/ggml-metal-device.m
-@@ -1744,6 +1744,10 @@ bool ggml_metal_device_supports_op(ggml_metal_device_t dev, const struct ggml_te
+@@ -1749,6 +1749,11 @@ bool ggml_metal_device_supports_op(ggml_metal_device_t dev, const struct ggml_te
          case GGML_OP_ROLL:
              return ggml_is_contiguous(op->src[0]);
          case GGML_OP_FLASH_ATTN_EXT:
-+            // Disabled for Anaconda: Flash Attention has numerical precision issues on macOS SDK < 15
-+            // NMSE errors 0.068-0.160 vs tolerance 0.005 (14-32x too high)
-+            // Fall back to CPU implementation for correct results
-+            return false;
++            // Anaconda: results exceeded tolerance on the macOS 13 CI hosts; CPU fallback before macOS 15 (14.x untested)
++            if (@available(macOS 15.0, iOS 18.0, tvOS 18.0, visionOS 2.0, *)) {
++            } else {
++                return false;
++            }
              // for new head sizes, add checks here
              if (op->src[0]->ne[0] != 32 &&
                  op->src[0]->ne[0] != 40 &&

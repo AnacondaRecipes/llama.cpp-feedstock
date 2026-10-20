@@ -1,11 +1,11 @@
 {% set name = "llama.cpp-meta" %}
 # Upstream has stabilised on vX.Y.Z semver anchors (ggml-org/ggml#1579),
 # so we ship those tags directly. Semver tags are dual-tagged on the
-# mainline (v0.6.0 == b11429 — same commit), so the b-number rev-count
+# mainline (v0.7.0 == b11669 — same commit), so the b-number rev-count
 # still supplies a monotonic suffix for the gguf output.
-{% set version = "0.6.0" %}
-{% set upstream_release_bnum = "11429" %}
-{% set upstream_commit = "d81235049384534c167caea52b85a694f6103d14" %}
+{% set version = "0.7.0" %}
+{% set upstream_release_bnum = "11669" %}
+{% set upstream_commit = "620d2225cc436ab0b001e3200e590e3b286ef9ab" %}
 {% set gguf_version = "0.19.0." + upstream_release_bnum %}
 {% set build_number = 0 %}
 
@@ -31,11 +31,9 @@ package:
 
 source:
   url: https://github.com/ggml-org/llama.cpp/archive/v{{ version }}.tar.gz
-  sha256: 09b36dba235fcac180efff18514da7038e65d8e5b9e4aefa59238468abfdec12
+  sha256: 55d67acf3ad2ad747a9bbeb75f9f0e173dbcc0d1753a471038a90c819421c5e1
 
   patches:
-    - patches/increase-nmse-tolerance.patch
-    - patches/increase-nmse-tolerance-aarch64.patch  # [linux and aarch64]
     - patches/ggml-search-module-dir.patch
     - patches/metal_gpu_selection.patch     # [osx]
     - patches/disable-metal-bf16.patch      # [osx]
@@ -43,9 +41,9 @@ source:
     - patches/fix-convert_hf_to_gguf.patch
     - patches/fix-convert_lora_to_gguf.patch
     - patches/fix-models-path.patch
-    - patches/fix-test-llama-archs-backend-dl.patch
     - patches/skip-test-chat-without-server.patch
     - patches/skip-test-mtmd-impl-without-tools.patch
+    - patches/link-test-backend-ops-threads.patch
 
 build:
   number: {{ build_number }}
@@ -115,6 +113,9 @@ outputs:
         - llvm-openmp {{ cxx_compiler_version }}              # [win and arm64]
         - vcomp14 {{ vcomp14 }}                               # [(win and x86_64) and not (blas_impl == "mkl")]
         - openssl {{ openssl }}
+        # nlohmann/json stays vendored: upstream's copy (vendor/nlohmann) carries the deep-nesting
+        # stack overflow fix (nlohmann/json#5387), which nlohmann_json 3.12.0 on defaults lacks.
+        # Unvendor once nlohmann/json releases a newer version.
       run:
         - {{ pin_compatible('cuda-version', max_pin='x.x') }} # [(gpu_variant or "").startswith('cuda')]
         - {{ pin_compatible('intel-openmp') }}                # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
@@ -122,7 +123,6 @@ outputs:
         - llvm-openmp                                         # [osx and not (blas_impl == "mkl")]
         - llvm-openmp                                         # [win and arm64]
         - vcomp14                                             # [(win and x86_64) and not (blas_impl == "mkl")]
-        - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
         - __cuda                                              # [(gpu_variant or "").startswith('cuda')]
 
     test:
@@ -158,7 +158,11 @@ outputs:
         Inference of Meta's LLaMA model (and others) in pure C/C++
       license: MIT
       license_family: MIT
-      license_file: LICENSE
+      # cpp-httplib (static) and nlohmann/json are compiled into llama-common, which this output ships.
+      license_file:
+        - LICENSE
+        - vendor/cpp-httplib/LICENSE
+        - licenses/LICENSE-jsonhpp
       dev_url: https://github.com/ggml-org/llama.cpp
       doc_url: https://github.com/ggml-org/llama.cpp
 
@@ -226,7 +230,6 @@ outputs:
         - llvm-openmp                                         # [osx and not (blas_impl == "mkl")]
         - llvm-openmp                                         # [win and arm64]
         - vcomp14                                             # [(win and x86_64) and not (blas_impl == "mkl")]
-        - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
         - __cuda                                              # [(gpu_variant or "").startswith('cuda')]
 
     test:
@@ -310,7 +313,6 @@ outputs:
         - {{ pin_compatible('intel-openmp') }}                # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
         - libgomp                                             # [linux and not (blas_impl == "mkl")]
         - vcomp14                                             # [(win and x86_64) and not (blas_impl == "mkl")]
-        - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
         - __cuda                                              # [(gpu_variant or "").startswith('cuda')]
 
     test:

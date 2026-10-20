@@ -1,52 +1,39 @@
-From b50d8d18a28f009e07964ec0ed3fd0d808c5f73c Mon Sep 17 00:00:00 2001
+From b4f224f217c79f9477e351841c62d7cafc083cae Mon Sep 17 00:00:00 2001
 From: Xianglong Kong <xkong@anaconda.com>
 Date: Mon, 5 Oct 2026 15:12:01 -0500
-Subject: [PATCH] Disable Metal BF16 support for macOS SDK < 15
+Subject: [PATCH] Disable Metal BF16 support before macOS 15
 
 AI assistant generated patch.
 
-Metal shader compiler in macOS SDK < 15 crashes when compiling BF16
-(bfloat16) shader code, causing test-backend-ops and test-thread-safety
-to fail with SEGFAULT/abort on macOS 12-14.
+BF16 on Metal was disabled because test-backend-ops and test-thread-safety
+aborted with it enabled on the macOS 13 CI hosts. The failure mechanism is
+not established: upstream already drops the BF16 kernels for Metal < 3.1
+(kernels/common.h) while has_bfloat still advertises BF16 ops.
 
-This patch disables BF16 at both compile-time and runtime:
-1. Comments out the preprocessor macro setting (line ~261)
-2. Sets has_bfloat = false unconditionally (line ~549)
+Clear has_bfloat at runtime when macOS < 15; GGML_METAL_HAS_BF16 and the
+BF16 checks in ggml_metal_device_supports_op derive from it. Upstream
+GGML_METAL_BF16_DISABLE still works.
 
-This matches old llama.cpp behavior where BF16 was disabled by default.
-Can be removed when building with macOS 15+ SDK.
+Tested: on macOS 15.7.3 / Apple M4 Pro, test-backend-ops passes all 218
+BF16 MUL_MAT cases on Metal. macOS 14 and 15.0-15.6 are untested, so the
+cutoff is conservative.
 ---
- ggml/src/ggml-metal/ggml-metal-device.m | 13 +++++++------
- 1 file changed, 7 insertions(+), 6 deletions(-)
+ ggml/src/ggml-metal/ggml-metal-device.m | 5 +++++
+ 1 file changed, 5 insertions(+)
 
 diff --git a/ggml/src/ggml-metal/ggml-metal-device.m b/ggml/src/ggml-metal/ggml-metal-device.m
-index 2996caa..419e54f 100644
+index 046441b..615acf3 100644
 --- a/ggml/src/ggml-metal/ggml-metal-device.m
 +++ b/ggml/src/ggml-metal/ggml-metal-device.m
-@@ -454,9 +454,10 @@ ggml_metal_library_t ggml_metal_library_init(ggml_metal_device_t dev) {
+@@ -1159,6 +1159,11 @@ ggml_metal_device_t ggml_metal_device_init(int device, int n_devices) {
  
-     // shared MTLCompileOptions preprocessor macros (matches the build-time defines)
-     NSMutableDictionary * prep = [NSMutableDictionary dictionary];
--    if (ggml_metal_device_get_props(dev)->has_bfloat) {
--        [prep setObject:@"1" forKey:@"GGML_METAL_HAS_BF16"];
--    }
-+    // Disabled for Anaconda: BF16 causes Metal shader compiler crashes on macOS SDK < 15
-+    // if (ggml_metal_device_get_props(dev)->has_bfloat) {
-+    //     [prep setObject:@"1" forKey:@"GGML_METAL_HAS_BF16"];
-+    // }
-     if (ggml_metal_device_get_props(dev)->has_tensor) {
-         [prep setObject:@"1" forKey:@"GGML_METAL_HAS_TENSOR"];
-     }
-@@ -1156,9 +1157,9 @@ ggml_metal_device_t ggml_metal_device_init(int device, int n_devices) {
-                 dev->props.has_simdgroup_mm = [dev->mtl_device supportsFamily:MTLGPUFamilyApple7];
-                 dev->props.has_unified_memory = dev->mtl_device.hasUnifiedMemory;
- 
--                dev->props.has_bfloat  = [dev->mtl_device supportsFamily:MTLGPUFamilyMetal3_GGML];
--                dev->props.has_bfloat |= [dev->mtl_device supportsFamily:MTLGPUFamilyApple6];
--                if (getenv("GGML_METAL_BF16_DISABLE") != NULL) {
-+                // Disabled for conda-forge: BF16 causes Metal shader compiler crashes on macOS SDK < 15
-+                dev->props.has_bfloat = false;
-+                if (false && getenv("GGML_METAL_BF16_DISABLE") != NULL) {
+                 dev->props.has_bfloat  = [dev->mtl_device supportsFamily:MTLGPUFamilyMetal3_GGML];
+                 dev->props.has_bfloat |= [dev->mtl_device supportsFamily:MTLGPUFamilyApple6];
++                // Anaconda: BF16 ops abort on the macOS 13 CI hosts; disabled before macOS 15 (14.x untested)
++                if (@available(macOS 15.0, iOS 18.0, tvOS 18.0, visionOS 2.0, *)) {
++                } else {
++                    dev->props.has_bfloat = false;
++                }
+                 if (getenv("GGML_METAL_BF16_DISABLE") != NULL) {
                      dev->props.has_bfloat = false;
                  }
- 

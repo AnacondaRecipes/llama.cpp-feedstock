@@ -1,4 +1,4 @@
-From 62dcac28af87ad9d138e1edef494443039cbc615 Mon Sep 17 00:00:00 2001
+From 9a2b236e9d52c044a31ec8be1b43fc7b741be9ac Mon Sep 17 00:00:00 2001
 From: Xianglong Kong <xkong@anaconda.com>
 Date: Mon, 5 Oct 2026 15:12:01 -0500
 Subject: [PATCH] ggml: also search the ggml library's directory for backends
@@ -26,7 +26,7 @@ Upstream status: to be proposed to ggml-org/llama.cpp.
  1 file changed, 31 insertions(+), 1 deletion(-)
 
 diff --git a/ggml/src/ggml-backend-reg.cpp b/ggml/src/ggml-backend-reg.cpp
-index 1c18b82..7c4a1a4 100644
+index 4e9681c..890b2dd 100644
 --- a/ggml/src/ggml-backend-reg.cpp
 +++ b/ggml/src/ggml-backend-reg.cpp
 @@ -461,6 +461,32 @@ static fs::path get_executable_path() {
