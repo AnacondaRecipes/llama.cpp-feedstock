@@ -46,6 +46,8 @@ if "%blas_impl%"=="mkl" (
 REM LLAMA build options
 set LLAMA_ARGS=-DLLAMA_BUILD_NUMBER=%LLAMA_BUILD_NUMBER% -DLLAMA_BUILD_COMMIT=%LLAMA_BUILD_COMMIT%
 set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_OPENSSL=ON
+REM llama-connect is a prebuilt binary that scripts/connect-download.cmake fetches at build time; never build it.
+set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_CONNECT=OFF
 REM Disable the unified `llama` router app: it #includes common/build-info.h but
 REM the upstream app/CMakeLists.txt does not wire up its include path, so the
 REM build fails with "fatal error: build-info.h: No such file or directory".
@@ -101,7 +103,9 @@ if "%PKG_NAME%" == "llama.cpp-tests" (
     REM test-model-resolution crashes intermittently (0xc0000409) when the whole suite runs in parallel;
     REM it passes alone and on retry, so let ctest retry failed tests instead of failing the build.
     REM test-tokenizers-ggml-vocabs requires git-lfs to download the model files
-    ctest -L main -C Release --output-on-failure -j%CPU_COUNT% --timeout 900 --repeat until-pass:3 -E "test-tokenizers-ggml-vocabs"
+    REM Since v0.8.0 upstream labels most unit tests "behavior" instead of "main": select both, and keep
+    REM excluding the "model" and "python" suites that -L main left out before.
+    ctest -L "main|behavior" -LE "model|python" -C Release --output-on-failure -j%CPU_COUNT% --timeout 900 --repeat until-pass:3 -E "test-tokenizers-ggml-vocabs"
     if errorlevel 1 exit 1
     popd
 )

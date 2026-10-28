@@ -64,6 +64,8 @@ fi
 # LLAMA build options
 LLAMA_ARGS="-DLLAMA_BUILD_NUMBER=${LLAMA_BUILD_NUMBER} -DLLAMA_BUILD_COMMIT=${LLAMA_BUILD_COMMIT}"
 LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_OPENSSL=ON"
+# llama-connect is a prebuilt binary that scripts/connect-download.cmake fetches at build time; never build it.
+LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_CONNECT=OFF"
 # Disable the unified `llama` router app: it #includes common/build-info.h but the
 # upstream app/CMakeLists.txt does not wire up its include path, so the build fails
 # with `fatal error: build-info.h: No such file or directory` on every platform.
@@ -130,15 +132,17 @@ if [[ "$PKG_NAME" == "llama.cpp-tests" ]]; then
     # it passes alone and on retry, so let ctest retry failed tests instead of failing the build.
     # test-tokenizers-ggml-vocabs requires git-lfs to download the model files
 
+    # Since v0.8.0 upstream labels most unit tests "behavior" instead of "main": select both, and keep
+    # excluding the "model" and "python" suites that -L main left out before.
     if [[ ${gpu_variant:-} = "metal" ]]; then
         # test-tokenizers-ggml-vocabs: Requires git-lfs to download model files
         # test-thread-safety: GGML_ASSERT(buf_dst) fails in ggml_metal_cpy_tensor_async during concurrent decode
         # test-llama-context: same GGML_ASSERT(buf_dst) (ggml-metal-context.m:380) on the CI Mac during the
         #   baseline decode of the first model; passes on an M4 Pro.
-        ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 --repeat until-pass:3 -E "(test-tokenizers-ggml-vocabs|test-thread-safety|test-llama-context)"
+        ctest -L "main|behavior" -LE "model|python" -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 --repeat until-pass:3 -E "(test-tokenizers-ggml-vocabs|test-thread-safety|test-llama-context)"
     else
         # Skip test-tokenizers-ggml-vocabs on all platforms: Requires git-lfs to download model files
-        ctest -L main -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 --repeat until-pass:3 -E "(test-tokenizers-ggml-vocabs)"
+        ctest -L "main|behavior" -LE "model|python" -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 --repeat until-pass:3 -E "(test-tokenizers-ggml-vocabs)"
     fi
     popd
 fi

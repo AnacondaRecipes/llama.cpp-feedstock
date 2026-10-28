@@ -1,11 +1,11 @@
 {% set name = "llama.cpp-meta" %}
 # Upstream has stabilised on vX.Y.Z semver anchors (ggml-org/ggml#1579),
 # so we ship those tags directly. Semver tags are dual-tagged on the
-# mainline (v0.7.0 == b11669 — same commit), so the b-number rev-count
+# mainline (v0.8.0 == b11960 — same commit), so the b-number rev-count
 # still supplies a monotonic suffix for the gguf output.
-{% set version = "0.7.0" %}
-{% set upstream_release_bnum = "11669" %}
-{% set upstream_commit = "620d2225cc436ab0b001e3200e590e3b286ef9ab" %}
+{% set version = "0.8.0" %}
+{% set upstream_release_bnum = "11960" %}
+{% set upstream_commit = "8642541b255bfb5dc39cd351a178be09013a55d6" %}
 {% set gguf_version = "0.19.0." + upstream_release_bnum %}
 {% set build_number = 0 %}
 
@@ -31,7 +31,7 @@ package:
 
 source:
   url: https://github.com/ggml-org/llama.cpp/archive/v{{ version }}.tar.gz
-  sha256: 55d67acf3ad2ad747a9bbeb75f9f0e173dbcc0d1753a471038a90c819421c5e1
+  sha256: 51b1e025d7b12e83fa55736e65bc254acd9d23e49f546be7531368fef82210ee
 
   patches:
     - patches/ggml-search-module-dir.patch
@@ -436,7 +436,7 @@ outputs:
       run:
         - python
         # Matches upstream gguf-py/pyproject.toml [project.dependencies] at
-        # v0.4.1 verbatim. numpy 2.2.6+ requires py>=3.11 on pkgs/main, and
+        # v0.8.0 verbatim. numpy 2.2.6+ requires py>=3.11 on pkgs/main, and
         # the py-skip floor above enforces that so this bound is satisfiable
         # on every subdir we build for.
         - numpy >=2.2.6
