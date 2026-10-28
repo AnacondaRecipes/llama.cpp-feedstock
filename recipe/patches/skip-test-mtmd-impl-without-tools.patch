@@ -1,4 +1,4 @@
-From e101f9fa26cae1ddad5dcf2691cb2c8af0b34cff Mon Sep 17 00:00:00 2001
+From fccbf3b1a6b09b5463fdfee2fd3235564d3b9a64 Mon Sep 17 00:00:00 2001
 From: Xianglong Kong <xkong@anaconda.com>
 Date: Mon, 5 Oct 2026 15:12:02 -0500
 Subject: [PATCH] Skip test-mtmd-impl when the mtmd target is not built
@@ -9,16 +9,16 @@ test-mtmd-impl links the mtmd library, which only exists when tools are built; t
  1 file changed, 3 insertions(+), 1 deletion(-)
 
 diff --git a/tests/CMakeLists.txt b/tests/CMakeLists.txt
-index a0488f2..648e363 100644
+index 649c911..22e4bd9 100644
 --- a/tests/CMakeLists.txt
 +++ b/tests/CMakeLists.txt
-@@ -339,7 +339,9 @@ endif()
+@@ -361,7 +361,9 @@ endif()
  # libmtmd
- llama_build_and_test(test-mtmd-c-api.c LINK mtmd)
+ llama_build_and_test(test-mtmd-c-api.c  LABEL behavior  LINK mtmd)
  
--llama_build_and_test(test-mtmd-impl.cpp LINK mtmd)
+-llama_build_and_test(test-mtmd-impl.cpp  LABEL behavior  LINK mtmd)
 +if (TARGET mtmd)
-+    llama_build_and_test(test-mtmd-impl.cpp LINK mtmd)
++    llama_build_and_test(test-mtmd-impl.cpp  LABEL behavior  LINK mtmd)
 +endif()
  
  # GGUF model data fetcher library for tests that need real model metadata

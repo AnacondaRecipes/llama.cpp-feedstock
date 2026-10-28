@@ -1,11 +1,11 @@
 {% set name = "llama.cpp-meta" %}
 # Upstream has stabilised on vX.Y.Z semver anchors (ggml-org/ggml#1579),
 # so we ship those tags directly. Semver tags are dual-tagged on the
-# mainline (v0.7.0 == b11669 — same commit), so the b-number rev-count
+# mainline (v0.8.0 == b11960 — same commit), so the b-number rev-count
 # still supplies a monotonic suffix for the gguf output.
-{% set version = "0.7.0" %}
-{% set upstream_release_bnum = "11669" %}
-{% set upstream_commit = "620d2225cc436ab0b001e3200e590e3b286ef9ab" %}
+{% set version = "0.8.0" %}
+{% set upstream_release_bnum = "11960" %}
+{% set upstream_commit = "8642541b255bfb5dc39cd351a178be09013a55d6" %}
 {% set gguf_version = "0.19.0." + upstream_release_bnum %}
 {% set build_number = 0 %}
 
@@ -31,7 +31,7 @@ package:
 
 source:
   url: https://github.com/ggml-org/llama.cpp/archive/v{{ version }}.tar.gz
-  sha256: 55d67acf3ad2ad747a9bbeb75f9f0e173dbcc0d1753a471038a90c819421c5e1
+  sha256: 51b1e025d7b12e83fa55736e65bc254acd9d23e49f546be7531368fef82210ee
 
   patches:
     - patches/ggml-search-module-dir.patch
@@ -388,6 +388,9 @@ outputs:
         - llama-convert-lora-to-gguf --help
         # --help exits before the converter's package imports; exercise them (static + dynamic) offline.
         - python -c "import pathlib, tempfile, llama_cpp_tools.convert_legacy_llama; from llama_cpp_tools.conversion import get_model_class; from llama_cpp_tools.conversion.base import ModelBase; ModelBase.load_hparams_guess(pathlib.Path(tempfile.mkdtemp())); assert get_model_class('LlamaForCausalLM').__name__"
+        # Fail on any conversion/examples import that fix-convert_hf_to_gguf.patch did not redirect,
+        # including function-local ones (e.g. --dspark) that the conversions below never reach.
+        - python -c "import os, pathlib; files = list(pathlib.Path(os.environ['SP_DIR'], 'llama_cpp_tools').rglob('*.py')); assert len(files) > 50, files; bad = [f'{p}:{i}' for p in files for i, l in enumerate(p.read_text(encoding='utf-8').splitlines(), 1) if (len(l.split()) > 1 and l.split()[0] in ('from', 'import') and l.split()[1].split('.')[0] in ('conversion', 'examples')) or ('__import__' in l and 'conversion.{' in l)]; assert not bad, bad"
         # Real offline conversion: tiny LoRA adapter on a config-only Llama base must yield a GGUF with 2 tensors.
         - python -c "import json, pathlib, subprocess, tempfile, torch; from safetensors.torch import save_file; from gguf import GGUFReader; d = pathlib.Path(tempfile.mkdtemp()); b = d / 'base'; a = d / 'adapter'; b.mkdir(); a.mkdir(); (b / 'config.json').write_text(json.dumps(dict(architectures=['LlamaForCausalLM'], model_type='llama', hidden_size=16, intermediate_size=32, num_attention_heads=2, num_key_value_heads=2, num_hidden_layers=1, vocab_size=32, max_position_embeddings=64, rms_norm_eps=1e-5))); (a / 'adapter_config.json').write_text(json.dumps(dict(peft_type='LORA', r=2, lora_alpha=4, target_modules=['q_proj'], base_model_name_or_path=str(b)))); p = 'base_model.model.model.layers.0.self_attn.q_proj.'; save_file(dict(zip([p + 'lora_A.weight', p + 'lora_B.weight'], [torch.rand(2, 16), torch.rand(16, 2)])), str(a / 'adapter_model.safetensors')); subprocess.run(['llama-convert-lora-to-gguf', '--base', str(b), '--outfile', str(d / 'out.gguf'), str(a)], check=True); assert len(GGUFReader(str(d / 'out.gguf')).tensors) == 2"
         - test -d $SP_DIR/llama_cpp_tools/models  # [unix]
@@ -436,7 +439,7 @@ outputs:
       run:
         - python
         # Matches upstream gguf-py/pyproject.toml [project.dependencies] at
-        # v0.4.1 verbatim. numpy 2.2.6+ requires py>=3.11 on pkgs/main, and
+        # v0.8.0 verbatim. numpy 2.2.6+ requires py>=3.11 on pkgs/main, and
         # the py-skip floor above enforces that so this bound is satisfiable
         # on every subdir we build for.
         - numpy >=2.2.6

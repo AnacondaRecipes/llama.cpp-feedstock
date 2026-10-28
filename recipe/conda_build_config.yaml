@@ -4,8 +4,8 @@
 # This helps us avoid mixing the two sets of packages in the same build on PBP.
 output_set:
   - llama
-  # gguf/llama.cpp-tools require pytorch and sentencepiece, neither of which
-  # is available on win-arm64 yet.
+  # Not on win-arm64: its only transformers (5.20.2) constrains mistral-common >=1.11.7,
+  # which isn't there yet (PKG-19294), so llama.cpp-tools can't be installed.
   - llama_cpp_tools            # [not (win and arm64)]
 
 # NOTE: c_stdlib and c_stdlib_version are intentionally NOT defined here.
