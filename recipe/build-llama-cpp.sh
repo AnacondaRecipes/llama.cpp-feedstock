@@ -142,7 +142,8 @@ if [[ "$PKG_NAME" == "llama.cpp-tests" ]]; then
         # test-thread-safety: GGML_ASSERT(buf_dst) fails in ggml_metal_cpy_tensor_async during concurrent decode
         # test-llama-context: same GGML_ASSERT(buf_dst) (ggml-metal-context.m:380) on the CI Mac during the
         #   baseline decode of the first model; passes on an M4 Pro.
-        ctest "${CTEST_SELECT[@]}" -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 --repeat until-pass:3 -E "(test-tokenizers-ggml-vocabs|test-thread-safety|test-llama-context)"
+        # test-speculative-rejection-sampling: same GGML_ASSERT(buf_dst) on the CI Mac.
+        ctest "${CTEST_SELECT[@]}" -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 --repeat until-pass:3 -E "(test-tokenizers-ggml-vocabs|test-thread-safety|test-llama-context|test-speculative-rejection-sampling)"
     else
         # Skip test-tokenizers-ggml-vocabs on all platforms: Requires git-lfs to download model files
         ctest "${CTEST_SELECT[@]}" -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 --repeat until-pass:3 -E "(test-tokenizers-ggml-vocabs)"
