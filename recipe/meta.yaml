@@ -21,6 +21,7 @@
 # "llama_cpp_tools" output_set they are undefined, so they fall back to 999.0a0.
 {% set mkl = mkl | default("999.0a0", true) %}
 {% set openblas = openblas | default("999.0a0", true) %}
+{% set openblas_devel = openblas_devel | default("999.0a0", true) %}
 {% set cuda_compiler_version = cuda_compiler_version | default("999.0a0", true) %}
 {% set openssl = openssl | default("999.0a0", true) %}
 {% set vcomp14 = vcomp14 | default("999.0a0", true) %}
@@ -38,12 +39,14 @@ source:
     - patches/metal_gpu_selection.patch     # [osx]
     - patches/disable-metal-bf16.patch      # [osx]
     - patches/disable-metal-flash-attention.patch  # [osx]
+    - patches/fix-metal-unary-bf16-constexpr.patch  # [osx]
     - patches/fix-convert_hf_to_gguf.patch
     - patches/fix-convert_lora_to_gguf.patch
     - patches/fix-models-path.patch
     - patches/skip-test-chat-without-server.patch
     - patches/skip-test-mtmd-impl-without-tools.patch
     - patches/link-test-backend-ops-threads.patch
+    - patches/ui-license-manifest.patch
 
 build:
   number: {{ build_number }}
@@ -105,7 +108,7 @@ outputs:
         - cuda-cudart-dev  {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
         - libcublas-dev                                       # [(gpu_variant or "").startswith('cuda')]
         - cuda-compat      {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda') and linux]
-        - openblas-devel {{ openblas }}                       # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "openblas"]
+        - openblas-devel {{ openblas_devel }}                 # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "openblas"]
         - mkl-devel {{ mkl }}                                 # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
         - intel-openmp {{ mkl }}                              # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
         - libgomp                                             # [linux and not (blas_impl == "mkl")]
@@ -147,9 +150,11 @@ outputs:
         # ggml_backend_* symbols live in libggml/libggml-base, so link both explicitly —
         # Windows import libs don't chain through llama.lib's DT_NEEDED equivalent, and
         # macOS test binary needs an explicit -rpath to find libllama at run time.
-        - $CC test-backend-load.c -I$PREFIX/include -L$PREFIX/lib -Wl,-rpath,$PREFIX/lib -lllama -lggml -lggml-base -o test-backend-load && ./test-backend-load  # [unix]
-        - cl.exe test-backend-load.c /I%LIBRARY_INC% /link /LIBPATH:%LIBRARY_LIB% llama.lib ggml.lib ggml-base.lib && test-backend-load.exe  # [win and not arm64]
-        - clang.exe test-backend-load.c -I%LIBRARY_INC% -L%LIBRARY_LIB% -lllama -lggml -lggml-base -o test-backend-load.exe && test-backend-load.exe  # [win and arm64]
+        # CUDA variants also require a CUDA device: __cuda puts these tests on GPU workers,
+        # so a build whose CUDA backend fails to load can't pass on the CPU backend alone.
+        - $CC test-backend-load.c -I$PREFIX/include -L$PREFIX/lib -Wl,-rpath,$PREFIX/lib -lllama -lggml -lggml-base -o test-backend-load && ./test-backend-load{{ " CUDA" if (gpu_variant or "").startswith("cuda") else "" }}  # [unix]
+        - cl.exe test-backend-load.c /I%LIBRARY_INC% /link /LIBPATH:%LIBRARY_LIB% llama.lib ggml.lib ggml-base.lib && test-backend-load.exe{{ " CUDA" if (gpu_variant or "").startswith("cuda") else "" }}  # [win and not arm64]
+        - clang.exe test-backend-load.c -I%LIBRARY_INC% -L%LIBRARY_LIB% -lllama -lggml -lggml-base -o test-backend-load.exe && test-backend-load.exe{{ " CUDA" if (gpu_variant or "").startswith("cuda") else "" }}  # [win and arm64]
 
     about:
       home: https://github.com/ggml-org/llama.cpp
@@ -208,12 +213,13 @@ outputs:
         - cmake
         - ninja-base
         - pkg-config
+        - nodejs                                              # builds the llama-server web UI
       host:
         - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
         - cuda-cudart-dev  {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
         - libcublas-dev                                       # [(gpu_variant or "").startswith('cuda')]
         - cuda-compat      {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda') and linux]
-        - openblas-devel {{ openblas }}                       # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "openblas"]
+        - openblas-devel {{ openblas_devel }}                 # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "openblas"]
         - mkl-devel {{ mkl }}                                 # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
         - intel-openmp {{ mkl }}                              # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
         - libgomp                                             # [linux and not (blas_impl == "mkl")]
@@ -256,6 +262,8 @@ outputs:
         - LICENSE
         - vendor/cpp-httplib/LICENSE
         - licenses/LICENSE-jsonhpp
+        # Licenses of the npm packages bundled into the embedded web UI, written by the build script.
+        - llama-ui-licenses.md
       dev_url: https://github.com/ggml-org/llama.cpp
       doc_url: https://github.com/ggml-org/llama.cpp
 
@@ -298,7 +306,7 @@ outputs:
         - cuda-cudart-dev  {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
         - libcublas-dev                                       # [(gpu_variant or "").startswith('cuda')]
         - cuda-compat      {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda') and linux]
-        - openblas-devel {{ openblas }}                       # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "openblas"]
+        - openblas-devel {{ openblas_devel }}                 # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "openblas"]
         - mkl-devel {{ mkl }}                                 # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
         - intel-openmp {{ mkl }}                              # [(not (gpu_variant or "").startswith('cuda')) and blas_impl == "mkl"]
         - libgomp                                             # [linux and not (blas_impl == "mkl")]
@@ -348,7 +356,8 @@ outputs:
       # gguf sibling (below) declares numpy >=2.2.6 truthfully; pkgs/main
       # only ships numpy 2.2.6+ for py>=3.11, so this output tracks the
       # same py<311 floor to keep the pin_subpackage(gguf, exact) satisfiable.
-      skip: True # [py<311]
+      # Upstream pyproject.toml caps requires-python at <3.15.
+      skip: True # [py<311 or py>=315]
       skip: true # [output_set != "llama_cpp_tools"]
       number: {{ build_number }}
 

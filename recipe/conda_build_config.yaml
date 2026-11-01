@@ -5,7 +5,8 @@
 output_set:
   - llama
   # Not on win-arm64: its only transformers (5.20.2) constrains mistral-common >=1.11.7,
-  # which isn't there yet (PKG-19294), so llama.cpp-tools can't be installed.
+  # which isn't there yet (PKG-19294), so llama.cpp-tools can't be installed. gguf has no
+  # such blocker; it is skipped there only because it builds in this same output set.
   - llama_cpp_tools            # [not (win and arm64)]
 
 # NOTE: c_stdlib and c_stdlib_version are intentionally NOT defined here.

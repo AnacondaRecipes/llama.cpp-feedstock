@@ -20,10 +20,10 @@ conservative.
  1 file changed, 5 insertions(+)
 
 diff --git a/ggml/src/ggml-metal/ggml-metal-device.m b/ggml/src/ggml-metal/ggml-metal-device.m
-index 615acf3..fc14e26 100644
+index 0e3f9b2..9012eea 100644
 --- a/ggml/src/ggml-metal/ggml-metal-device.m
 +++ b/ggml/src/ggml-metal/ggml-metal-device.m
-@@ -1749,6 +1749,11 @@ bool ggml_metal_device_supports_op(ggml_metal_device_t dev, const struct ggml_te
+@@ -1746,6 +1746,11 @@ bool ggml_metal_device_supports_op(ggml_metal_device_t dev, const struct ggml_te
          case GGML_OP_ROLL:
              return ggml_is_contiguous(op->src[0]);
          case GGML_OP_FLASH_ATTN_EXT:

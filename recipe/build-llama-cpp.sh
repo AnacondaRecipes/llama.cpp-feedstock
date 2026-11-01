@@ -67,6 +67,9 @@ LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_OPENSSL=ON"
 # Upstream default is OFF; pinned so a default flip can't pull in llama-connect, a prebuilt
 # binary that scripts/connect-download.cmake downloads at build time.
 LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_CONNECT=OFF"
+# Build the llama-server web UI from source (npm ci on tools/ui/package-lock.json, then vite build)
+# instead of the default, which downloads upstream's prebuilt bundle from a Hugging Face bucket.
+LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_USE_PREBUILT_UI=OFF -DLLAMA_BUILD_UI=ON"
 # Disable the unified `llama` router app: it #includes common/build-info.h but the
 # upstream app/CMakeLists.txt does not wire up its include path, so the build fails
 # with `fatal error: build-info.h: No such file or directory` on every platform.
@@ -106,6 +109,14 @@ cmake -S . -B build_${gpu_variant} \
     ${LLAMA_ARGS}
 
 cmake --build build_${gpu_variant} --config Release --verbose
+
+if [[ "$PKG_NAME" == "llama.cpp" ]]; then
+    # scripts/ui-assets.cmake only warns and builds a UI-less server when npm fails, so check the
+    # UI was built, and ship the license manifest of its bundled npm dependencies (ui-license-manifest.patch).
+    test -f build_${gpu_variant}/tools/ui/dist/index.html
+    cp build_${gpu_variant}/tools/ui/ui-src/.svelte-kit/output/client/.vite/license.md "${SRC_DIR}/llama-ui-licenses.md"
+fi
+
 cmake --install build_${gpu_variant}
 
 # Move ggml backend plugins next to libggml so the module-dir search
@@ -142,7 +153,8 @@ if [[ "$PKG_NAME" == "llama.cpp-tests" ]]; then
         # test-thread-safety: GGML_ASSERT(buf_dst) fails in ggml_metal_cpy_tensor_async during concurrent decode
         # test-llama-context: same GGML_ASSERT(buf_dst) (ggml-metal-context.m:380) on the CI Mac during the
         #   baseline decode of the first model; passes on an M4 Pro.
-        # test-speculative-rejection-sampling: same GGML_ASSERT(buf_dst) on the CI Mac.
+        # test-speculative-rejection-sampling: same GGML_ASSERT(buf_dst) on the CI Mac (3/3 retries); the CI
+        #   package passes it on an M4 Pro / macOS 15.7.3 once fix-metal-unary-bf16-constexpr.patch is applied.
         ctest "${CTEST_SELECT[@]}" -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 --repeat until-pass:3 -E "(test-tokenizers-ggml-vocabs|test-thread-safety|test-llama-context|test-speculative-rejection-sampling)"
     else
         # Skip test-tokenizers-ggml-vocabs on all platforms: Requires git-lfs to download model files

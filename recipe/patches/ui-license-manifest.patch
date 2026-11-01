@@ -1,0 +1,29 @@
+From: Xianglong Kong <xkong@anaconda.com>
+Date: Sat, 1 Nov 2026 12:00:00 -0500
+Subject: [PATCH] Emit a license manifest for the bundled UI dependencies
+
+AI assistant generated patch.
+
+The recipe builds the llama-server web UI from source with npm instead of
+downloading upstream's prebuilt bundle. Vite's build.license writes
+.vite/license.md with the license text of every dependency bundled into the
+UI; the build script installs it as a license file of the llama.cpp package.
+---
+ tools/ui/vite.config.ts | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/tools/ui/vite.config.ts b/tools/ui/vite.config.ts
+index 233ba74..241adcb 100644
+--- a/tools/ui/vite.config.ts
++++ b/tools/ui/vite.config.ts
+@@ -32,7 +32,9 @@ export default defineConfig(({ mode }) => {
+ 		build: {
+ 			assetsInlineLimit: 32000,
+ 			chunkSizeWarningLimit: 3072,
+-			minify: true
++			minify: true,
++			// Anaconda: write .vite/license.md listing the licenses of every bundled dependency
++			license: true
+ 		},
+ 
+ 		plugins: [

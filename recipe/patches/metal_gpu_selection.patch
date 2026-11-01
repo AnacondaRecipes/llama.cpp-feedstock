@@ -12,15 +12,19 @@ https://developer.apple.com/documentation/metal/mtldevice/1433409-lowpower#discu
 I did try linking to CoreGraphics, but MTLCreateSystemDefaultDevice was still returning nil.
 
 Updated for b8994. File rename from ggml/src/ggml-metal/ggml-metal.m to ggml-metal-device.m happened in b6653.
+
+Updated for 0.8.0: the fallback leaked the MTLCopyAllDevices array and stored an
+unretained device that ggml_metal_device_free later releases (the file is built
+without ARC). It now retains the first device and releases the array.
 ---
  ggml/src/ggml-metal/ggml-metal-device.m | 19 +++++++++++++++++++
- 1 file changed, 19 insertions(+)
+ 1 file changed, 15 insertions(+)
 
 diff --git a/ggml/src/ggml-metal/ggml-metal-device.m b/ggml/src/ggml-metal/ggml-metal-device.m
-index d1bce8b..046441b 100644
+index 451f652..d500a52 100644
 --- a/ggml/src/ggml-metal/ggml-metal-device.m
 +++ b/ggml/src/ggml-metal/ggml-metal-device.m
-@@ -1116,6 +1116,25 @@ ggml_metal_device_t ggml_metal_device_init(int device, int n_devices) {
+@@ -1116,6 +1116,21 @@ ggml_metal_device_t ggml_metal_device_init(int device, int n_devices) {
      @autoreleasepool {
          if (dev->mtl_device == nil) {
              dev->mtl_device = MTLCreateSystemDefaultDevice();
@@ -32,16 +36,12 @@ index d1bce8b..046441b 100644
 +                Systems with Apple silicon only have one GPU, which removes the need to choose a GPU.
 +                > https://developer.apple.com/documentation/metal/mtldevice/1433409-lowpower#discussion
 +               */
-+                NSArray * devices = MTLCopyAllDevices();
-+                for (id<MTLDevice> dev_tmp in devices) {
-+                    if (dev_tmp != nil) {
-+                        if (dev->mtl_device == nil) {
-+                            dev->mtl_device = dev_tmp;
-+                        } else {
-+                            [dev_tmp release];
-+                        }
-+                    }
-+                }
++                // This file is built without ARC: MTLCopyAllDevices returns a +1 array that
++                // owns its elements. Retain the pick to match MTLCreateSystemDefaultDevice's
++                // +1, which ggml_metal_device_free releases, then release the array.
++                NSArray<id<MTLDevice>> * devices = MTLCopyAllDevices();
++                dev->mtl_device = [[devices firstObject] retain];
++                [devices release];
 +            }
  
              if (dev->mtl_device) {
