@@ -1,4 +1,4 @@
-From 01b36fcea0dd39d7d757b66e55b316436539e489 Mon Sep 17 00:00:00 2001
+From 85619dbbe000717164166734da605d292b392198 Mon Sep 17 00:00:00 2001
 From: Xianglong Kong <xkong@anaconda.com>
 Date: Fri, 1 May 2026 12:00:00 -0500
 Subject: [PATCH] tests: skip server-linked tests when LLAMA_BUILD_SERVER is
@@ -25,27 +25,27 @@ unaffected.
  1 file changed, 8 insertions(+), 6 deletions(-)
 
 diff --git a/tests/CMakeLists.txt b/tests/CMakeLists.txt
-index 991bf54..a0488f2 100644
+index 2e768cb..649c911 100644
 --- a/tests/CMakeLists.txt
 +++ b/tests/CMakeLists.txt
-@@ -187,12 +187,14 @@ if (NOT WIN32 OR NOT BUILD_SHARED_LIBS)
-     llama_build_and_test(test-grammar-integration.cpp)
-     llama_build_and_test(test-llama-grammar.cpp LINK llama)
-     llama_build_and_test(test-batch-alloc.cpp LINK llama)
--    llama_build_and_test(test-chat.cpp WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+@@ -188,12 +188,14 @@ if (NOT WIN32 OR NOT BUILD_SHARED_LIBS)
+     llama_build_and_test(test-grammar-integration.cpp  LABEL behavior)
+     llama_build_and_test(test-llama-grammar.cpp  LABEL behavior  LINK llama)
+     llama_build_and_test(test-batch-alloc.cpp  LABEL behavior  LINK llama)
+-    llama_build_and_test(test-chat.cpp  LABEL behavior  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 -    target_include_directories(test-chat PRIVATE ${PROJECT_SOURCE_DIR}/tools/server)
 -    target_link_libraries(test-chat PRIVATE server-context)
--    llama_build_and_test(test-server-component.cpp)
+-    llama_build_and_test(test-server-component.cpp  LABEL behavior)
 -    target_include_directories(test-server-component PRIVATE ${PROJECT_SOURCE_DIR}/tools/server)
 -    target_link_libraries(test-server-component PRIVATE server-context)
 +    if (LLAMA_BUILD_SERVER)
-+        llama_build_and_test(test-chat.cpp WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
++        llama_build_and_test(test-chat.cpp  LABEL behavior  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 +        target_include_directories(test-chat PRIVATE ${PROJECT_SOURCE_DIR}/tools/server)
 +        target_link_libraries(test-chat PRIVATE server-context)
-+        llama_build_and_test(test-server-component.cpp)
++        llama_build_and_test(test-server-component.cpp  LABEL behavior)
 +        target_include_directories(test-server-component PRIVATE ${PROJECT_SOURCE_DIR}/tools/server)
 +        target_link_libraries(test-server-component PRIVATE server-context)
 +    endif()
-     llama_build_and_test(test-json-schema-to-grammar.cpp)
+     llama_build_and_test(test-json-schema-to-grammar.cpp  LABEL behavior)
  
      if (NOT GGML_BACKEND_DL)

@@ -15,10 +15,10 @@ llama_cpp_tools/conversion/base.py, two parents up reaches the models dir).
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/conversion/base.py b/conversion/base.py
-index 49152f0..b3374aa 100644
+index 730614d..d992f1c 100644
 --- a/conversion/base.py
 +++ b/conversion/base.py
-@@ -2430,7 +2430,7 @@ class TextModel(ModelBase):
+@@ -2466,7 +2466,7 @@ class TextModel(ModelBase):
          special_vocab.add_to_gguf(self.gguf_writer)
  
      def _set_vocab_builtin(self, model_name: Literal["gpt-neox", "llama-spm"], vocab_size: int):

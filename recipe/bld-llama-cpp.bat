@@ -46,6 +46,12 @@ if "%blas_impl%"=="mkl" (
 REM LLAMA build options
 set LLAMA_ARGS=-DLLAMA_BUILD_NUMBER=%LLAMA_BUILD_NUMBER% -DLLAMA_BUILD_COMMIT=%LLAMA_BUILD_COMMIT%
 set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_OPENSSL=ON
+REM Upstream default is OFF; pinned so a default flip can't pull in llama-connect, a prebuilt
+REM binary that scripts/connect-download.cmake downloads at build time.
+set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_CONNECT=OFF
+REM Build the llama-server web UI from source (npm ci on tools/ui/package-lock.json, then vite build)
+REM instead of the default, which downloads upstream's prebuilt bundle from a Hugging Face bucket.
+set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_USE_PREBUILT_UI=OFF -DLLAMA_BUILD_UI=ON
 REM Disable the unified `llama` router app: it #includes common/build-info.h but
 REM the upstream app/CMakeLists.txt does not wire up its include path, so the
 REM build fails with "fatal error: build-info.h: No such file or directory".
@@ -93,6 +99,14 @@ if "%gpu_variant:~0,5%"=="cuda-" set BUILD_JOBS=4
 cmake --build build --config Release --verbose --parallel %BUILD_JOBS%
 if errorlevel 1 exit 1
 
+if "%PKG_NAME%" == "llama.cpp" (
+    REM scripts/ui-assets.cmake only warns and builds a UI-less server when npm fails, so check the
+    REM UI was built, and ship the license manifest of its bundled npm dependencies (ui-license-manifest.patch).
+    if not exist build\tools\ui\dist\index.html exit 1
+    copy /Y build\tools\ui\ui-src\.svelte-kit\output\client\.vite\license.md "%SRC_DIR%\llama-ui-licenses.md"
+    if errorlevel 1 exit 1
+)
+
 cmake --install build
 if errorlevel 1 exit 1
 
@@ -101,7 +115,10 @@ if "%PKG_NAME%" == "llama.cpp-tests" (
     REM test-model-resolution crashes intermittently (0xc0000409) when the whole suite runs in parallel;
     REM it passes alone and on retry, so let ctest retry failed tests instead of failing the build.
     REM test-tokenizers-ggml-vocabs requires git-lfs to download the model files
-    ctest -L main -C Release --output-on-failure -j%CPU_COUNT% --timeout 900 --repeat until-pass:3 -E "test-tokenizers-ggml-vocabs"
+    REM Since v0.8.0 upstream labels most unit tests "behavior" instead of "main": select both, and keep
+    REM excluding the "model" and "python" suites that -L main left out before. A label is one
+    REM space-separated string, e.g. "main behavior backend", so match whole words.
+    ctest -L "(^| )(main|behavior)( |$)" -LE "(^| )(model|python)( |$)" -C Release --output-on-failure -j%CPU_COUNT% --timeout 900 --repeat until-pass:3 -E "test-tokenizers-ggml-vocabs"
     if errorlevel 1 exit 1
     popd
 )
