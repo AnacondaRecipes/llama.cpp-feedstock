@@ -264,6 +264,9 @@ outputs:
         - licenses/LICENSE-jsonhpp
         # Licenses of the npm packages bundled into the embedded web UI, written by the build script.
         - llama-ui-licenses.md
+        - tools/ui/src/lib/vendors/nerdamer-prime/LICENSE
+        - tools/ui/src/lib/vendors/decimal.js/LICENCE.md
+        - tools/ui/src/lib/vendors/big-integer/LICENSE
       dev_url: https://github.com/ggml-org/llama.cpp
       doc_url: https://github.com/ggml-org/llama.cpp
 
