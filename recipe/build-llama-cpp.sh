@@ -154,7 +154,7 @@ if [[ "$PKG_NAME" == "llama.cpp-tests" ]]; then
         # test-llama-context: same GGML_ASSERT(buf_dst) (ggml-metal-context.m:380) on the CI Mac during the
         #   baseline decode of the first model; passes on an M4 Pro.
         # test-speculative-rejection-sampling: same GGML_ASSERT(buf_dst) on the CI Mac (3/3 retries); the CI
-        #   package passes it on an M4 Pro / macOS 15.7.3 once fix-metal-unary-bf16-constexpr.patch is applied.
+        #   package passes it on an M4 Pro / macOS 15.7.3 (with upstream's unary bf16 fix, #31360).
         ctest "${CTEST_SELECT[@]}" -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 --repeat until-pass:3 -E "(test-tokenizers-ggml-vocabs|test-thread-safety|test-llama-context|test-speculative-rejection-sampling)"
     else
         # Skip test-tokenizers-ggml-vocabs on all platforms: Requires git-lfs to download model files
