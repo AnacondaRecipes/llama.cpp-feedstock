@@ -135,8 +135,8 @@ outputs:
         - if not exist %PREFIX%/Library/lib/llama.lib exit 1    # [win]
         - if not exist %PREFIX%/Library/bin/llama.dll exit 1    # [win]
         # Release version, not upstream's default "X.Y.Z-dev" (LLAMA_BUILD_IS_DEV).
-        - grep -qx "Version: {{ version }}" $PREFIX/lib/pkgconfig/llama.pc  # [unix]
-        - findstr /x /c:"Version: {{ version }}" %PREFIX%\Library\lib\pkgconfig\llama.pc  # [win]
+        - 'grep -qx "Version: {{ version }}" $PREFIX/lib/pkgconfig/llama.pc'  # [unix]
+        - 'findstr /x /c:"Version: {{ version }}" %PREFIX%\Library\lib\pkgconfig\llama.pc'  # [win]
         - bash test-openmp.sh  # [linux and blas_impl == "mkl"]
         - call test-openmp.bat  # [win and blas_impl == "mkl"]
         # Verify backends load from any caller location, not just next to the calling
