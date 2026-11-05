@@ -64,6 +64,9 @@ fi
 # LLAMA build options
 LLAMA_ARGS="-DLLAMA_BUILD_NUMBER=${LLAMA_BUILD_NUMBER} -DLLAMA_BUILD_COMMIT=${LLAMA_BUILD_COMMIT}"
 LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_OPENSSL=ON"
+# Release tag: upstream defaults to a dev build, which versions llama.pc and the CMake package "X.Y.Z-dev"
+# (ggml-org/ggml#1579).
+LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_BUILD_IS_DEV=OFF"
 # Upstream default is OFF; pinned so a default flip can't pull in llama-connect, a prebuilt
 # binary that scripts/connect-download.cmake downloads at build time.
 LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_CONNECT=OFF"
@@ -119,14 +122,9 @@ fi
 
 cmake --install build_${gpu_variant}
 
-# Move ggml backend plugins next to libggml so the module-dir search
-# (ggml-search-module-dir.patch) finds them from any caller. Avoids a
-# compile-time GGML_BACKEND_DIR whose gcc-hard-coded length is broken by
-# conda-build's NUL-padded prefix rewrite (PKG-18403). Runs per-output
-# build; each output gets its own $PREFIX, and outputs without plugins
-# fall through the no-glob-match harmlessly. The MODULE plugins are .so
-# on both linux and osx (CMAKE_SHARED_MODULE_SUFFIX); libggml itself
-# (which is a real shared library, .dylib on osx) already sits in lib/.
+# Move the ggml backend plugins (MODULE .so on linux and osx) next to libggml, where
+# ggml-search-module-dir.patch finds them from any caller; a compile-time GGML_BACKEND_DIR
+# breaks under conda-build's NUL-padded prefix rewrite (PKG-18403). No match is a no-op.
 shopt -s nullglob
 plugins=("${PREFIX}"/bin/libggml-*.so)
 if (( ${#plugins[@]} > 0 )); then
@@ -154,7 +152,7 @@ if [[ "$PKG_NAME" == "llama.cpp-tests" ]]; then
         # test-llama-context: same GGML_ASSERT(buf_dst) (ggml-metal-context.m:380) on the CI Mac during the
         #   baseline decode of the first model; passes on an M4 Pro.
         # test-speculative-rejection-sampling: same GGML_ASSERT(buf_dst) on the CI Mac (3/3 retries); the CI
-        #   package passes it on an M4 Pro / macOS 15.7.3 once fix-metal-unary-bf16-constexpr.patch is applied.
+        #   0.8.0 package passed it on an M4 Pro / macOS 15.7.3 with the unary bf16 fix (upstream #31360 since 0.9.0).
         ctest "${CTEST_SELECT[@]}" -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 --repeat until-pass:3 -E "(test-tokenizers-ggml-vocabs|test-thread-safety|test-llama-context|test-speculative-rejection-sampling)"
     else
         # Skip test-tokenizers-ggml-vocabs on all platforms: Requires git-lfs to download model files

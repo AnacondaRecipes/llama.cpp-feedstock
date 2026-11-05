@@ -46,6 +46,9 @@ if "%blas_impl%"=="mkl" (
 REM LLAMA build options
 set LLAMA_ARGS=-DLLAMA_BUILD_NUMBER=%LLAMA_BUILD_NUMBER% -DLLAMA_BUILD_COMMIT=%LLAMA_BUILD_COMMIT%
 set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_OPENSSL=ON
+REM Release tag: upstream defaults to a dev build, which versions llama.pc and the CMake package "X.Y.Z-dev"
+REM (ggml-org/ggml#1579).
+set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_BUILD_IS_DEV=OFF
 REM Upstream default is OFF; pinned so a default flip can't pull in llama-connect, a prebuilt
 REM binary that scripts/connect-download.cmake downloads at build time.
 set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_CONNECT=OFF

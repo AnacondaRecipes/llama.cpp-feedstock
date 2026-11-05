@@ -1,24 +1,18 @@
 {% set name = "llama.cpp-meta" %}
+{% set upstream_name = "llama.cpp" %}
 # Upstream has stabilised on vX.Y.Z semver anchors (ggml-org/ggml#1579),
 # so we ship those tags directly. Semver tags are dual-tagged on the
-# mainline (v0.8.0 == b11960 — same commit), so the b-number rev-count
+# mainline (v0.9.0 == b12110 — same commit), so the b-number rev-count
 # still supplies a monotonic suffix for the gguf output.
-{% set version = "0.8.0" %}
-{% set upstream_release_bnum = "11960" %}
-{% set upstream_commit = "8642541b255bfb5dc39cd351a178be09013a55d6" %}
+{% set version = "0.9.0" %}
+{% set upstream_release_bnum = "12110" %}
+{% set upstream_commit = "cd959bae99ff4bed22bef2604f45241c09bbb8c8" %}
 {% set gguf_version = "0.19.0." + upstream_release_bnum %}
 {% set build_number = 0 %}
 
-# When output_set is llama_cpp_tools, PBP trips on undefined variables
-# because they are not part of the variant config.
-# So we set them to 999.0a0 to avoid the render error.
-# Setting to 999.0a0 is safe because if they ever get used in the build, they
-# will generate a solve error.
-# NOTE: expressed as `{% set %}` with the `default` filter rather than a
-# `{% if %}` block because the Anaconda Linter's recipe parser does not support
-# `{% if %}` statements (parsing_jinja_failure). For the "llama" output_set these
-# variables are supplied by conda_build_config.yaml and are kept as-is; for the
-# "llama_cpp_tools" output_set they are undefined, so they fall back to 999.0a0.
+# The llama_cpp_tools output_set has none of these variant keys: default them to the unsatisfiable
+# 999.0a0 so the recipe renders and any accidental use fails to solve. Uses the `default` filter
+# because the Anaconda Linter can't parse `{% if %}` (parsing_jinja_failure).
 {% set mkl = mkl | default("999.0a0", true) %}
 {% set openblas = openblas | default("999.0a0", true) %}
 {% set openblas_devel = openblas_devel | default("999.0a0", true) %}
@@ -31,21 +25,19 @@ package:
   version: {{ version }}
 
 source:
-  url: https://github.com/ggml-org/llama.cpp/archive/v{{ version }}.tar.gz
-  sha256: 51b1e025d7b12e83fa55736e65bc254acd9d23e49f546be7531368fef82210ee
+  url: https://github.com/ggml-org/{{ upstream_name }}/archive/v{{ version }}.tar.gz
+  sha256: 5d0f1aaf55fd8629c29a55e81b7cb63b80239f83c33a580963071204896836a8
 
   patches:
     - patches/ggml-search-module-dir.patch
     - patches/metal_gpu_selection.patch     # [osx]
     - patches/disable-metal-bf16.patch      # [osx]
     - patches/disable-metal-flash-attention.patch  # [osx]
-    - patches/fix-metal-unary-bf16-constexpr.patch  # [osx]
     - patches/fix-convert_hf_to_gguf.patch
     - patches/fix-convert_lora_to_gguf.patch
     - patches/fix-models-path.patch
     - patches/skip-test-chat-without-server.patch
     - patches/skip-test-mtmd-impl-without-tools.patch
-    - patches/link-test-backend-ops-threads.patch
     - patches/ui-license-manifest.patch
 
 build:
@@ -142,6 +134,9 @@ outputs:
         - if not exist %PREFIX%/Library/include/llama.h exit 1  # [win]
         - if not exist %PREFIX%/Library/lib/llama.lib exit 1    # [win]
         - if not exist %PREFIX%/Library/bin/llama.dll exit 1    # [win]
+        # Release version, not upstream's default "X.Y.Z-dev" (LLAMA_BUILD_IS_DEV).
+        - 'grep -qx "Version: {{ version }}" $PREFIX/lib/pkgconfig/llama.pc'  # [unix]
+        - 'findstr /x /c:"Version: {{ version }}" %PREFIX%\Library\lib\pkgconfig\llama.pc'  # [win]
         - bash test-openmp.sh  # [linux and blas_impl == "mkl"]
         - call test-openmp.bat  # [win and blas_impl == "mkl"]
         # Verify backends load from any caller location, not just next to the calling
@@ -255,8 +250,9 @@ outputs:
       summary: llama.cpp server example and tools, using libllama
       description: |
         Server example and tools for llama.cpp, using libllama
-      license: MIT
-      license_family: MIT
+      # MIT for llama.cpp; the rest from the npm packages and vendored libraries bundled into the web UI.
+      license: MIT AND ISC AND BSD-3-Clause AND Apache-2.0 AND (MPL-2.0 OR Apache-2.0) AND Unlicense
+      license_family: Other
       # cpp-httplib (static) and nlohmann/json are compiled into llama-common, which these binaries link.
       license_file:
         - LICENSE
@@ -372,9 +368,10 @@ outputs:
         # https://github.com/ggml-org/llama.cpp/tree/master/requirements
         - python
         # requirements/requirements-convert_legacy_llama.txt
-        # Bounds from upstream pyproject.toml; requirements' ~=2.2.6 (<2.3) is only for Ubuntu 22.04 pip
+        # Bounds from upstream pyproject.toml; requirements' ~=2.2.6 / ~=2.4.6 (py3.14) are only for pip
         # installs (ggml-org/llama.cpp#28654). Conversions verified on numpy 2.3.
-        - numpy >=2.2.6,<3.0.0
+        - numpy >=2.2.6,<3.0.0  # [py<314]
+        - numpy >=2.3.0,<3.0.0  # [py>=314]
         - sentencepiece >=0.1.98,<0.3.0
         # Upstream pins ==4.57.6 for the rope/yarn fix huggingface/transformers#45887 (ggml-org/llama.cpp#23966);
         # 5.9.0 is the first 5.x release containing it and 4.57.6 is not on pkgs/main. YaRN conversion verified on 5.9.0.
@@ -451,10 +448,11 @@ outputs:
       run:
         - python
         # Matches upstream gguf-py/pyproject.toml [project.dependencies] at
-        # v0.8.0 verbatim. numpy 2.2.6+ requires py>=3.11 on pkgs/main, and
+        # v0.9.0 verbatim. numpy 2.2.6+ requires py>=3.11 on pkgs/main, and
         # the py-skip floor above enforces that so this bound is satisfiable
         # on every subdir we build for.
-        - numpy >=2.2.6
+        - numpy >=2.2.6  # [py<314]
+        - numpy >=2.3.0  # [py>=314]
         - tqdm >=4.27
         - pyyaml >=5.1
         - requests >=2.25

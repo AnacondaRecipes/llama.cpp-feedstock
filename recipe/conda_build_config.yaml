@@ -4,10 +4,7 @@
 # This helps us avoid mixing the two sets of packages in the same build on PBP.
 output_set:
   - llama
-  # Not on win-arm64: its only transformers (5.20.2) constrains mistral-common >=1.11.7,
-  # which isn't there yet (PKG-19294), so llama.cpp-tools can't be installed. gguf has no
-  # such blocker; it is skipped there only because it builds in this same output set.
-  - llama_cpp_tools            # [not (win and arm64)]
+  - llama_cpp_tools
 
 # NOTE: c_stdlib and c_stdlib_version are intentionally NOT defined here.
 # When defined with only Linux/macOS selectors (no Windows value), conda-build
