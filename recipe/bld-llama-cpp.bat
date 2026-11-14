@@ -52,9 +52,11 @@ set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_BUILD_IS_DEV=OFF
 REM Upstream default is OFF; pinned so a default flip can't pull in llama-connect, a prebuilt
 REM binary that scripts/connect-download.cmake downloads at build time.
 set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_CONNECT=OFF
-REM Build the llama-server web UI from source (npm ci on tools/ui/package-lock.json, then vite build)
-REM instead of the default, which downloads upstream's prebuilt bundle from a Hugging Face bucket.
-set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_USE_PREBUILT_UI=OFF -DLLAMA_BUILD_UI=ON
+REM Build llama-server without the embedded web UI. Since 1.0.0 the UI bundles the llama-brand logo and
+REM favicons (CC-BY-NC-4.0 plus a separate redistribution grant), which awaits a team/legal decision.
+REM Both switches are needed: the default (USE_PREBUILT_UI=ON) downloads upstream's prebuilt bundle.
+REM Users can still serve a UI with `llama-server --path <dir>`.
+set LLAMA_ARGS=!LLAMA_ARGS! -DLLAMA_USE_PREBUILT_UI=OFF -DLLAMA_BUILD_UI=OFF
 REM Disable the unified `llama` router app: it #includes common/build-info.h but
 REM the upstream app/CMakeLists.txt does not wire up its include path, so the
 REM build fails with "fatal error: build-info.h: No such file or directory".
@@ -103,11 +105,11 @@ cmake --build build --config Release --verbose --parallel %BUILD_JOBS%
 if errorlevel 1 exit 1
 
 if "%PKG_NAME%" == "llama.cpp" (
-    REM scripts/ui-assets.cmake only warns and builds a UI-less server when npm fails, so check the
-    REM UI was built, and ship the license manifest of its bundled npm dependencies (ui-license-manifest.patch).
-    if not exist build\tools\ui\dist\index.html exit 1
-    copy /Y build\tools\ui\ui-src\.svelte-kit\output\client\.vite\license.md "%SRC_DIR%\llama-ui-licenses.md"
-    if errorlevel 1 exit 1
+    REM scripts/ui-assets.cmake embeds any UI it can find (a prebuilt tools/ui/dist first), so check
+    REM that no assets were embedded: the generated ui.h only defines this macro when some were.
+    if not exist build\tools\ui\ui.h exit 1
+    findstr /C:"#define LLAMA_UI_HAS_ASSETS" build\tools\ui\ui.h >nul
+    if not errorlevel 1 exit 1
 )
 
 cmake --install build

@@ -25,30 +25,21 @@ package:
   version: {{ version }}
 
 source:
-  - url: https://github.com/ggml-org/{{ upstream_name }}/archive/v{{ version }}.tar.gz
-    sha256: 3f5f750e36326aea4d65c7623e7d597a33e395d65f4d76e5e0532171f252532b
+  url: https://github.com/ggml-org/{{ upstream_name }}/archive/v{{ version }}.tar.gz
+  sha256: 3f5f750e36326aea4d65c7623e7d597a33e395d65f4d76e5e0532171f252532b
 
-    patches:
-      - patches/ggml-search-module-dir.patch
-      - patches/metal_gpu_selection.patch     # [osx]
-      - patches/disable-metal-bf16.patch      # [osx]
-      - patches/disable-metal-flash-attention.patch  # [osx]
-      - patches/fix-convert_hf_to_gguf.patch
-      - patches/fix-convert_lora_to_gguf.patch
-      - patches/fix-models-path.patch
-      - patches/skip-test-chat-without-server.patch
-      - patches/skip-test-mtmd-impl-without-tools.patch
-      - patches/ui-license-manifest.patch
-
-  # The web UI bundles the logo and favicons of llama-brand (CC-BY-NC-4.0) at the commit pinned in
-  # tools/ui/package-lock.json. Its BRAND-USAGE.md grants redistribution in packages, commercial included,
-  # but is not in the npm tarball, so both files come from that commit to ship as license files.
-  - url: https://raw.githubusercontent.com/ggml-org/llama-brand/f05540643c1ca2a18d732ed6491c839686da9a3a/LICENSE
-    sha256: 41003d4a74749c0220e33dd415042164b5a1093ed401f36277234f772d22d3d0
-    folder: llama-brand
-  - url: https://raw.githubusercontent.com/ggml-org/llama-brand/f05540643c1ca2a18d732ed6491c839686da9a3a/BRAND-USAGE.md
-    sha256: 3f9e9b47e1ce34a34178f23daeac254f400f58ddf49009aa8b4026d92a3f0d46
-    folder: llama-brand
+  patches:
+    - patches/ggml-search-module-dir.patch
+    - patches/metal_gpu_selection.patch     # [osx]
+    - patches/disable-metal-bf16.patch      # [osx]
+    - patches/disable-metal-flash-attention.patch  # [osx]
+    - patches/fix-convert_hf_to_gguf.patch
+    - patches/fix-convert_lora_to_gguf.patch
+    - patches/fix-models-path.patch
+    - patches/skip-test-chat-without-server.patch
+    - patches/skip-test-mtmd-impl-without-tools.patch
+    # Only takes effect when the web UI is built, which 1.0.0 disables (see build-llama-cpp.sh).
+    - patches/ui-license-manifest.patch
 
 build:
   number: {{ build_number }}
@@ -218,7 +209,6 @@ outputs:
         - cmake
         - ninja-base
         - pkg-config
-        - nodejs                                              # builds the llama-server web UI
       host:
         - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
         - cuda-cudart-dev  {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
@@ -259,23 +249,16 @@ outputs:
       home: https://github.com/ggml-org/llama.cpp
       summary: llama.cpp server example and tools, using libllama
       description: |
-        Server example and tools for llama.cpp, using libllama
-      # MIT for llama.cpp; the rest from the npm packages and vendored libraries bundled into the web UI.
-      # CC-BY-NC-4.0 is llama-brand's logo/favicons, redistributed under its BRAND-USAGE.md grant.
-      license: MIT AND ISC AND BSD-3-Clause AND Apache-2.0 AND (MPL-2.0 OR Apache-2.0) AND Unlicense AND CC-BY-NC-4.0
-      license_family: Other
+        Server example and tools for llama.cpp, using libllama.
+        llama-server is built without the embedded web UI; serve one with `llama-server --path <dir>`.
+      # No web UI is built (see build-llama-cpp.sh), so none of its npm/vendored licenses apply.
+      license: MIT
+      license_family: MIT
       # cpp-httplib (static) and nlohmann/json are compiled into llama-common, which these binaries link.
       license_file:
         - LICENSE
         - vendor/cpp-httplib/LICENSE
         - licenses/LICENSE-jsonhpp
-        # Licenses of the npm packages bundled into the embedded web UI, written by the build script.
-        - llama-ui-licenses.md
-        - tools/ui/src/lib/vendors/nerdamer-prime/LICENSE
-        - tools/ui/src/lib/vendors/decimal.js/LICENCE.md
-        - tools/ui/src/lib/vendors/big-integer/LICENSE
-        - llama-brand/LICENSE
-        - llama-brand/BRAND-USAGE.md
       dev_url: https://github.com/ggml-org/llama.cpp
       doc_url: https://github.com/ggml-org/llama.cpp
 

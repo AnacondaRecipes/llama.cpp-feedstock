@@ -70,9 +70,11 @@ LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_BUILD_IS_DEV=OFF"
 # Upstream default is OFF; pinned so a default flip can't pull in llama-connect, a prebuilt
 # binary that scripts/connect-download.cmake downloads at build time.
 LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_CONNECT=OFF"
-# Build the llama-server web UI from source (npm ci on tools/ui/package-lock.json, then vite build)
-# instead of the default, which downloads upstream's prebuilt bundle from a Hugging Face bucket.
-LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_USE_PREBUILT_UI=OFF -DLLAMA_BUILD_UI=ON"
+# Build llama-server without the embedded web UI. Since 1.0.0 the UI bundles the llama-brand logo and
+# favicons (CC-BY-NC-4.0 plus a separate redistribution grant), which awaits a team/legal decision.
+# Both switches are needed: the default (USE_PREBUILT_UI=ON) downloads upstream's prebuilt bundle.
+# Users can still serve a UI with `llama-server --path <dir>`.
+LLAMA_ARGS="${LLAMA_ARGS} -DLLAMA_USE_PREBUILT_UI=OFF -DLLAMA_BUILD_UI=OFF"
 # Disable the unified `llama` router app: it #includes common/build-info.h but the
 # upstream app/CMakeLists.txt does not wire up its include path, so the build fails
 # with `fatal error: build-info.h: No such file or directory` on every platform.
@@ -114,10 +116,13 @@ cmake -S . -B build_${gpu_variant} \
 cmake --build build_${gpu_variant} --config Release --verbose
 
 if [[ "$PKG_NAME" == "llama.cpp" ]]; then
-    # scripts/ui-assets.cmake only warns and builds a UI-less server when npm fails, so check the
-    # UI was built, and ship the license manifest of its bundled npm dependencies (ui-license-manifest.patch).
-    test -f build_${gpu_variant}/tools/ui/dist/index.html
-    cp build_${gpu_variant}/tools/ui/ui-src/.svelte-kit/output/client/.vite/license.md "${SRC_DIR}/llama-ui-licenses.md"
+    # scripts/ui-assets.cmake embeds any UI it can find (a prebuilt tools/ui/dist first), so check
+    # that no assets were embedded: the generated ui.h only defines this macro when some were.
+    test -f build_${gpu_variant}/tools/ui/ui.h
+    if grep -q '#define LLAMA_UI_HAS_ASSETS' build_${gpu_variant}/tools/ui/ui.h; then
+        echo "llama-server embedded a web UI; expected none" >&2
+        exit 1
+    fi
 fi
 
 cmake --install build_${gpu_variant}
@@ -153,7 +158,9 @@ if [[ "$PKG_NAME" == "llama.cpp-tests" ]]; then
         #   baseline decode of the first model; passes on an M4 Pro.
         # test-speculative-rejection-sampling: same GGML_ASSERT(buf_dst) on the CI Mac (3/3 retries); the CI
         #   0.8.0 package passed it on an M4 Pro / macOS 15.7.3 with the unary bf16 fix (upstream #31360 since 0.9.0).
-        ctest "${CTEST_SELECT[@]}" -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 --repeat until-pass:3 -E "(test-tokenizers-ggml-vocabs|test-thread-safety|test-llama-context|test-speculative-rejection-sampling)"
+        # test-fp8-kv (new in 1.0.0): same GGML_ASSERT(buf_dst) on the CI Mac in its MTL0 decode; passes on an
+        #   M4 Pro / macOS 15.7.3, and the CPU builds still run it.
+        ctest "${CTEST_SELECT[@]}" -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 --repeat until-pass:3 -E "(test-tokenizers-ggml-vocabs|test-thread-safety|test-llama-context|test-speculative-rejection-sampling|test-fp8-kv)"
     else
         # Skip test-tokenizers-ggml-vocabs on all platforms: Requires git-lfs to download model files
         ctest "${CTEST_SELECT[@]}" -C Release --output-on-failure -j${CPU_COUNT} --timeout 900 --repeat until-pass:3 -E "(test-tokenizers-ggml-vocabs)"
