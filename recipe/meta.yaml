@@ -2,11 +2,11 @@
 {% set upstream_name = "llama.cpp" %}
 # Upstream has stabilised on vX.Y.Z semver anchors (ggml-org/ggml#1579),
 # so we ship those tags directly. Semver tags are dual-tagged on the
-# mainline (v0.9.0 == b12110 — same commit), so the b-number rev-count
+# mainline (v1.0.0 == b12359 — same commit), so the b-number rev-count
 # still supplies a monotonic suffix for the gguf output.
-{% set version = "0.9.0" %}
-{% set upstream_release_bnum = "12110" %}
-{% set upstream_commit = "cd959bae99ff4bed22bef2604f45241c09bbb8c8" %}
+{% set version = "1.0.0" %}
+{% set upstream_release_bnum = "12359" %}
+{% set upstream_commit = "b1b770d90d94cad9e9ea5b993bdbc383a522fb28" %}
 {% set gguf_version = "0.19.0." + upstream_release_bnum %}
 {% set build_number = 0 %}
 
@@ -25,20 +25,30 @@ package:
   version: {{ version }}
 
 source:
-  url: https://github.com/ggml-org/{{ upstream_name }}/archive/v{{ version }}.tar.gz
-  sha256: 5d0f1aaf55fd8629c29a55e81b7cb63b80239f83c33a580963071204896836a8
+  - url: https://github.com/ggml-org/{{ upstream_name }}/archive/v{{ version }}.tar.gz
+    sha256: 3f5f750e36326aea4d65c7623e7d597a33e395d65f4d76e5e0532171f252532b
 
-  patches:
-    - patches/ggml-search-module-dir.patch
-    - patches/metal_gpu_selection.patch     # [osx]
-    - patches/disable-metal-bf16.patch      # [osx]
-    - patches/disable-metal-flash-attention.patch  # [osx]
-    - patches/fix-convert_hf_to_gguf.patch
-    - patches/fix-convert_lora_to_gguf.patch
-    - patches/fix-models-path.patch
-    - patches/skip-test-chat-without-server.patch
-    - patches/skip-test-mtmd-impl-without-tools.patch
-    - patches/ui-license-manifest.patch
+    patches:
+      - patches/ggml-search-module-dir.patch
+      - patches/metal_gpu_selection.patch     # [osx]
+      - patches/disable-metal-bf16.patch      # [osx]
+      - patches/disable-metal-flash-attention.patch  # [osx]
+      - patches/fix-convert_hf_to_gguf.patch
+      - patches/fix-convert_lora_to_gguf.patch
+      - patches/fix-models-path.patch
+      - patches/skip-test-chat-without-server.patch
+      - patches/skip-test-mtmd-impl-without-tools.patch
+      - patches/ui-license-manifest.patch
+
+  # The web UI bundles the logo and favicons of llama-brand (CC-BY-NC-4.0) at the commit pinned in
+  # tools/ui/package-lock.json. Its BRAND-USAGE.md grants redistribution in packages, commercial included,
+  # but is not in the npm tarball, so both files come from that commit to ship as license files.
+  - url: https://raw.githubusercontent.com/ggml-org/llama-brand/f05540643c1ca2a18d732ed6491c839686da9a3a/LICENSE
+    sha256: 41003d4a74749c0220e33dd415042164b5a1093ed401f36277234f772d22d3d0
+    folder: llama-brand
+  - url: https://raw.githubusercontent.com/ggml-org/llama-brand/f05540643c1ca2a18d732ed6491c839686da9a3a/BRAND-USAGE.md
+    sha256: 3f9e9b47e1ce34a34178f23daeac254f400f58ddf49009aa8b4026d92a3f0d46
+    folder: llama-brand
 
 build:
   number: {{ build_number }}
@@ -251,7 +261,8 @@ outputs:
       description: |
         Server example and tools for llama.cpp, using libllama
       # MIT for llama.cpp; the rest from the npm packages and vendored libraries bundled into the web UI.
-      license: MIT AND ISC AND BSD-3-Clause AND Apache-2.0 AND (MPL-2.0 OR Apache-2.0) AND Unlicense
+      # CC-BY-NC-4.0 is llama-brand's logo/favicons, redistributed under its BRAND-USAGE.md grant.
+      license: MIT AND ISC AND BSD-3-Clause AND Apache-2.0 AND (MPL-2.0 OR Apache-2.0) AND Unlicense AND CC-BY-NC-4.0
       license_family: Other
       # cpp-httplib (static) and nlohmann/json are compiled into llama-common, which these binaries link.
       license_file:
@@ -263,6 +274,8 @@ outputs:
         - tools/ui/src/lib/vendors/nerdamer-prime/LICENSE
         - tools/ui/src/lib/vendors/decimal.js/LICENCE.md
         - tools/ui/src/lib/vendors/big-integer/LICENSE
+        - llama-brand/LICENSE
+        - llama-brand/BRAND-USAGE.md
       dev_url: https://github.com/ggml-org/llama.cpp
       doc_url: https://github.com/ggml-org/llama.cpp
 
@@ -448,7 +461,7 @@ outputs:
       run:
         - python
         # Matches upstream gguf-py/pyproject.toml [project.dependencies] at
-        # v0.9.0 verbatim. numpy 2.2.6+ requires py>=3.11 on pkgs/main, and
+        # v1.0.0 verbatim. numpy 2.2.6+ requires py>=3.11 on pkgs/main, and
         # the py-skip floor above enforces that so this bound is satisfiable
         # on every subdir we build for.
         - numpy >=2.2.6  # [py<314]
