@@ -152,6 +152,9 @@ if [[ "$PKG_NAME" == "llama.cpp-tests" ]]; then
     # space-separated string (e.g. "main behavior backend"), so match whole words.
     CTEST_SELECT=(-L "(^| )(main|behavior)( |$)" -LE "(^| )(model|python)( |$)")
     if [[ ${gpu_variant:-} = "metal" ]]; then
+        # The GGML_ASSERT(buf_dst) skips below: ggml_metal_get_tensor_async's newBufferWithBytesNoCopy returns nil
+        # for a buffer that isn't page-aligned on macOS 12/13 (the CI Mac runs 13). Upstream issue
+        # ggml-org/llama.cpp#16266; fix proposed in #29814 (open). Drop these skips once it is in a release.
         # test-tokenizers-ggml-vocabs: Requires git-lfs to download model files
         # test-thread-safety: GGML_ASSERT(buf_dst) fails in ggml_metal_cpy_tensor_async during concurrent decode
         # test-llama-context: same GGML_ASSERT(buf_dst) (ggml-metal-context.m:380) on the CI Mac during the

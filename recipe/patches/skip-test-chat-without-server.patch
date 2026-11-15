@@ -1,6 +1,6 @@
-From 92aad49a7e0e0cec67e17bf613cc7c30d5442fba Mon Sep 17 00:00:00 2001
-From: xkong-anaconda <xkong@anaconda.com>
-Date: Sat, 14 Nov 2026 07:46:27 -0600
+From 85619dbbe000717164166734da605d292b392198 Mon Sep 17 00:00:00 2001
+From: Xianglong Kong <xkong@anaconda.com>
+Date: Fri, 1 May 2026 12:00:00 -0500
 Subject: [PATCH] tests: skip server-linked tests when LLAMA_BUILD_SERVER is
  OFF
 
