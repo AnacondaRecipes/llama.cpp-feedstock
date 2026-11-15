@@ -4,10 +4,12 @@ Subject: [PATCH] Emit a license manifest for the bundled UI dependencies
 
 AI assistant generated patch.
 
-The recipe builds the llama-server web UI from source with npm instead of
-downloading upstream's prebuilt bundle. Vite's build.license writes
-.vite/license.md with the license text of every dependency bundled into the
-UI; the build script installs it as a license file of the llama.cpp package.
+Only takes effect when the web UI is built. Since 1.0.0 the recipe builds
+llama-server without it (-DLLAMA_BUILD_UI=OFF); the patch is kept so the UI
+can be re-enabled. When the recipe builds the UI from source with npm,
+Vite's build.license writes .vite/license.md with the license text of every
+dependency bundled into the UI, for the build script to install as a license
+file of the llama.cpp package.
 ---
  tools/ui/vite.config.ts | 4 +++-
  1 file changed, 3 insertions(+), 1 deletion(-)

@@ -2,11 +2,11 @@
 {% set upstream_name = "llama.cpp" %}
 # Upstream has stabilised on vX.Y.Z semver anchors (ggml-org/ggml#1579),
 # so we ship those tags directly. Semver tags are dual-tagged on the
-# mainline (v0.9.0 == b12110 — same commit), so the b-number rev-count
+# mainline (v1.0.0 == b12359 — same commit), so the b-number rev-count
 # still supplies a monotonic suffix for the gguf output.
-{% set version = "0.9.0" %}
-{% set upstream_release_bnum = "12110" %}
-{% set upstream_commit = "cd959bae99ff4bed22bef2604f45241c09bbb8c8" %}
+{% set version = "1.0.0" %}
+{% set upstream_release_bnum = "12359" %}
+{% set upstream_commit = "b1b770d90d94cad9e9ea5b993bdbc383a522fb28" %}
 {% set gguf_version = "0.19.0." + upstream_release_bnum %}
 {% set build_number = 0 %}
 
@@ -25,20 +25,43 @@ package:
   version: {{ version }}
 
 source:
-  url: https://github.com/ggml-org/{{ upstream_name }}/archive/v{{ version }}.tar.gz
-  sha256: 5d0f1aaf55fd8629c29a55e81b7cb63b80239f83c33a580963071204896836a8
+  - url: https://github.com/ggml-org/{{ upstream_name }}/archive/v{{ version }}.tar.gz
+    sha256: 3f5f750e36326aea4d65c7623e7d597a33e395d65f4d76e5e0532171f252532b
 
-  patches:
-    - patches/ggml-search-module-dir.patch
-    - patches/metal_gpu_selection.patch     # [osx]
-    - patches/disable-metal-bf16.patch      # [osx]
-    - patches/disable-metal-flash-attention.patch  # [osx]
-    - patches/fix-convert_hf_to_gguf.patch
-    - patches/fix-convert_lora_to_gguf.patch
-    - patches/fix-models-path.patch
-    - patches/skip-test-chat-without-server.patch
-    - patches/skip-test-mtmd-impl-without-tools.patch
-    - patches/ui-license-manifest.patch
+    patches:
+      - patches/ggml-search-module-dir.patch
+      - patches/metal_gpu_selection.patch     # [osx]
+      - patches/disable-metal-bf16.patch      # [osx]
+      - patches/disable-metal-flash-attention.patch  # [osx]
+      - patches/fix-convert_hf_to_gguf.patch
+      - patches/fix-convert_lora_to_gguf.patch
+      - patches/fix-models-path.patch
+      - patches/skip-test-chat-without-server.patch
+      - patches/skip-test-mtmd-impl-without-tools.patch
+      # Only takes effect when the web UI is built, which 1.0.0 disables (see build-llama-cpp.sh).
+      - patches/ui-license-manifest.patch
+
+  # License texts of vendored code that only carries its license inside a header (stb_image.h and
+  # miniaudio.h alone are 0.3 MB and 4 MB). The commits are the ones scripts/sync_vendor.py vendors from;
+  # stb is vendored from master, whose LICENSE matches the header's text.
+  # All four are named LICENSE upstream, so each gets its own fn: (conda-build caches sources by file name).
+  - url: https://raw.githubusercontent.com/sheredom/subprocess.h/0dccaa9aa176dd6d7ef8afeca3c18d6e80a32795/LICENSE
+    sha256: 7e12e5df4bae12cb21581ba157ced20e1986a0508dd10d0e8a4ab9a4cf94e85c
+    fn: LICENSE-sheredom
+    folder: vendor-licenses
+  - url: https://raw.githubusercontent.com/nothings/stb/9600522de53973336fa033a289858a4354cbb04c/LICENSE
+    sha256: eb36e45c704dd0b59730115523e089b051852625b4db0a6fe76c991900af20e7
+    fn: LICENSE-stb
+    folder: vendor-licenses
+  - url: https://raw.githubusercontent.com/mackron/miniaudio/877ea4a7c2601c7b0f2a44e83dfac42e6470fea6/LICENSE
+    sha256: 457f1b500e0adf6bc059edddfa78a2f62012e7c3bb43476c20e0bd23b25ba0eb
+    fn: LICENSE-miniaudio
+    folder: vendor-licenses
+  # gguf-py/gguf/vocab.py copies and adapts code from Transformers (Apache-2.0).
+  - url: https://raw.githubusercontent.com/huggingface/transformers/v4.57.6/LICENSE
+    sha256: 77fd4710def9ec3c0f6225800e0235f15a425abd4a8b03559127fcd782612049
+    fn: LICENSE-transformers
+    folder: vendor-licenses
 
 build:
   number: {{ build_number }}
@@ -156,13 +179,15 @@ outputs:
       summary: LLM inference in C/C++
       description: |
         Inference of Meta's LLaMA model (and others) in pure C/C++
-      license: MIT
-      license_family: MIT
+      # Unlicense: sheredom/subprocess.h, compiled into llama-common (common/CMakeLists.txt links it PUBLIC).
+      license: MIT AND Unlicense
+      license_family: Other
       # cpp-httplib (static) and nlohmann/json are compiled into llama-common, which this output ships.
       license_file:
         - LICENSE
         - vendor/cpp-httplib/LICENSE
         - licenses/LICENSE-jsonhpp
+        - vendor-licenses/LICENSE-sheredom
       dev_url: https://github.com/ggml-org/llama.cpp
       doc_url: https://github.com/ggml-org/llama.cpp
 
@@ -208,7 +233,6 @@ outputs:
         - cmake
         - ninja-base
         - pkg-config
-        - nodejs                                              # builds the llama-server web UI
       host:
         - cuda-version     {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
         - cuda-cudart-dev  {{ cuda_compiler_version }}        # [(gpu_variant or "").startswith('cuda')]
@@ -249,20 +273,24 @@ outputs:
       home: https://github.com/ggml-org/llama.cpp
       summary: llama.cpp server example and tools, using libllama
       description: |
-        Server example and tools for llama.cpp, using libllama
-      # MIT for llama.cpp; the rest from the npm packages and vendored libraries bundled into the web UI.
-      license: MIT AND ISC AND BSD-3-Clause AND Apache-2.0 AND (MPL-2.0 OR Apache-2.0) AND Unlicense
+        Server example and tools for llama.cpp, using libllama.
+        llama-server is built without the embedded web UI; serve one with `llama-server --path <dir>`.
+      # No web UI is built (see build-llama-cpp.sh), so its npm licenses don't apply. The vendored code compiled
+      # into the binaries does: sheredom/subprocess.h (Unlicense; llama-server-impl and libmtmd), and in libmtmd
+      # stb_image (MIT OR Unlicense), miniaudio (Unlicense OR MIT-0) and vendor/hash sha256 (public domain,
+      # with the MIT rotate-bits.h header).
+      license: MIT AND Unlicense AND (MIT OR Unlicense) AND (Unlicense OR MIT-0)
       license_family: Other
       # cpp-httplib (static) and nlohmann/json are compiled into llama-common, which these binaries link.
       license_file:
         - LICENSE
         - vendor/cpp-httplib/LICENSE
         - licenses/LICENSE-jsonhpp
-        # Licenses of the npm packages bundled into the embedded web UI, written by the build script.
-        - llama-ui-licenses.md
-        - tools/ui/src/lib/vendors/nerdamer-prime/LICENSE
-        - tools/ui/src/lib/vendors/decimal.js/LICENCE.md
-        - tools/ui/src/lib/vendors/big-integer/LICENSE
+        - vendor-licenses/LICENSE-sheredom
+        - vendor-licenses/LICENSE-stb
+        - vendor-licenses/LICENSE-miniaudio
+        - vendor/hash/sha256/LICENSE
+        - vendor/hash/rotate-bits/LICENSE.md
       dev_url: https://github.com/ggml-org/llama.cpp
       doc_url: https://github.com/ggml-org/llama.cpp
 
@@ -332,13 +360,15 @@ outputs:
       summary: llama.cpp test executables
       description: |
         Test executables for llama.cpp
-      license: MIT
-      license_family: MIT
+      # Unlicense: sheredom/subprocess.h, compiled in through llama-common's PUBLIC link (e.g. test-jinja).
+      license: MIT AND Unlicense
+      license_family: Other
       # cpp-httplib (static) and nlohmann/json are compiled into llama-common, which these binaries link.
       license_file:
         - LICENSE
         - vendor/cpp-httplib/LICENSE
         - licenses/LICENSE-jsonhpp
+        - vendor-licenses/LICENSE-sheredom
       dev_url: https://github.com/ggml-org/llama.cpp
       doc_url: https://github.com/ggml-org/llama.cpp
 
@@ -448,7 +478,7 @@ outputs:
       run:
         - python
         # Matches upstream gguf-py/pyproject.toml [project.dependencies] at
-        # v0.9.0 verbatim. numpy 2.2.6+ requires py>=3.11 on pkgs/main, and
+        # v1.0.0 verbatim. numpy 2.2.6+ requires py>=3.11 on pkgs/main, and
         # the py-skip floor above enforces that so this bound is satisfiable
         # on every subdir we build for.
         - numpy >=2.2.6  # [py<314]
@@ -487,9 +517,12 @@ outputs:
       summary: Read and write ML models in GGUF for GGML
       description: |
         Read and write ML models in GGUF for GGML
-      license: MIT
-      license_family: MIT
-      license_file: LICENSE
+      # Apache-2.0: gguf/vocab.py copies and adapts code from Transformers.
+      license: MIT AND Apache-2.0
+      license_family: Other
+      license_file:
+        - LICENSE
+        - vendor-licenses/LICENSE-transformers
       dev_url: https://github.com/ggml-org/llama.cpp/tree/master/gguf-py
       doc_url: https://github.com/ggml-org/llama.cpp/tree/master/gguf-py
 
